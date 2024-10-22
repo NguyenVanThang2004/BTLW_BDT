@@ -33,7 +33,7 @@
                             @item.DonGia.ToString("C")
                         </td>
                         <td class="align-middle">
-                            <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display:inline;">
+                            <form asp-controller="Home" asp-action="UpdateQuantity" method="post" style="display:inline;">
                                 <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
                                 <input type="hidden" name="quantity" value="@item.SoLuong" />
                                 <div class="input-group quantity mx-auto" style="width: 100px;">
@@ -55,7 +55,7 @@
                             @item.TongTien.ToString("C")
                         </td>
                         <td class="align-middle">
-                            <form asp-controller="Cart" asp-action="RemoveFromCart" method="post">
+                            <form asp-controller="Home" asp-action="RemoveFromCart" method="post">
                                 <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
                                 <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="fa fa-times"></i>
@@ -102,7 +102,7 @@
                         @(Model.Sum(item => item.DonGia * item.SoLuong) + 10.00m)
                     </h5>
                 </div>
-                <button class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</button>
+                <a asp-controller="Home" asp-action="Checkout" class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</a>
             </div>
         </div>
     </div>

@@ -85,7 +85,7 @@
                     <i class="fas fa-heart text-primary"></i>
                     <span class="badge">0</span>
                 </a>
-                <a asp-controller="Cart" asp-action="Cart" class="btn border">
+                <a asp-controller="Home" asp-action="Cart" class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
                     <span class="badge">0</span>
                 </a>
@@ -139,8 +139,8 @@
                             <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
                                 <div class="dropdown-menu rounded-0 m-0">
-                                    <a href="cart.html" class="dropdown-item">Shopping Cart</a>
-                                    <a href="checkout.html" class="dropdown-item">Checkout</a>
+                                    <a asp-controller="Home" asp-action="Cart" class="dropdown-item">Shopping Cart</a>
+                                    <a asp-controller="Home" asp-action="Checkout" class="dropdown-item">Checkout</a>
                                 </div>
                             </div>
                             <a href="contact.html" class="nav-item nav-link">Contact</a>
