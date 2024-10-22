@@ -1,4 +1,4 @@
-using BTLW_BDT.Models;
+﻿using BTLW_BDT.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -6,6 +6,7 @@ namespace BTLW_BDT.Controllers
 {
     public class HomeController : Controller
     {
+        BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger)
@@ -15,8 +16,12 @@ namespace BTLW_BDT.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var lstSanPham = db.SanPhams.ToList();  
+
+            return View(lstSanPham);
         }
+
+        
 
         public IActionResult Privacy()
         {
