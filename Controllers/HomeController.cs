@@ -18,10 +18,19 @@ namespace BTLW_BDT.Controllers
             _context = context;
         }
 
+        public int CartCount
+        {
+            get
+            {
+                return Carts.Count(); // Đếm tổng số lượng sản phẩm trong giỏ
+            }
+        }
+
         public IActionResult Index()
         {
-            var lstSanPham = _context.SanPhams.ToList();  
-
+            ViewBag.CartCount = CartCount; // Truyền số lượng sản phẩm vào ViewBag
+            var lstSanPham = _context.SanPhams.ToList();
+       
             return View(lstSanPham);
         }
 
@@ -41,8 +50,10 @@ namespace BTLW_BDT.Controllers
 
         public IActionResult Cart()
         {
+            ViewBag.CartCount = CartCount; // Truyền số lượng sản phẩm vào ViewBag
             ViewData["Page"] = "Shopping Cart";
             var cart = Carts;
+            
             return View(Carts);
         }
 
@@ -88,7 +99,9 @@ namespace BTLW_BDT.Controllers
             // Lưu giỏ hàng lại vào session
             HttpContext.Session.Set("GioHang", myCart);
 
-            return RedirectToAction("Cart");  // Điều hướng về trang giỏ hàng
+           
+
+            return RedirectToAction("Index");  // Điều hướng về trang giỏ hàng
         }
 
 
@@ -137,6 +150,10 @@ namespace BTLW_BDT.Controllers
             HttpContext.Session.Set("GioHang", myCart);
             return RedirectToAction("Cart"); // Trở lại trang giỏ hàng
         }
+
+
+
+       
         public IActionResult Checkout()
         {
             ViewData["Page"] = "Checkout";

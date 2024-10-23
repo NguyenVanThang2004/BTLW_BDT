@@ -37,7 +37,7 @@
                 <div class="d-inline-flex align-items-center">
                     <a class="text-dark" href="">FAQs</a>
                     <span class="text-muted px-2">|</span>
-                    <a class="text-dark" href="">Quyết Thắng đẹp trai nhất hành tinh!!!</a>
+                    <a class="text-dark" href="">Help</a>
                     <span class="text-muted px-2">|</span>
                     <a class="text-dark" href="">Support</a>
                 </div>
@@ -87,7 +87,7 @@
                 </a>
                 <a asp-controller="Home" asp-action="Cart" class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">0</span>
+                    <span class="badge">@ViewBag.CartCount</span>
                 </a>
             </div>
         </div>
