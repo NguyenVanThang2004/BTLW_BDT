@@ -9,9 +9,10 @@
         <div class="col-lg-5 pb-5">
             <div id="product-carousel" class="carousel slide" data-ride="carousel">
                 <div class="carousel-inner border">
-                    @foreach (var image in Model.dmAnhSp)
+                    @for (int i = 0; i < Model.dmAnhSp.Count; i++)
                     {
-                        <div class="carousel-item">
+                        var image = Model.dmAnhSp[i];
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
                             <img class="w-100 h-100" src="@Url.Content("../PhoneImages/Images/" + image.TenFile)" alt="@image.ViTri">
                         </div>
                     }
@@ -37,23 +38,19 @@
                 </div>
                 <small class="pt-1">(50 Reviews)</small>
             </div>
-            <h3 class="font-weight-semi-bold mb-4">@Model.dmSp.DonGiaBanRa</h3>
+            <h3 id="productPrice" class="font-weight-semi-bold mb-4">@Model.dmSp.DonGiaBanRa</h3>
             <p class="mb-4">Giá đã khuyến mãi @Model.dmSp.KhuyenMai%</p>
             <div class="d-flex mb-3">
                 <p class="text-dark font-weight-medium mb-0 mr-3">ROM(Dung lượng bộ nhớ)</p>
-                <form>
-                    @foreach(var rom in Model.dmRomSp)
+                <form id="romForm">
+                    @for (int i = 0; i < Model.dmRomSp.Count; i++)
                     {
+                        var rom = Model.dmRomSp[i];
                         <div class="custom-control custom-radio custom-control-inline">
-                            <input type="radio" class="custom-control-input" name="rom">
-                            <label class="custom-control-label">@rom.ThongSo</label>
+                            <input type="radio" class="custom-control-input" id="rom-@rom.MaRom" name="rom" value="@rom.MaRom" data-index="@i">
+                            <label class="custom-control-label" for="rom-@rom.MaRom">@rom.ThongSo</label>
                         </div>
                     }
-
-                    @* <div class="custom-control custom-radio custom-control-inline">
-                        <input type="radio" class="custom-control-input" id="size-5" name="size">
-                        <label class="custom-control-label" for="size-5">XL</label>
-                    </div> *@
                 </form>
             </div>
             <div class="d-flex mb-4">
@@ -216,3 +213,19 @@
     </div>
 </div>
 
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            const basePrice = @Model.dmSp.DonGiaBanRa;
+            const priceElement = $('#productPrice');
+            const priceDifference = 500000; // 500,000 đồng
+
+            $('#romForm input[type=radio]').on('change', function() {
+                const selectedIndex = parseInt($(this).data('index'));
+                const additionalPrice = selectedIndex * priceDifference;
+                const newPrice = basePrice + additionalPrice;
+                priceElement.text(newPrice.toLocaleString('vi-VN') + ' đ');
+            });
+        });
+    </script>
+}
