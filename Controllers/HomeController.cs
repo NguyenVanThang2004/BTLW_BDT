@@ -82,17 +82,17 @@ namespace BTLW_BDT.Controllers
                 // Thêm sản phẩm vào giỏ hàng
                 item = new CartItem
                 {
-                    MaSanPham = id,  // Đổi tên cho đúng với CSDL
+                    MaSanPham = id,  
                     TenSanPham = hangHoa.TenSanPham,
-                    DonGia = hangHoa.DonGiaBanRa.HasValue ? hangHoa.DonGiaBanRa.Value : 0,  // Sử dụng giá bán ra
+                    DonGia = hangHoa.DonGiaBanRa.HasValue ? hangHoa.DonGiaBanRa.Value : 0,  
                     SoLuong = 1,
-                    Anh = hangHoa.AnhDaiDien  // Lấy ảnh từ AnhSanPham
+                    Anh = hangHoa.AnhDaiDien  
                 };
                 myCart.Add(item);
             }
             else
             {
-                // Nếu sản phẩm đã có trong giỏ, tăng số lượng
+               
                 item.SoLuong++;
             }
 
@@ -105,7 +105,7 @@ namespace BTLW_BDT.Controllers
         }
 
 
-        [HttpPost] // Đảm bảo phương thức chỉ nhận yêu cầu POST
+        [HttpPost] 
         public IActionResult RemoveFromCart(string maSanPham)
         {
             var myCart = Carts;
