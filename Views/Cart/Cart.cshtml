@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Cart";
     Layout = "~/Views/Shared/_LayoutCart.cshtml";
 }
@@ -26,14 +25,14 @@
                 {
                     <tr>
                         <td class="align-middle">
-                            <img src="@item.Anh" alt="@item.TenSanPham" style="width: 50px;">
+                            <img src="@Url.Content("../PhoneImages/Images/"+item.Anh)" alt="@item.TenSanPham" style="width: 50px;">
                             @item.TenSanPham
                         </td>
                         <td class="align-middle">
                             @item.DonGia.ToString("C")
                         </td>
                         <td class="align-middle">
-                            <form asp-controller="Home" asp-action="UpdateQuantity" method="post" style="display:inline;">
+                            <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display:inline;">
                                 <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
                                 <input type="hidden" name="quantity" value="@item.SoLuong" />
                                 <div class="input-group quantity mx-auto" style="width: 100px;">
@@ -55,7 +54,7 @@
                             @item.TongTien.ToString("C")
                         </td>
                         <td class="align-middle">
-                            <form asp-controller="Home" asp-action="RemoveFromCart" method="post">
+                            <form asp-controller="Cart" asp-action="RemoveFromCart" method="post">
                                 <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
                                 <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="fa fa-times"></i>
