@@ -18,10 +18,19 @@ namespace BTLW_BDT.Controllers
             _context = context;
         }
 
+        public int CartCount
+        {
+            get
+            {
+                return Carts.Count(); // Đếm tổng số lượng sản phẩm trong giỏ
+            }
+        }
+
         public IActionResult Index()
         {
-            var lstSanPham = _context.SanPhams.ToList();  
-
+            ViewBag.CartCount = CartCount; // Truyền số lượng sản phẩm vào ViewBag
+            var lstSanPham = _context.SanPhams.ToList();
+       
             return View(lstSanPham);
         }
 
@@ -41,8 +50,10 @@ namespace BTLW_BDT.Controllers
 
         public IActionResult Cart()
         {
+            ViewBag.CartCount = CartCount; // Truyền số lượng sản phẩm vào ViewBag
             ViewData["Page"] = "Shopping Cart";
             var cart = Carts;
+            
             return View(Carts);
         }
 
@@ -71,28 +82,30 @@ namespace BTLW_BDT.Controllers
                 // Thêm sản phẩm vào giỏ hàng
                 item = new CartItem
                 {
-                    MaSanPham = id,  // Đổi tên cho đúng với CSDL
+                    MaSanPham = id,  
                     TenSanPham = hangHoa.TenSanPham,
-                    DonGia = hangHoa.DonGiaBanRa.HasValue ? hangHoa.DonGiaBanRa.Value : 0,  // Sử dụng giá bán ra
+                    DonGia = hangHoa.DonGiaBanRa.HasValue ? hangHoa.DonGiaBanRa.Value : 0,  
                     SoLuong = 1,
-                    Anh = hangHoa.AnhDaiDien  // Lấy ảnh từ AnhSanPham
+                    Anh = hangHoa.AnhDaiDien  
                 };
                 myCart.Add(item);
             }
             else
             {
-                // Nếu sản phẩm đã có trong giỏ, tăng số lượng
+               
                 item.SoLuong++;
             }
 
             // Lưu giỏ hàng lại vào session
             HttpContext.Session.Set("GioHang", myCart);
 
-            return RedirectToAction("Cart");  // Điều hướng về trang giỏ hàng
+           
+
+            return RedirectToAction("Index");  // Điều hướng về trang giỏ hàng
         }
 
 
-        [HttpPost] // Đảm bảo phương thức chỉ nhận yêu cầu POST
+        [HttpPost] 
         public IActionResult RemoveFromCart(string maSanPham)
         {
             var myCart = Carts;
@@ -137,6 +150,10 @@ namespace BTLW_BDT.Controllers
             HttpContext.Session.Set("GioHang", myCart);
             return RedirectToAction("Cart"); // Trở lại trang giỏ hàng
         }
+
+
+
+       
         public IActionResult Checkout()
         {
             ViewData["Page"] = "Checkout";
