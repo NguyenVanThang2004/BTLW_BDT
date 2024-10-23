@@ -19,7 +19,7 @@ public partial class SanPham
 
     public decimal? KhuyenMai { get; set; }
 
-    public string? Hang { get; set; }
+    public string? MaHang { get; set; }
 
     public string? ManHinh { get; set; }
 
@@ -44,6 +44,8 @@ public partial class SanPham
     public virtual ICollection<ChiTietGioHang> ChiTietGioHangs { get; set; } = new List<ChiTietGioHang>();
 
     public virtual ICollection<ChiTietHoaDonBan> ChiTietHoaDonBans { get; set; } = new List<ChiTietHoaDonBan>();
+
+    public virtual Hang? MaHangNavigation { get; set; }
 
     public virtual MauSac? MaMauNavigation { get; set; }
 
