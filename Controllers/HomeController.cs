@@ -3,6 +3,7 @@ using BTLW_BDT.Models.Cart;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using BTLW_BDT.Models.Authentication;
 
 namespace BTLW_BDT.Controllers
 {
@@ -18,7 +19,7 @@ namespace BTLW_BDT.Controllers
             
         }
 
-
+        [Authentication]
         public int CartCount()
         {
             var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
@@ -32,11 +33,6 @@ namespace BTLW_BDT.Controllers
             return View(lstSanPham);
         }
 
-       
-
-
-       
-      
 
 
 
