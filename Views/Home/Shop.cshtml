@@ -2,36 +2,159 @@
     ViewData["Title"] = "Shop";
     Layout = "~/Views/Shared/_LayoutShop.cshtml";
 }
-@using X.PagedList.Mvc.Core;
-@using X.PagedList;
-@using X.PagedList.Web.Common
-@model X.PagedList.IPagedList<SanPham>
 
-<div class="row">
+@* <div id="productContainer" class="row pb-3">
     @foreach (var item in Model)
     {
         @await Html.PartialAsync("PartialSanPham", item)
     }
+</div> *@
+
+<div id="productContainer" class="row pb-3">
+    <!-- Sản phẩm sẽ được thêm vào đây bằng JavaScript -->
 </div>
 
 <div class="col-12 pb-1">
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center mb-3">
-            @Html.PagedListPager(
-                     Model,
-                     page => Url.Action("Shop", new { page = page }),
-                     new PagedListRenderOptions
-            {
-                UlElementClasses = new[] { "pagination" },
-                LiElementClasses = new[] { "page-item" },
-                PageClasses = new[] { "page-link" },
-                ActiveLiElementClass = "active",
-                PreviousElementClass = "page-item",
-                NextElementClass = "page-item",
-                FunctionToDisplayEachPageNumber = pageNumber => pageNumber.ToString(),
-                DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
-                DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded
-            })
+            <!-- Phân trang sẽ được thêm vào đây bằng JavaScript -->
         </ul>
     </nav>
 </div>
+
+@section Scripts {
+    <script>
+        var currentPage = 1;
+
+        $(document).ready(function() {
+            // Lấy dữ liệu RAM từ API
+            $.ajax({
+                url: '/api/Phone/GetRamOptions',
+                method: 'GET',
+                success: function(data) {
+                    var ramForm = $('#ramFilterForm');
+                    data.forEach(function(ram) {
+                        var checkbox = `
+                            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                <input type="checkbox" class="custom-control-input ram-filter" id="ram-${ram}" value="${ram}">
+                                <label class="custom-control-label" for="ram-${ram}">${ram} GB</label>
+                            </div>
+                        `;
+                        ramForm.append(checkbox);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error fetching RAM options:', error);
+                }
+            });
+
+            // Xử lý sự kiện khi checkbox được chọn
+            $(document).on('change', '.ram-filter', function() {
+                var isAllRam = $(this).val() === 'all';
+                var isChecked = $(this).prop('checked');
+
+                if (isAllRam) {
+                    // Nếu "All RAM" được chọn, bỏ chọn tất cả các tùy chọn khác
+                    $('.ram-filter:not(#ram-all)').prop('checked', false);
+                } else {
+                    // Nếu một tùy chọn khác được chọn, bỏ chọn "All RAM"
+                    $('#ram-all').prop('checked', false);
+
+                    // Nếu không có tùy chọn nào được chọn, chọn lại "All RAM"
+                    if ($('.ram-filter:checked').length === 0) {
+                        $('#ram-all').prop('checked', true);
+                    }
+                }
+
+                currentPage = 1;
+                loadProducts();
+            });
+
+            // Xử lý sự kiện khi nhấn nút phân trang
+            $(document).on('click', '.page-link', function(e) {
+                e.preventDefault();
+                currentPage = $(this).data('page');
+                loadProducts();
+            });
+
+            function loadProducts() {
+                var selectedRams = $('.ram-filter:checked').map(function() {
+                    return this.value;
+                }).get();
+
+                // Nếu "All RAM" được chọn hoặc không có RAM nào được chọn, lấy tất cả sản phẩm
+                var url = (selectedRams.includes('all') || selectedRams.length === 0)
+                    ? `/api/Phone/GetAllPhones?page=${currentPage}`
+                    : `/api/Phone/GetPhoneByRam?rams=${selectedRams.join(',')}&page=${currentPage}`;
+                
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function(data) {
+                        updateProductList(data.products);
+                        updatePagination(data.totalPages, data.currentPage);
+                    },
+                    error: function(error) {
+                        console.error('Error fetching products:', error);
+                    }
+                });
+            }
+
+            function updateProductList(products) {
+                var productContainer = $('#productContainer');
+                productContainer.empty();
+                products.forEach(function(product) {
+                    productContainer.append(createProductHtml(product));
+                });
+            }
+
+            function createProductHtml(product) {
+                // Tạo HTML cho mỗi sản phẩm dựa trên dữ liệu nhận được
+                // Đảm bảo rằng cấu trúc này khớp với PartialSanPham.cshtml của bạn
+                return `
+                    <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
+                        <div class="card product-item border-0 mb-4">
+                            <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                                <img class="img-fluid w-100" src="/PhoneImages/Images/${product.anhDaiDien}" alt="${product.tenSanPham}">
+                            </div>
+                            <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                                <h6 class="text-truncate mb-3">${product.tenSanPham}</h6>
+                                <div class="d-flex justify-content-center">
+                                    <h6>${product.donGiaBanRa}</h6><h6 class="text-muted ml-2"><del>${product.donGiaBanGoc}</del></h6>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between bg-light border">
+                                <a href="/Home/ProductDetail?maSp=${product.maSanPham}&maMau=${product.maMau}&maRom=${product.maRom}" class="btn btn-sm text-dark p-0">
+                                    <i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết
+                                </a>
+                                <a href="" class="btn btn-sm text-dark p-0"><i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function updatePagination(totalPages, currentPage) {
+                var paginationContainer = $('.pagination');
+                paginationContainer.empty();
+
+                for (var i = 1; i <= totalPages; i++) {
+                    var pageItem = $('<li>').addClass('page-item');
+                    if (i === currentPage) {
+                        pageItem.addClass('active');
+                    }
+                    var pageLink = $('<a>')
+                        .addClass('page-link')
+                        .attr('href', '#')
+                        .data('page', i)
+                        .text(i);
+                    pageItem.append(pageLink);
+                    paginationContainer.append(pageItem);
+                }
+            }
+
+            // Load sản phẩm ban đầu
+            loadProducts();
+        });
+    </script>
+}

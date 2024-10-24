@@ -168,7 +168,7 @@
         <div class="row px-xl-5">
             <!-- Shop Sidebar Start -->
             <div class="col-lg-3 col-md-12">
-                <!-- Price Start -->
+                @* <!-- Price Start -->
                 <div class="border-bottom mb-4 pb-4">
                     <h5 class="font-weight-semi-bold mb-4">Filter by price</h5>
                     <form>
@@ -278,7 +278,19 @@
                         </div>
                     </form>
                 </div>
-                <!-- Size End -->
+                <!-- Size End --> *@
+                <!-- RAM Start -->
+                <div class="border-bottom mb-4 pb-4">
+                    <h5 class="font-weight-semi-bold mb-4">Filter by RAM</h5>
+                    <form id="ramFilterForm">
+                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                            <input type="checkbox" class="custom-control-input ram-filter" checked id="ram-all" value="all">
+                            <label class="custom-control-label" for="ram-all">All RAM</label>
+                        </div>
+                        <!-- Các tùy chọn RAM sẽ được thêm vào đây bằng JavaScript -->
+                    </form>
+                </div>
+                <!-- RAM End -->
             </div>
             <!-- Shop Sidebar End -->
             <!-- Shop Product Start -->
@@ -401,6 +413,7 @@
 
     <!-- Template Javascript -->
     <script src="../assets/js/main.js"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 
 </html>
