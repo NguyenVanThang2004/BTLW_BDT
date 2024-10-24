@@ -6,6 +6,7 @@
 
     namespace BTLW_BDT.Controllers
     {
+
         public class HomeController : Controller
         {
             BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
@@ -18,25 +19,36 @@
            
             }
             
-         public int CartCount()
+   
+      
+
+        public int CartCount()
+
         {
             var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
             return cart.Count();
         }
-       
 
-            public IActionResult Index()
-            {
-            ViewBag.CartCount = CartCount(); // Truyền số lượng sản phẩm vào ViewBag 
-            var lstSanPham = db.SanPhams.ToList();
-       
-                return View(lstSanPham);
-            }
 
        
 
 
      
+
+        public IActionResult Index()
+        {
+            ViewBag.CartCount = CartCount(); // Truyền số lượng sản phẩm vào ViewBag
+            var lstSanPham = db.SanPhams.ToList();
+       
+            return View(lstSanPham);
+        }
+
+       
+
+
+       
+      
+
 
 
 

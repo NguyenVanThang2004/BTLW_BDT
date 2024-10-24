@@ -2,7 +2,7 @@
     ViewData["Title"] = "Checkout";
     Layout = "~/Views/Shared/_LayoutCart.cshtml";
 }
-
+@model List<BTLW_BDT.Models.Cart.CartItem>
 <div class="row px-xl-5">
     <div class="col-lg-8">
         <div class="mb-4">
@@ -119,97 +119,81 @@
         </div>
     </div>
     <div class="col-lg-4">
+        
         <div class="card border-secondary mb-5">
             <div class="card-header bg-secondary border-0">
                 <h4 class="font-weight-semi-bold m-0">Order Total</h4>
             </div>
             <div class="card-body">
                 <h5 class="font-weight-medium mb-3">Products</h5>
-                <div class="d-flex justify-content-between">
-                    <p>Colorful Stylish Shirt 1</p>
-                    <p>$150</p>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <p>Colorful Stylish Shirt 2</p>
-                    <p>$150</p>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <p>Colorful Stylish Shirt 3</p>
-                    <p>$150</p>
-                </div>
+
+                @foreach (var item in Model)
+                {
+                    <div class="d-flex justify-content-between">
+                        <p>@item.TenSanPham</p>
+                        <p>@item.TongTien</p> <!-- Hiển thị tổng tiền của mỗi sản phẩm -->
+                    </div>
+                }
+
                 <hr class="mt-0">
                 <div class="d-flex justify-content-between mb-3 pt-1">
                     <h6 class="font-weight-medium">Subtotal</h6>
-                    <h6 class="font-weight-medium">$150</h6>
+                    <h6 class="font-weight-medium">
+                        @Model.Sum(item => item.TongTien) <!-- Tính tổng tiền từ giỏ hàng -->
+                    </h6>
                 </div>
                 <div class="d-flex justify-content-between">
                     <h6 class="font-weight-medium">Shipping</h6>
-                    <h6 class="font-weight-medium">$10</h6>
+                    <h6 class="font-weight-medium">$10</h6> <!-- Phí vận chuyển cố định -->
                 </div>
             </div>
             <div class="card-footer border-secondary bg-transparent">
                 <div class="d-flex justify-content-between mt-2">
                     <h5 class="font-weight-bold">Total</h5>
-                    <h5 class="font-weight-bold">$160</h5>
+                    <h5 class="font-weight-bold">
+                        @(Model.Sum(item => item.TongTien) + 10.00m) <!-- Tính tổng tiền cộng phí vận chuyển -->
+                    </h5>
                 </div>
             </div>
         </div>
+
+       
         <div>
             <div class="payment-info">
                 <div class="payment-selection" onclick="openModal()">
-                    <img src="credit-card-icon.png" alt="Icon" class="icon">
+                    <img src="../assets/img/store-icon.png" alt="Icon" class="icon" id="selectedIcon">
                     <div class="payment-text">
-                        <p>Chọn phương thức thanh toán</p>
-                        <small>Giảm thêm tới 200.000đ</small>
+                        <p id="selectedMethod">Pay at store</p>
                     </div>
-                    <span class="arrow">&gt;</span>
+                    <span class="change-text">change &gt;</span>
                 </div>
             </div>
 
             <div class="modal" id="paymentModal">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal()">&times;</span>
-                    <h2>Chọn phương thức thanh toán</h2>
+                    <h2>Select Payment Method</h2>
                     <div class="payment-options">
-                        <div class="option">Thanh toán tại cửa hàng</div>
-                        <div class="option">Chuyển khoản ngân hàng qua mã QR</div>
-                        <div class="option">VNPAY</div>
-                        <div class="option">Qua thẻ Visa/Master/JCB/Napas</div>
-                        <div class="option">Ví MoMo <small>(Giảm thêm 2% tối đa 200.000đ)</small></div>
-                        <div class="option">Kredivo</div>
+                        <div class="option" onclick="selectMethod('Pay at store', 'store-icon.png')">
+                            Pay at store
+                        </div>
+                        <div class="option" onclick="selectMethod('Bank transfer via QR code', 'qr-icon.png')">
+                            Bank transfer via QR code
+                        </div>
+                        <div class="option" onclick="selectMethod('VNPAY', 'vnpay-icon.png')">VNPAY</div>
+                        <div class="option" onclick="selectMethod('Visa/Master/JCB/Napas', 'card-icon.png')">
+                            Visa/Master/JCB/Napas card
+                        </div>
+                        <div class="option" onclick="selectMethod('MoMo Wallet', 'momo-icon.png')">
+                            MoMo Wallet
+                        </div>
+                        <div class="option" onclick="selectMethod('Kredivo', 'kredivo-icon.png')">Kredivo</div>
                     </div>
-                    <button class="confirm-btn">Xác nhận</button>
+                    <button class="confirm-btn" onclick="confirmSelection()">Confirm</button>
                 </div>
             </div>
 
-            <div class="card border-secondary mb-5">
-                <div class="card-header bg-secondary border-0">
-                    <h4 class="font-weight-semi-bold m-0">Payment</h4>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <div class="custom-control custom-radio">
-                            <input type="radio" class="custom-control-input" name="payment" id="paypal">
-                            <label class="custom-control-label" for="paypal">Paypal</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="custom-control custom-radio">
-                            <input type="radio" class="custom-control-input" name="payment" id="directcheck">
-                            <label class="custom-control-label" for="directcheck">Direct Check</label>
-                        </div>
-                    </div>
-                    <div class="">
-                        <div class="custom-control custom-radio">
-                            <input type="radio" class="custom-control-input" name="payment" id="banktransfer">
-                            <label class="custom-control-label" for="banktransfer">Bank Transfer</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer border-secondary bg-transparent">
-                    <button class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3">Place Order</button>
-                </div>
-            </div>
+
         </div>
     </div>
 
@@ -235,18 +219,13 @@
 
         .payment-text p {
             margin: 0;
-            color: red;
             font-weight: bold;
         }
 
-        .payment-text small {
-            color: gray;
-        }
-
-        .arrow {
+        .change-text {
             margin-left: auto;
-            font-size: 20px;
-            color: gray;
+            color: red;
+            cursor: pointer;
         }
 
         /* Modal styles */
@@ -299,13 +278,60 @@
             margin-top: 15px;
             cursor: pointer;
         }
-    </style>
-    <script>
-        function openModal() {
-            document.getElementById('paymentModal').style.display = 'block';
+
+        .payment-options .option {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
         }
 
+            .payment-options .option.selected {
+                background-color: #d1e7dd;
+                color: #0f5132;
+                font-weight: bold;
+            }
+
+            /* Xử lý nút cuối không có border */
+            .payment-options .option:last-child {
+                border-bottom: none;
+            }
+    </style>
+    <script>
+
+        let selectedMethodText = 'Thanh toán tại cửa hàng';
+        let selectedIconSrc = '../assets/img/store-icon.png';
+        let currentSelectedElement = null; // Theo dõi phần tử đã chọn
+
+        // Hàm mở modal
+        function openModal() {
+          document.getElementById('paymentModal').style.display = 'block';
+        }
+
+        // Hàm đóng modal
         function closeModal() {
-            document.getElementById('paymentModal').style.display = 'none';
+          document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        // Hàm lưu phương thức được chọn và tô màu phần tử đã chọn
+        function selectMethod(method, icon) {
+          selectedMethodText = method;
+          selectedIconSrc = icon;
+
+          // Xóa màu của phần tử trước đó (nếu có)
+          if (currentSelectedElement) {
+            currentSelectedElement.classList.remove('selected');
+          }
+
+          // Gán phần tử được chọn và thêm lớp `selected`
+          event.target.classList.add('selected');
+          currentSelectedElement = event.target;
+        }
+
+        // Hàm xác nhận lựa chọn và cập nhật giao diện chính
+        function confirmSelection() {
+          document.getElementById('selectedMethod').textContent = selectedMethodText;
+          document.getElementById('selectedIcon').src = selectedIconSrc;
+          closeModal();
         }
     </script>

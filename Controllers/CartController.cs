@@ -1,13 +1,16 @@
-﻿using BTLW_BDT.Models.Cart;
-using BTLW_BDT.Models;
+
+﻿using BTLW_BDT.Models;
+using BTLW_BDT.Models.Cart;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BTLW_BDT.Controllers
 {
     public class CartController : Controller
     {
-        
+
         private readonly BtlLtwQlbdtContext _context;
+
+
         public CartController(BtlLtwQlbdtContext context)
         {
             _context = context;
@@ -21,7 +24,7 @@ namespace BTLW_BDT.Controllers
             }
         }
 
-     
+
 
         public List<CartItem> Carts
         {
@@ -37,8 +40,21 @@ namespace BTLW_BDT.Controllers
         }
 
 
-        public IActionResult Cart()
+
+        
+
+        public IActionResult Index()
         {
+            ViewBag.CartCount = CartCount; // Truyền số lượng sản phẩm vào ViewBag
+            ViewData["Page"] = "Shopping Cart";
+            var cart = Carts;
+
+            return View(Carts);
+        }
+        public IActionResult DetailCart()
+
+        {
+
             ViewBag.CartCount = CartCount; // Truyền số lượng sản phẩm vào ViewBag
             ViewData["Page"] = "Shopping Cart";
             var cart = Carts;
@@ -88,8 +104,7 @@ namespace BTLW_BDT.Controllers
             // Lưu giỏ hàng lại vào session
             HttpContext.Session.Set("GioHang", myCart);
 
-
-
+            TempData["Message"] = "Sản phẩm đã được thêm vào giỏ hàng!";
             return RedirectToAction("Index","Home");  // Điều hướng về trang giỏ hàng
         }
 
@@ -108,7 +123,10 @@ namespace BTLW_BDT.Controllers
 
             // Lưu giỏ hàng lại vào session
             HttpContext.Session.Set("GioHang", myCart);
-            return RedirectToAction("Cart"); // Trở lại trang giỏ hàng
+
+
+            return RedirectToAction("DetailCart"); // Trở lại trang giỏ hàng
+
         }
 
         [HttpPost]
@@ -137,10 +155,22 @@ namespace BTLW_BDT.Controllers
 
             // Lưu giỏ hàng lại vào session
             HttpContext.Session.Set("GioHang", myCart);
-            return RedirectToAction("Cart"); // Trở lại trang giỏ hàng
+
+            return RedirectToAction("DetailCart"); // Trở lại trang giỏ hàng
+
         }
 
 
+
+
+
+        public IActionResult Checkout()
+        {
+            ViewData["Page"] = "Checkout";
+            return View();
+        }
+
+        
 
     }
 }
