@@ -18,26 +18,25 @@
                 _logger = logger;
            
             }
-            
-   
-      
+
+
+
 
         public int CartCount()
-
         {
             var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
-            return cart.Count();
+            return cart.Count;
         }
 
 
-       
 
 
-     
+
+
 
         public IActionResult Index()
         {
-            ViewBag.CartCount = CartCount(); // Truyền số lượng sản phẩm vào ViewBag
+            ViewBag.CartCount = CartCount();  // Truyền số lượng sản phẩm vào ViewBag
             var lstSanPham = db.SanPhams.ToList();
        
             return View(lstSanPham);

@@ -33,6 +33,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+
 // Kích hoạt middleware session
 app.UseSession(); // Thêm dòng này để kích hoạt session
 
