@@ -1,5 +1,6 @@
 
 ﻿using BTLW_BDT.Models;
+using BTLW_BDT.Models.Authentication;
 using BTLW_BDT.Models.Cart;
 using Microsoft.AspNetCore.Mvc;
 
@@ -63,6 +64,8 @@ namespace BTLW_BDT.Controllers
         }
 
         // Thêm sản phẩm vào giỏ hàng
+
+        [Authentication]
         public IActionResult AddToCart(string id)
         {
             var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
