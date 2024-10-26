@@ -30,7 +30,9 @@
                             @item.TenSanPham
                         </td>
                         <td class="align-middle">
-                            @item.DonGia.ToString("C")
+                            
+                            @Convert.ToDouble(item.DonGia).ToString("N0") VNĐ
+                          
                         </td>
                         <td class="align-middle">
                             <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display:inline;">
@@ -52,7 +54,7 @@
                             </form>
                         </td>
                         <td class="align-middle">
-                            @item.TongTien.ToString("C")
+                            @Convert.ToDouble(item.TongTien).ToString("N0") VNĐ
                         </td>
                         <td class="align-middle">
                             <form asp-controller="Cart" asp-action="RemoveFromCart" method="post">
@@ -87,19 +89,24 @@
                 <div class="d-flex justify-content-between mb-3 pt-1">
                     <h6 class="font-weight-medium">Subtotal</h6>
                     <h6 class="font-weight-medium">
-                        @Model.Sum(item => item.DonGia * item.SoLuong).ToString("C")
+
+                        @Convert.ToDouble(@Model.Sum(item => item.DonGia * item.SoLuong)).ToString("N0") VNĐ
+                        
                     </h6>
                 </div>
                 <div class="d-flex justify-content-between">
                     <h6 class="font-weight-medium">Shipping</h6>
-                    <h6 class="font-weight-medium">$10</h6>
+                    <h6 class="font-weight-medium">25,000 VNĐ</h6>
                 </div>
             </div>
             <div class="card-footer border-secondary bg-transparent">
                 <div class="d-flex justify-content-between mt-2">
                     <h5 class="font-weight-bold">Total</h5>
                     <h5 class="font-weight-bold">
-                        @(Model.Sum(item => item.DonGia * item.SoLuong) + 10.00m)
+
+                        @((Model.Sum(item => item.DonGia * item.SoLuong) + 25000).ToString("N0")) VNĐ
+
+                       
                     </h5>
                 </div>
                 <a asp-controller="Checkout" asp-action="DetailCheckout" class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</a>
