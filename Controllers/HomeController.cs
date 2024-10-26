@@ -1,8 +1,8 @@
-﻿    using BTLW_BDT.Models;
-    using BTLW_BDT.Models.Cart;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
-    using System.Diagnostics;
+﻿using BTLW_BDT.Models;
+using BTLW_BDT.Models.Cart;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
     namespace BTLW_BDT.Controllers
     {
@@ -18,8 +18,6 @@
                 _logger = logger;
            
             }
-
-
 
 
         public int CartCount()
@@ -42,7 +40,7 @@
             return View(lstSanPham);
         }
 
-       
+
 
 
        
@@ -50,11 +48,10 @@
 
 
 
-
-            public IActionResult Privacy()
-            {
-                return View();
-            }
+        public IActionResult Privacy()
+        {
+            return View();
+        }
 
             [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
             public IActionResult Error()
