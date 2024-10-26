@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddSession();
 
 // Đăng ký DbContext trong DI container
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(options =>
@@ -33,13 +34,15 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+
 // Kích hoạt middleware session
 app.UseSession(); // Thêm dòng này để kích hoạt session
 
 app.UseAuthorization();
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Access}/{action=Login}/{id?}");
 
 app.Run();

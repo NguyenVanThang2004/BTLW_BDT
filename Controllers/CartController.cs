@@ -20,7 +20,7 @@ namespace BTLW_BDT.Controllers
         {
             get
             {
-                return Carts.Count(); // Đếm tổng số lượng sản phẩm trong giỏ
+                return Carts.Count();
             }
         }
 
@@ -65,47 +65,33 @@ namespace BTLW_BDT.Controllers
         // Thêm sản phẩm vào giỏ hàng
         public IActionResult AddToCart(string id)
         {
-            var myCart = Carts;
+            var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
 
-            // Tìm sản phẩm trong giỏ hàng hiện tại
-            var item = myCart.SingleOrDefault(x => x.MaSanPham == id);
-
+            // Thêm sản phẩm vào giỏ hàng
+            var item = cart.SingleOrDefault(x => x.MaSanPham == id);
             if (item == null)
             {
-                // Tìm sản phẩm trong CSDL
                 var hangHoa = _context.SanPhams.SingleOrDefault(x => x.MaSanPham == id);
-
-                if (hangHoa == null)
+                if (hangHoa != null)
                 {
-                    // Xử lý trường hợp không tìm thấy sản phẩm trong CSDL
-                    return NotFound();
+                    item = new CartItem
+                    {
+                        MaSanPham = id,
+                        TenSanPham = hangHoa.TenSanPham,
+                        DonGia = hangHoa.DonGiaBanRa ?? 0,
+                        SoLuong = 1,
+                        Anh = hangHoa.AnhDaiDien
+                    };
+                    cart.Add(item);
                 }
-
-
-
-
-                // Thêm sản phẩm vào giỏ hàng
-                item = new CartItem
-                {
-                    MaSanPham = id,
-                    TenSanPham = hangHoa.TenSanPham,
-                    DonGia = hangHoa.DonGiaBanRa.HasValue ? hangHoa.DonGiaBanRa.Value : 0,
-                    SoLuong = 1,
-                    Anh = hangHoa.AnhDaiDien
-                };
-                myCart.Add(item);
             }
             else
             {
-
                 item.SoLuong++;
             }
 
-            // Lưu giỏ hàng lại vào session
-            HttpContext.Session.Set("GioHang", myCart);
-
-            TempData["Message"] = "Sản phẩm đã được thêm vào giỏ hàng!";
-            return RedirectToAction("Index","Home");  // Điều hướng về trang giỏ hàng
+            HttpContext.Session.Set("GioHang", cart);  // Lưu giỏ hàng lại vào session
+            return RedirectToAction("Index","Home");
         }
 
 

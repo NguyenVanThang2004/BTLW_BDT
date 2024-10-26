@@ -25,24 +25,7 @@
     <!-- Customized Bootstrap Stylesheet -->
     <link href="../assets/css/style.css" rel="stylesheet">
 
-    <style>
-        /* CSS để căn giữa thông báo */
-        #notification {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            padding: 20px;
-            background-color: #28a745; /* Màu xanh lá cho thông báo thành công */
-            color: white;
-            font-size: 18px;
-            border-radius: 5px;
-            text-align: center;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
-            opacity: 0.9;
-        }
-    </style>
+  
         
 
 </head>
@@ -168,7 +151,7 @@
                             <a href="contact.html" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0">
-                            <a href="" class="nav-item nav-link">Login</a>
+                            <a asp-controller="Access" asp-action="Logout" class="nav-item nav-link">Logout</a>
                             <a href="" class="nav-item nav-link">Register</a>
                         </div>
                     </div>
@@ -327,12 +310,8 @@
         </div>
     </div>
     <!-- Offer End -->
-    @if (TempData["Message"] != null)
-    {
-        <div id="notification" class="alert alert-success">
-            @TempData["Message"]
-        </div>
-    }
+   
+
     <!-- Products Start -->
     <div class="container-fluid pt-5">
         <div class="text-center mb-4">
@@ -636,12 +615,6 @@
     <!-- Template Javascript -->
     <script src="../assets/js/main.js"></script>
 
-    <script>
-        // Tự động ẩn thông báo sau 3 giây
-        setTimeout(function () {
-            document.getElementById('notification').style.display = 'none';
-        }, 3000);
-    </script>
     
 </body>
 
