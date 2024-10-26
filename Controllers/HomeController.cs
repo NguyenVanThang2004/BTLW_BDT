@@ -27,6 +27,7 @@ using X.PagedList;
             }
 
 
+
         public int CartCount()
         {
             var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
