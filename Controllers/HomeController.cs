@@ -1,11 +1,18 @@
+
 ﻿using BTLW_BDT.Models;
 using BTLW_BDT.Models.Cart;
+using Azure;
+
+using BTLW_BDT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using X.PagedList;
 
     namespace BTLW_BDT.Controllers
     {
+
+
 
         public class HomeController : Controller
         {
@@ -43,8 +50,35 @@ using System.Diagnostics;
 
 
 
+
        
       
+
+
+        public IActionResult Shop(int? page)
+        {
+            int pageSize = 9;
+            int pageNumber = page == null || page < 0 ? 1 : page.Value;
+            var lstsanpham = db.SanPhams.AsNoTracking().OrderBy(x => x.TenSanPham);
+            PagedList<SanPham> lst = new PagedList<SanPham>
+                (lstsanpham, pageNumber, pageSize);
+            return View(lst);
+        }
+        public IActionResult ProductDetail(string maSp, string maMau, string maRom)
+        {
+            var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp);
+            var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp).ToList();
+            var mauSanPham = db.MauSacs.Where(x => x.MaMau == maMau).ToList();
+            var romSanPham = db.Roms.Where(x => x.MaRom == maRom).ToList();
+            var detailView = new ProductDetailViewModel
+            {
+                dmSp = sanPham,
+                dmAnhSp = anhSanPham,
+                dmMauSp = mauSanPham,
+                dmRomSp = romSanPham
+            };
+            return View(detailView);
+        }
 
 
 
