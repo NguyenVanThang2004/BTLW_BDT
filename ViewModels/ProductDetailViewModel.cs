@@ -7,5 +7,6 @@ namespace BTLW_BDT.ViewModels
         public List<AnhSanPham> dmAnhSp { get; set;}
         public List<MauSac> dmMauSp { get; set;}
         public List<Rom> dmRomSp { get; set;}
+        public string SelectedColor { get; set; } // Thêm thuộc tính này
     }
 }
