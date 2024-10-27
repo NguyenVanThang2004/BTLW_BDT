@@ -37,7 +37,7 @@
                 </div>
                 <small class="pt-1">(50 Reviews)</small>
             </div>
-            <h3 id="productPrice" class="font-weight-semi-bold mb-4">@Model.dmSp.DonGiaBanRa?.ToString("#,##0") VNĐ</h3>
+            <h3 id="productPrice" class="font-weight-semi-bold mb-4">@Model.CurrentPrice?.ToString("#,##0") VNĐ</h3>
             @if (Model.dmSp.SoLuongTonKho > 0)
             {
                 <div class="alert alert-success mb-4">
@@ -55,12 +55,19 @@
             <div class="d-flex mb-3">
                 <p class="text-dark font-weight-medium mb-0 mr-3">Dung lượng bộ nhớ:</p>
                 <form id="romForm">
-                    @for (int i = 0; i < Model.dmRomSp.Count; i++)
+                    @foreach (var rom in Model.dmRomSp)
                     {
-                        var rom = Model.dmRomSp[i];
                         <div class="custom-control custom-radio custom-control-inline">
-                            <input type="radio" class="custom-control-input" id="rom-@rom.MaRom" name="rom" value="@rom.MaRom" data-index="@i">
-                            <label class="custom-control-label" for="rom-@rom.MaRom">@rom.ThongSo</label>
+                            <input type="radio" 
+                                   class="custom-control-input rom-select" 
+                                   id="rom-@rom.MaRom" 
+                                   name="rom" 
+                                   value="@rom.MaRom"
+                                   data-url="@Url.Action("GetRomPrice", "Home", new { maSp = Model.dmSp.MaSanPham, maRom = rom.MaRom })"
+                                   @(rom.MaRom == Model.SelectedRom ? "checked" : "")>
+                            <label class="custom-control-label" for="rom-@rom.MaRom">
+                                @rom.ThongSo 
+                            </label>
                         </div>
                     }
                 </form>
@@ -292,6 +299,15 @@
             e.preventDefault();
             $carousel.carousel('next');
         });
+
+        $('.rom-select').change(function() {
+            var url = $(this).data('url');
+            $.get(url, function(response) {
+                if (response.success) {
+                    $('#productPrice').text(response.formattedPrice);
+                }
+            });
+        });
     });
 </script>
 
@@ -387,4 +403,5 @@
         height: 100%;
     }
 </style>
+
 

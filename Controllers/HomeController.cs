@@ -46,20 +46,26 @@ using X.PagedList;
                 var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp);
                 var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp).ToList();
                 var mauSanPham = db.MauSacs.Where(x => x.MaSanPham == maSp).ToList();
-                var romSanPham = db.Roms.Where(x => x.MaSanPham == maSp).ToList();
+                var romSanPham = db.Roms.Where(x => x.MaSanPham == maSp)
+                            .OrderBy(x => x.Gia)  // Sắp xếp theo giá tăng dần
+                            .ToList();
             
                 // Lấy màu đầu tiên
                 var firstColor = mauSanPham.FirstOrDefault()?.MaMau;
-                // Lấy ảnh của màu đầu tiên
                 var firstColorImages = anhSanPham.Where(x => x.MaMau == firstColor).ToList();
+            
+                // Lấy ROM nhỏ nhất (rẻ nhất)
+                var smallestRom = romSanPham.FirstOrDefault();
             
                 var detailView = new ProductDetailViewModel
                 {
                     dmSp = sanPham,
-                    dmAnhSp = firstColorImages, // Chỉ truyền ảnh của màu đầu tiên
+                    dmAnhSp = firstColorImages,
                     dmMauSp = mauSanPham,
                     dmRomSp = romSanPham,
-                    SelectedColor = firstColor // Thêm thuộc tính này vào ViewModel
+                    SelectedColor = firstColor,
+                    SelectedRom = smallestRom?.MaRom,
+                    CurrentPrice = sanPham.DonGiaBanRa // Giá ban đầu với ROM nhỏ nhất
                 };
                 return View(detailView);
             }
@@ -77,6 +83,30 @@ using X.PagedList;
             public IActionResult Error()
             {
                 return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            }
+
+            [HttpGet]
+            public IActionResult GetRomPrice(string maSp, string maRom)
+            {
+                var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp);
+                var romList = db.Roms.Where(x => x.MaSanPham == maSp)
+                        .OrderBy(x => x.Gia)
+                        .ToList();
+            
+                var selectedRom = romList.FirstOrDefault(x => x.MaRom == maRom);
+                var baseRom = romList.FirstOrDefault(); // ROM nhỏ nhất
+            
+                if (selectedRom == null || baseRom == null || sanPham == null)
+                    return Json(new { success = false });
+                
+                // Tính giá mới = Giá cơ bản + (Giá ROM đã chọn - Giá ROM nhỏ nhất)
+                var newPrice = sanPham.DonGiaBanRa + (selectedRom.Gia - baseRom.Gia);
+            
+                return Json(new { 
+                    success = true, 
+                    price = newPrice,
+                    formattedPrice = newPrice.Value.ToString("#,##0") + " VNĐ"
+                });
             }
         }
     }
