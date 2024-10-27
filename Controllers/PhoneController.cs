@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using BTLW_BDT.Models;
 using BTLW_BDT.Models.PhoneModels;
+using System.Linq;
 
 namespace BTLW_BDT.Controllers
 {
@@ -54,6 +55,42 @@ namespace BTLW_BDT.Controllers
                 CurrentPage = page
             };
             
+            return Json(viewModel);
+        }
+        [HttpGet("GetFilteredPhones")]
+        public IActionResult GetFilteredPhones([FromQuery] string rams = "", decimal? minPrice = null, decimal? maxPrice = null, int page = 1, int pageSize = 12)
+        {
+            var ramList = string.IsNullOrEmpty(rams) ? new List<string>() : rams.Split(',').Select(r => r.Trim()).ToList();
+            var query = db.SanPhams.AsQueryable();
+
+            // Lọc theo RAM
+            if (ramList.Any() && !ramList.Contains("all"))
+            {
+                query = query.Where(p => ramList.Contains(p.Ram));
+            }
+
+            // Lọc theo giá
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.DonGiaBanRa >= minPrice.Value);
+            }
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.DonGiaBanRa <= maxPrice.Value);
+            }
+
+            var totalItems = query.Count();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var phones = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var viewModel = new
+            {
+                Products = phones,
+                TotalPages = totalPages,
+                CurrentPage = page
+            };
+
             return Json(viewModel);
         }
     }

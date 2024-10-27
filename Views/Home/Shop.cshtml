@@ -2,14 +2,6 @@
     ViewData["Title"] = "Shop";
     Layout = "~/Views/Shared/_LayoutShop.cshtml";
 }
-
-@* <div id="productContainer" class="row pb-3">
-    @foreach (var item in Model)
-    {
-        @await Html.PartialAsync("PartialSanPham", item)
-    }
-</div> *@
-
 <div id="productContainer" class="row pb-3">
     <!-- Sản phẩm sẽ được thêm vào đây bằng JavaScript -->
 </div>
@@ -27,43 +19,36 @@
         var currentPage = 1;
 
         $(document).ready(function() {
-            // Lấy dữ liệu RAM từ API
-            $.ajax({
-                url: '/api/Phone/GetRamOptions',
-                method: 'GET',
-                success: function(data) {
-                    var ramForm = $('#ramFilterForm');
-                    data.forEach(function(ram) {
-                        var checkbox = `
-                            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                                <input type="checkbox" class="custom-control-input ram-filter" id="ram-${ram}" value="${ram}">
-                                <label class="custom-control-label" for="ram-${ram}">${ram} GB</label>
-                            </div>
-                        `;
-                        ramForm.append(checkbox);
-                    });
-                },
-                error: function(error) {
-                    console.error('Error fetching RAM options:', error);
-                }
+            // Reset các ô input về giá trị mặc định khi trang được tải
+            $(window).on('pageshow', function() {
+                $('#minPrice').val('');
+                $('#maxPrice').val('');
+            });
+            // Tải các tùy chọn RAM
+            loadRamOptions();
+
+            // Tải sản phẩm ban đầu
+            loadProducts();
+
+            // Xử lý sự kiện khi checkbox RAM thay đổi
+            $(document).on('change', '.ram-filter', function() {
+                currentPage = 1;
+                loadProducts();
             });
 
-            // Xử lý sự kiện khi checkbox được chọn
-            $(document).on('change', '.ram-filter', function() {
-                var isAllRam = $(this).val() === 'all';
-                var isChecked = $(this).prop('checked');
+            // Xử lý sự kiện khi giá trị trong ô nhập thay đổi
+            $('#minPrice, #maxPrice').on('input', function() {
+                currentPage = 1;
+                loadProducts();
+            });
 
-                if (isAllRam) {
-                    // Nếu "All RAM" được chọn, bỏ chọn tất cả các tùy chọn khác
-                    $('.ram-filter:not(#ram-all)').prop('checked', false);
-                } else {
-                    // Nếu một tùy chọn khác được chọn, bỏ chọn "All RAM"
-                    $('#ram-all').prop('checked', false);
+            $('#maxPrice').on('input', function () {
+                var minPrice = parseInt($('#minPrice').val()) || 0;
+                var maxPrice = parseInt($(this).val()) || 0;
 
-                    // Nếu không có tùy chọn nào được chọn, chọn lại "All RAM"
-                    if ($('.ram-filter:checked').length === 0) {
-                        $('#ram-all').prop('checked', true);
-                    }
+                // Đảm bảo giá lớn nhất không nhỏ hơn giá nhỏ nhất
+                if (maxPrice < minPrice) {
+                    $(this).val(minPrice);
                 }
 
                 currentPage = 1;
@@ -77,22 +62,47 @@
                 loadProducts();
             });
 
+            function loadRamOptions() {
+                $.ajax({
+                    url: '/api/Phone/GetRamOptions',
+                    method: 'GET',
+                    success: function(data) {
+                        var ramForm = $('#ramFilterForm');
+                        ramForm.empty(); // Xóa các tùy chọn cũ nếu có
+                        data.forEach(function(ram) {
+                            var checkbox = `
+                                <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                    <input type="checkbox" class="custom-control-input ram-filter" id="ram-${ram}" value="${ram}">
+                                    <label class="custom-control-label" for="ram-${ram}">${ram} GB</label>
+                                </div>
+                            `;
+                            ramForm.append(checkbox);
+                        });
+                    },
+                    error: function(error) {
+                        console.error('Error fetching RAM options:', error);
+                    }
+                });
+            }
+
             function loadProducts() {
                 var selectedRams = $('.ram-filter:checked').map(function() {
                     return this.value;
-                }).get();
+                }).get().join(',');
 
-                // Nếu "All RAM" được chọn hoặc không có RAM nào được chọn, lấy tất cả sản phẩm
-                var url = (selectedRams.includes('all') || selectedRams.length === 0)
-                    ? `/api/Phone/GetAllPhones?page=${currentPage}`
-                    : `/api/Phone/GetPhoneByRam?rams=${selectedRams.join(',')}&page=${currentPage}`;
-                
+                var minPrice = $('#minPrice').val();
+                var maxPrice = $('#maxPrice').val();
+
                 $.ajax({
-                    url: url,
+                    url: `/api/Phone/GetFilteredPhones?rams=${selectedRams}&minPrice=${minPrice}&maxPrice=${maxPrice}&page=${currentPage}`,
                     method: 'GET',
                     success: function(data) {
-                        updateProductList(data.products);
-                        updatePagination(data.totalPages, data.currentPage);
+                        if (data.products.length === 0) {
+                            $('#productContainer').html('<p>Không có sản phẩm phù hợp.</p>');
+                        } else {
+                            updateProductList(data.products);
+                            updatePagination(data.totalPages, data.currentPage);
+                        }
                     },
                     error: function(error) {
                         console.error('Error fetching products:', error);
@@ -109,8 +119,6 @@
             }
 
             function createProductHtml(product) {
-                // Tạo HTML cho mỗi sản phẩm dựa trên dữ liệu nhận được
-                // Đảm bảo rằng cấu trúc này khớp với PartialSanPham.cshtml của bạn
                 return `
                     <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
                         <div class="card product-item border-0 mb-4">
@@ -152,9 +160,6 @@
                     paginationContainer.append(pageItem);
                 }
             }
-
-            // Load sản phẩm ban đầu
-            loadProducts();
         });
     </script>
 }
