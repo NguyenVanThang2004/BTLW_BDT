@@ -58,7 +58,7 @@ namespace BTLW_BDT.Controllers
             return Json(viewModel);
         }
         [HttpGet("GetFilteredPhones")]
-        public IActionResult GetFilteredPhones([FromQuery] string rams = "", decimal? minPrice = null, decimal? maxPrice = null, int page = 1, int pageSize = 12)
+        public IActionResult GetFilteredPhones([FromQuery] string rams = "", decimal? minPrice = null, decimal? maxPrice = null, string searchQuery = "", string brand = "", int page = 1, int pageSize = 12)
         {
             var ramList = string.IsNullOrEmpty(rams) ? new List<string>() : rams.Split(',').Select(r => r.Trim()).ToList();
             var query = db.SanPhams.AsQueryable();
@@ -79,6 +79,18 @@ namespace BTLW_BDT.Controllers
                 query = query.Where(p => p.DonGiaBanRa <= maxPrice.Value);
             }
 
+            // Lọc theo tên sản phẩm
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(p => p.TenSanPham.Contains(searchQuery));
+            }
+
+            // Lọc theo hãng
+            if (!string.IsNullOrEmpty(brand))
+            {
+                query = query.Where(p => p.MaHang == brand);
+            }
+
             var totalItems = query.Count();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
@@ -92,6 +104,12 @@ namespace BTLW_BDT.Controllers
             };
 
             return Json(viewModel);
+        }
+        [HttpGet("GetBrands")]
+        public IActionResult GetBrands()
+        {
+            var brands = db.Hangs.Select(h => new { h.MaHang, h.TenHang }).ToList();
+            return Ok(brands);
         }
     }
 }

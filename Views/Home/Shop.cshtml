@@ -17,15 +17,22 @@
 @section Scripts {
     <script>
         var currentPage = 1;
+        var debounceTimeout;
+        var selectedBrand = '';
 
         $(document).ready(function() {
             // Reset các ô input về giá trị mặc định khi trang được tải
             $(window).on('pageshow', function() {
                 $('#minPrice').val('');
                 $('#maxPrice').val('');
+                $('#searchInput').val('');
             });
+
             // Tải các tùy chọn RAM
             loadRamOptions();
+
+            // Tải các hãng
+            loadBrands();
 
             // Tải sản phẩm ban đầu
             loadProducts();
@@ -55,10 +62,34 @@
                 loadProducts();
             });
 
+            // Xử lý sự kiện khi nhấn nút tìm kiếm
+            $('#searchButton').on('click', function() {
+                currentPage = 1;
+                loadProducts();
+            });
+
+            // Xử lý sự kiện khi nhấn Enter trong ô tìm kiếm
+            $('#searchInput').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    currentPage = 1;
+                    loadProducts();
+                }
+            });
+
             // Xử lý sự kiện khi nhấn nút phân trang
             $(document).on('click', '.page-link', function(e) {
                 e.preventDefault();
                 currentPage = $(this).data('page');
+                loadProducts();
+            });
+
+            // Xử lý sự kiện khi nhấn vào hãng trong thanh điều hướng
+            $(document).on('click', '.brand-filter', function(e) {
+                e.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ a
+                selectedBrand = $(this).data('brand');
+                console.log('Selected Brand:', selectedBrand); // Kiểm tra giá trị của selectedBrand
+                currentPage = 1;
                 loadProducts();
             });
 
@@ -85,6 +116,31 @@
                 });
             }
 
+            function loadBrands() {
+                $.ajax({
+                    url: '/api/phone/getbrands',
+                    method: 'GET',
+                    success: function(data) {
+                        var brandNav = $('#brandNav');
+                        brandNav.empty(); // Xóa các hãng cũ nếu có
+                        data.forEach(function(brand) {
+                            var brandLink = `
+                                <a href="#" class="nav-item nav-link brand-filter" data-brand="${brand.maHang}">${brand.tenHang}</a>
+                            `;
+                            brandNav.append(brandLink);
+                        });
+
+                        // Tính toán chiều cao dựa trên số lượng hãng
+                        var itemHeight = 40; // Chiều cao ước tính của mỗi mục
+                        var totalHeight = data.length * itemHeight;
+                        $('#navbar-vertical').css('height', totalHeight + 'px');
+                    },
+                    error: function(error) {
+                        console.error('Error fetching brands:', error);
+                    }
+                });
+            }
+
             function loadProducts() {
                 var selectedRams = $('.ram-filter:checked').map(function() {
                     return this.value;
@@ -92,20 +148,32 @@
 
                 var minPrice = $('#minPrice').val();
                 var maxPrice = $('#maxPrice').val();
+                var searchQuery = $('#searchInput').val();
+
+                console.log('Loading products with params:', {
+                    rams: selectedRams,
+                    minPrice: minPrice,
+                    maxPrice: maxPrice,
+                    searchQuery: searchQuery,
+                    brand: selectedBrand,
+                    page: currentPage
+                });
 
                 $.ajax({
-                    url: `/api/Phone/GetFilteredPhones?rams=${selectedRams}&minPrice=${minPrice}&maxPrice=${maxPrice}&page=${currentPage}`,
+                    url: `/api/phone/getfilteredphones?rams=${selectedRams}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchQuery=${searchQuery}&brand=${selectedBrand}&page=${currentPage}`,
                     method: 'GET',
                     success: function(data) {
-                        if (data.products.length === 0) {
-                            $('#productContainer').html('<p>Không có sản phẩm phù hợp.</p>');
-                        } else {
+                        console.log('Data received:', data); // Kiểm tra dữ liệu nhận được
+
+                        if (data && data.products && data.products.length > 0) {
                             updateProductList(data.products);
                             updatePagination(data.totalPages, data.currentPage);
+                        } else {
+                            $('#productContainer').html('<p>Không có sản phẩm phù hợp.</p>');
                         }
                     },
                     error: function(error) {
-                        console.error('Error fetching products:', error);
+                        console.error('Error fetching products:', error); // Kiểm tra lỗi
                     }
                 });
             }
