@@ -120,7 +120,7 @@
                             <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
                                 <h6 class="text-truncate mb-3">${product.tenSanPham}</h6>
                                 <div class="d-flex justify-content-center">
-                                    <h6>${product.donGiaBanRa}</h6><h6 class="text-muted ml-2"><del>${product.donGiaBanGoc}</del></h6>
+                                    <h6>${product.donGiaBanRa.toLocaleString('vi-VN')} VNĐ </h6><h6 class="text-muted ml-2"><del>${(product.donGiaBanGoc * 1.2).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VNĐ </del></h6>
                                 </div>
                             </div>
                             <div class="card-footer d-flex justify-content-between bg-light border">

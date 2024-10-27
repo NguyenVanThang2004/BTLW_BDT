@@ -56,49 +56,5 @@ namespace BTLW_BDT.Controllers
             
             return Json(viewModel);
         }
-        //BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
-        //[HttpGet]
-        //public ActionResult<IEnumerable<Phone>> GetAllPhones()
-        //{
-        //    try
-        //    {
-        //        var phones = (from p in db.SanPhams
-        //                      select new Phone
-        //                      {
-        //                          MaSanPham = p.MaSanPham,
-        //                          TenSanPham = p.TenSanPham,
-        //                          DonGiaBanGoc = p.DonGiaBanGoc,
-        //                          DonGiaBanRa = p.DonGiaBanRa,
-        //                          KhuyenMai = p.KhuyenMai,
-        //                          Ram = p.Ram,
-        //                          Pin = p.Pin,
-        //                          AnhDaiDien = p.AnhDaiDien
-        //                      }).ToList();
-        //        return Ok(phones);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log the exception
-        //        return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
-        //    }
-        //}
-        //[HttpGet("{ttyc}")]
-        //public IEnumerable<Phone> GetPhoneByTT(string ttyc)
-        //{
-        //    var phones = (from p in db.SanPhams
-        //                  where p.Ram == ttyc || p.Pin.Contains(ttyc) || p.TenSanPham.Contains(ttyc)
-        //                  select new Phone
-        //                  {
-        //                      MaSanPham = p.MaSanPham,
-        //                      TenSanPham = p.TenSanPham,
-        //                      DonGiaBanGoc = p.DonGiaBanGoc,
-        //                      DonGiaBanRa = p.DonGiaBanRa,
-        //                      KhuyenMai = p.KhuyenMai,
-        //                      Ram = p.Ram,
-        //                      Pin = p.Pin,
-        //                      AnhDaiDien = p.AnhDaiDien
-        //                  }).ToList();
-        //    return phones;
-        //}
     }
 }

@@ -1,8 +1,6 @@
-
 ﻿using BTLW_BDT.Models;
 using BTLW_BDT.Models.Cart;
 using Azure;
-
 using BTLW_BDT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,9 +9,6 @@ using X.PagedList;
 
     namespace BTLW_BDT.Controllers
     {
-
-
-
         public class HomeController : Controller
         {
             BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
@@ -25,21 +20,11 @@ using X.PagedList;
                 _logger = logger;
            
             }
-
-
-
         public int CartCount()
         {
             var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
             return cart.Count;
         }
-
-
-
-
-
-
-
         public IActionResult Index()
         {
             ViewBag.CartCount = CartCount();  // Truyền số lượng sản phẩm vào ViewBag
@@ -47,15 +32,6 @@ using X.PagedList;
        
             return View(lstSanPham);
         }
-
-
-
-
-
-       
-      
-
-
         public IActionResult Shop(int? page)
         {
             int pageSize = 9;
@@ -65,12 +41,12 @@ using X.PagedList;
                 (lstsanpham, pageNumber, pageSize);
             return View(lst);
         }
-        public IActionResult ProductDetail(string maSp, string maMau, string maRom)
+        public IActionResult ProductDetail(string maSp)
         {
             var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp);
             var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp).ToList();
-            var mauSanPham = db.MauSacs.Where(x => x.MaMau == maMau).ToList();
-            var romSanPham = db.Roms.Where(x => x.MaRom == maRom).ToList();
+            var mauSanPham = db.MauSacs.Where(x => x.MaSanPham == maSp).ToList();
+            var romSanPham = db.Roms.Where(x => x.MaSanPham == maSp).ToList();
             var detailView = new ProductDetailViewModel
             {
                 dmSp = sanPham,
@@ -80,9 +56,6 @@ using X.PagedList;
             };
             return View(detailView);
         }
-
-
-
         public IActionResult Privacy()
         {
             return View();
