@@ -1,6 +1,8 @@
+﻿using BTLW_BDT.Models;
+using BTLW_BDT.Repository;
+using Microsoft.EntityFrameworkCore;
 
 using BTLW_BDT.Models;
-using BTLW_BDT.Repository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,12 @@ builder.Services.AddSession();
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+var connectionString = builder.Configuration.GetConnectionString("BtlLtwQlbdtContext");
+builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<ILoaiSpRepository, LoaiSpRepository>();
+builder.Services.AddSession();
+
 // Cấu hình Session
 builder.Services.AddSession(options =>
 {
@@ -20,12 +28,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;                 // Cookie chỉ có thể truy cập qua HTTP (bảo mật)
     options.Cookie.IsEssential = true;              // Cookie là cần thiết
 });
-
-var connectionString = builder.Configuration.GetConnectionString("BtlLtwQlbdt3Context");
-builder.Services.AddDbContext<BtlLtwQlbdt3Context>(x => x.UseSqlServer(connectionString));
-
-builder.Services.AddScoped<ILoaiSpRepository, LoaiSpRepository>();
-builder.Services.AddSession();
 
 var app = builder.Build();
 

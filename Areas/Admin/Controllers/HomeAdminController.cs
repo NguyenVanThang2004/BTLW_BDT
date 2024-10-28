@@ -8,10 +8,10 @@ namespace BTLW_BDT.Areas.Admin.Controllers
 {
     [Area("admin")]
     [Route("admin")]
-
+    //[Route("admin/homeadmin")]
     public class HomeAdminController : Controller
     {
-        BtlLtwQlbdt3Context db = new BtlLtwQlbdt3Context();
+        BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
         [Route("")]
         [Route("index")]
         public IActionResult Index()

@@ -3,8 +3,8 @@ namespace BTLW_BDT.Repository
 {
     public class LoaiSpRepository : ILoaiSpRepository
     {
-        private readonly BtlLtwQlbdt3Context _context;
-        public LoaiSpRepository(BtlLtwQlbdt3Context context)
+        private readonly BtlLtwQlbdtContext _context;
+        public LoaiSpRepository(BtlLtwQlbdtContext context)
         {
             _context = context; 
         }
