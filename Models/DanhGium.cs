@@ -9,11 +9,11 @@ public partial class DanhGium
 
     public int? Rate { get; set; }
 
-    public string TenDangNhap { get; set; } = null!;
+    public string? TenDangNhap { get; set; }
 
-    public string MaHoaDon { get; set; } = null!;
+    public string? MaHoaDon { get; set; }
 
-    public virtual HoaDonBan MaHoaDonNavigation { get; set; } = null!;
+    public virtual HoaDonBan? MaHoaDonNavigation { get; set; }
 
-    public virtual TaiKhoan TenDangNhapNavigation { get; set; } = null!;
+    public virtual TaiKhoan? TenDangNhapNavigation { get; set; }
 }

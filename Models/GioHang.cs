@@ -11,7 +11,5 @@ public partial class GioHang
 
     public string? TenDangNhap { get; set; }
 
-    public virtual ICollection<ChiTietGioHang> ChiTietGioHangs { get; set; } = new List<ChiTietGioHang>();
-
     public virtual TaiKhoan? TenDangNhapNavigation { get; set; }
 }

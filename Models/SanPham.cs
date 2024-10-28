@@ -39,12 +39,6 @@ public partial class SanPham
 
     public string? AnhDaiDien { get; set; }
 
-    public virtual ICollection<AnhSanPham> AnhSanPhams { get; set; } = new List<AnhSanPham>();
-
-    public virtual ICollection<ChiTietGioHang> ChiTietGioHangs { get; set; } = new List<ChiTietGioHang>();
-
-    public virtual ICollection<ChiTietHoaDonBan> ChiTietHoaDonBans { get; set; } = new List<ChiTietHoaDonBan>();
-
     public virtual MauSac? MaMauNavigation { get; set; }
 
     public virtual Rom? MaRomNavigation { get; set; }
