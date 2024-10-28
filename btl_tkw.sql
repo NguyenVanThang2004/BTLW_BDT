@@ -58,6 +58,7 @@ CREATE TABLE [dbo].[DanhGia](
 	[NoiDung] [nvarchar](255) NULL,
 	[Rate] [int] NULL,
 	[TenDangNhap] [nvarchar](100) NOT NULL,
+	[ThoiGianDanhGia] [datetime] NOT NULL,
 	[MaHoaDon] [nvarchar](50) NOT NULL,
  CONSTRAINT [PK_DanhGia] PRIMARY KEY CLUSTERED 
 (
@@ -656,25 +657,25 @@ INSERT [dbo].[ChiTietHoaDonBan] ([SoLuongBan], [DonGiaCuoi], [MaHoaDon], [MaSanP
 GO
 INSERT [dbo].[ChiTietHoaDonBan] ([SoLuongBan], [DonGiaCuoi], [MaHoaDon], [MaSanPham]) VALUES (2, NULL, N'HD020', N'vv002')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Dịch vụ tốt, sản phẩm chất lượng!', 5, N'user11', N'HD011')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Dịch vụ tốt, sản phẩm chất lượng!', 5, N'user11', N'HD011', '2023-01-15 10:30:00')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Dịch vụ tốt, sản phẩm chất lượng!', 5, N'user12', N'HD012')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Dịch vụ tốt, sản phẩm chất lượng!', 5, N'user12', N'HD012', '2023-02-20 14:45:00')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Chất lượng sản phẩm không như mong đợi.', 3, N'user13', N'HD013')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Chất lượng sản phẩm không như mong đợi.', 3, N'user13', N'HD013', '2023-03-10 09:15:00')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Giao hàng nhanh chóng, nhưng sản phẩm bị lỗi.', 2, N'user14', N'HD014')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Giao hàng nhanh chóng, nhưng sản phẩm bị lỗi.', 2, N'user14', N'HD014', '2023-04-05 16:00:00')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Tôi không hài lòng với dịch vụ hỗ trợ.', 1, N'user15', N'HD015')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Tôi không hài lòng với dịch vụ hỗ trợ.', 1, N'user15', N'HD015', '2023-05-25 11:20:00')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Rất hài lòng, sản phẩm xịn!', 5, N'user16', N'HD016')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Rất hài lòng, sản phẩm xịn!', 5, N'user16', N'HD016', '2023-06-30 13:50:00')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Dịch vụ khách hàng rất tốt!', 4, N'user17', N'HD017')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Dịch vụ khách hàng rất tốt!', 4, N'user17', N'HD017', '2023-07-15 08:40:00')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Sản phẩm như mô tả, tôi hài lòng!', 4, N'user18', N'HD018')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Sản phẩm như mô tả, tôi hài lòng!', 4, N'user18', N'HD018', '2023-08-10 17:30:00')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Sản phẩm giao chậm nhưng chất lượng ổn.', 3, N'user19', N'HD019')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Sản phẩm giao chậm nhưng chất lượng ổn.', 3, N'user19', N'HD019', '2023-09-05 12:10:00')
 GO
-INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon]) VALUES (N'Chất lượng sản phẩm tốt nhưng giá hơi cao.', 3, N'user20', N'HD020')
+INSERT [dbo].[DanhGia] ([NoiDung], [Rate], [TenDangNhap], [MaHoaDon], [ThoiGianDanhGia]) VALUES (N'Chất lượng sản phẩm tốt nhưng giá hơi cao.', 3, N'user20', N'HD020', '2023-10-20 15:25:00')
 GO
 INSERT [dbo].[GioHang] ([MaGioHang], [TongTien], [TenDangNhap]) VALUES (N'GH001', CAST(0.00 AS Decimal(18, 2)), N'user06')
 GO

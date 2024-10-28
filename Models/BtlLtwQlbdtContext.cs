@@ -44,7 +44,7 @@ public partial class BtlLtwQlbdtContext : DbContext
     public virtual DbSet<TaiKhoan> TaiKhoans { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(" Data Source=DESKTOP-1FDDR5U\\SQLEXPRESS;Initial Catalog=BTL_LTW_QLBDT;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
+        => optionsBuilder.UseSqlServer("Data Source=DESKTOP-1FDDR5U\\SQLEXPRESS;Initial Catalog=BTL_LTW_QLBDT;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -110,6 +110,7 @@ public partial class BtlLtwQlbdtContext : DbContext
             entity.Property(e => e.MaHoaDon).HasMaxLength(50);
             entity.Property(e => e.TenDangNhap).HasMaxLength(100);
             entity.Property(e => e.NoiDung).HasMaxLength(255);
+            entity.Property(e => e.ThoiGianDanhGia).HasColumnType("datetime");
 
             entity.HasOne(d => d.MaHoaDonNavigation).WithMany(p => p.DanhGia)
                 .HasForeignKey(d => d.MaHoaDon)
@@ -138,7 +139,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<Hang>(entity =>
         {
-            entity.HasKey(e => e.MaHang).HasName("PK__Hang__19C0DB1DA418F6D2");
+            entity.HasKey(e => e.MaHang).HasName("PK__Hang__19C0DB1DDE1C8195");
 
             entity.ToTable("Hang");
 
@@ -148,7 +149,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<HoaDonBan>(entity =>
         {
-            entity.HasKey(e => e.MaHoaDon).HasName("PK__HoaDonBa__835ED13BD4DCCFF6");
+            entity.HasKey(e => e.MaHoaDon).HasName("PK__HoaDonBa__835ED13B159E4C65");
 
             entity.ToTable("HoaDonBan", tb => tb.HasTrigger("theoDoiCustomerMuaSanPham"));
 
@@ -171,7 +172,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<KhachHang>(entity =>
         {
-            entity.HasKey(e => e.MaKhachHang).HasName("PK__KhachHan__88D2F0E54670793D");
+            entity.HasKey(e => e.MaKhachHang).HasName("PK__KhachHan__88D2F0E560EAE31F");
 
             entity.ToTable("KhachHang");
 
@@ -191,7 +192,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<LichSuHoatDong>(entity =>
         {
-            entity.HasKey(e => e.MaHoatDong).HasName("PK__LichSuHo__BD808BE70159770F");
+            entity.HasKey(e => e.MaHoatDong).HasName("PK__LichSuHo__BD808BE7FFCD5322");
 
             entity.ToTable("LichSuHoatDong");
 
@@ -224,7 +225,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<NhanVien>(entity =>
         {
-            entity.HasKey(e => e.MaNhanVien).HasName("PK__NhanVien__77B2CA47C2572C69");
+            entity.HasKey(e => e.MaNhanVien).HasName("PK__NhanVien__77B2CA4712710FCE");
 
             entity.ToTable("NhanVien");
 
@@ -299,7 +300,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<TaiKhoan>(entity =>
         {
-            entity.HasKey(e => e.TenDangNhap).HasName("PK__TaiKhoan__55F68FC153E047E0");
+            entity.HasKey(e => e.TenDangNhap).HasName("PK__TaiKhoan__55F68FC111189E5C");
 
             entity.ToTable("TaiKhoan");
 

@@ -43,7 +43,7 @@ using X.PagedList;
             }
             public IActionResult ProductDetail(string maSp)
             {
-                var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp);
+                var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp) ?? new SanPham();
                 var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp).ToList();
                 var mauSanPham = db.MauSacs.Where(x => x.MaSanPham == maSp).ToList();
                 var romSanPham = db.Roms.Where(x => x.MaSanPham == maSp)
@@ -57,6 +57,9 @@ using X.PagedList;
                 // Lấy ROM nhỏ nhất (rẻ nhất)
                 var smallestRom = romSanPham.FirstOrDefault();
             
+                // Lấy danh sách đánh giá
+                var reviews = db.DanhGia.Where(r => r.MaHoaDon == maSp).ToList();
+
                 var detailView = new ProductDetailViewModel
                 {
                     dmSp = sanPham,
@@ -65,7 +68,8 @@ using X.PagedList;
                     dmRomSp = romSanPham,
                     SelectedColor = firstColor,
                     SelectedRom = smallestRom?.MaRom,
-                    CurrentPrice = sanPham.DonGiaBanRa // Giá ban đầu với ROM nhỏ nhất
+                    CurrentPrice = sanPham.DonGiaBanRa, // Giá ban đầu với ROM nhỏ nhất
+                    Reviews = reviews
                 };
                 return View(detailView);
             }
@@ -102,10 +106,22 @@ using X.PagedList;
                 // Tính giá mới = Giá cơ bản + (Giá ROM đã chọn - Giá ROM nhỏ nhất)
                 var newPrice = sanPham.DonGiaBanRa + (selectedRom.Gia - baseRom.Gia);
             
+                string formattedPrice;
+
+                if (newPrice.HasValue)
+                {
+                    formattedPrice = newPrice.Value.ToString("#,##0") + " VNĐ";
+                }
+                else
+                {
+                    formattedPrice = "Giá không khả dụng";
+                }
+            
+                // Sử dụng formattedPrice ở đây
                 return Json(new { 
                     success = true, 
                     price = newPrice,
-                    formattedPrice = newPrice.Value.ToString("#,##0") + " VNĐ"
+                    formattedPrice = formattedPrice
                 });
             }
         }
