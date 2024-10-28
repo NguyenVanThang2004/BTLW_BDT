@@ -592,6 +592,9 @@ License - nucleoapp.com/license/
 .ni-ui-04::before {
   content: "\ea65";
 }
-
+.ps--active-x > .ps__rail-x, .ps--active-y > .ps__rail-y {
+    display: none;
+    background-color: transparent;
+}
 
 /* all icon font classes list here */
