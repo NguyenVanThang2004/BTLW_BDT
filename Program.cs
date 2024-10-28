@@ -1,7 +1,17 @@
+using BTLW_BDT.Models;
+using BTLW_BDT.Repository;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+var connectionString = builder.Configuration.GetConnectionString("BtlLtwQlbdt3Context");
+builder.Services.AddDbContext<BtlLtwQlbdt3Context>(x => x.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<ILoaiSpRepository, LoaiSpRepository>();
+builder.Services.AddSession();
 
 var app = builder.Build();
 
