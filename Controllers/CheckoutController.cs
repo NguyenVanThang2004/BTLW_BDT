@@ -31,6 +31,30 @@ namespace BTLW_BDT.Controllers
         }
 
         [HttpPost]
+        public IActionResult PlaceOrder(string paymentMethod)
+        {
+            ViewData["Page"] = "Checkout";
+            if (paymentMethod == "Pay at store")
+            {
+                // Thực hiện logic đặt hàng nếu cần (lưu dữ liệu đơn hàng, cập nhật trạng thái...)
+
+                // Điều hướng sang trang thành công
+                return RedirectToAction("OrderSuccess");
+            }
+            else
+            {
+                // Xử lý các phương thức thanh toán khác (nếu có)
+            }
+
+            return View("Checkout"); // Quay lại nếu có lỗi
+        }
+
+        public IActionResult OrderSuccess()
+        {
+            return View(); // Trả về trang Order Success
+        }
+
+        [HttpPost]
         public IActionResult ProcessCheckout(OrderModel model)
         {
 
@@ -52,6 +76,7 @@ namespace BTLW_BDT.Controllers
                 };
                 _context.KhachHangs.Add(khachHang);
                 _context.SaveChanges();
+
             }
 
             return RedirectToAction("Index","Home"); 

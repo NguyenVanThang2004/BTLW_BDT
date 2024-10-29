@@ -15,5 +15,6 @@
         public string LoaiKhachHang { get; set; }
 
         public string GhiChu { get; set; }
+
     }
 }

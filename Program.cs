@@ -2,9 +2,6 @@
 using BTLW_BDT.Repository;
 using Microsoft.EntityFrameworkCore;
 
-using BTLW_BDT.Models;
-using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -53,6 +50,7 @@ app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Access}/{action=Login}/{id?}");
+    //pattern: "{controller=Access}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}");
 
 app.Run();

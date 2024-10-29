@@ -80,8 +80,10 @@
             </div>
         </div>
 
-       
-        <div>
+
+        <form asp-controller="Checkout" asp-action="PlaceOrder" method="post">
+            <input type="hidden" id="paymentMethod" name="paymentMethod" value="Pay at store" />
+
             <div class="payment-info">
                 <div class="payment-selection" onclick="openModal()">
                     <img src="../assets/img/how-pay-icon.png" alt="Icon" class="icon" id="selectedIcon">
@@ -91,6 +93,7 @@
                     <span class="change-text">change &gt;</span>
                 </div>
             </div>
+
             <div class="modal" id="paymentModal">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal()">&times;</span>
@@ -121,16 +124,17 @@
                             <span>Kredivo</span>
                         </div>
                     </div>
-                    <button class="confirm-btn" onclick="confirmSelection()">Confirm</button>
+                    <button class="confirm-btn" type="button" onclick="confirmSelection()">Confirm</button>
                 </div>
             </div>
 
+            <div class="card-footer border-secondary bg-transparent">
+                <button type="submit" class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3">
+                    Place Order
+                </button>
+            </div>
+        </form>
 
-        </div>
-        <div class="card-footer border-secondary bg-transparent">
-            <button class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3">Place Order</button>
-        </div>
-    </div>
 
     <style>
         /* Payment info section */
@@ -272,39 +276,41 @@
     </style>
     <script>
 
-        let selectedMethodText = 'Thanh toán tại cửa hàng';
-        let selectedIconSrc = '../assets/img/how-pay-icon.png';
-        let currentSelectedElement = null; // Theo dõi phần tử đã chọn
+            let selectedMethodText = 'Pay at store';
+            let selectedIconSrc = '../assets/img/how-pay-icon.png';
+            let currentSelectedElement = null;
 
-        /* Hàm mở modal */
-        function openModal() {
-          document.getElementById('paymentModal').style.display = 'block';
-        }
+            function openModal() {
+                document.getElementById('paymentModal').style.display = 'block';
+            }
 
-       /* Hàm đóng modal */
-        function closeModal() {
-          document.getElementById('paymentModal').style.display = 'none';
-        }
+            function closeModal() {
+                document.getElementById('paymentModal').style.display = 'none';
+            }
 
-        /* Hàm lưu phương thức được chọn và tô màu phần tử đã chọn */
-        function selectMethod(method, icon) {
-          selectedMethodText = method;
-          selectedIconSrc = icon;
+            function selectMethod(method, icon) {
+                selectedMethodText = method;
+                selectedIconSrc = icon;
 
-          /*  Xóa màu của phần tử trước đó (nếu có) */
-          if (currentSelectedElement) {
-            currentSelectedElement.classList.remove('selected');
-          }
+                // Xóa màu của phần tử trước đó
+                if (currentSelectedElement) {
+                    currentSelectedElement.classList.remove('selected');
+                }
 
-         /*   Gán phần tử được chọn và thêm lớp `selected` */
-          event.target.classList.add('selected');
-          currentSelectedElement = event.target;
-        }
+                // Gán phần tử được chọn và thêm lớp 'selected'
+                event.target.classList.add('selected');
+                currentSelectedElement = event.target;
 
-        /*  Hàm xác nhận lựa chọn và cập nhật giao diện chính */
-        function confirmSelection() {
-          document.getElementById('selectedMethod').textContent = selectedMethodText;
-          document.getElementById('selectedIcon').src = selectedIconSrc;
-          closeModal();
-        }
+                // Cập nhật giá trị trong input hidden
+                document.getElementById('paymentMethod').value = method;
+            }
+
+            function confirmSelection() {
+                // Cập nhật giao diện chính
+                document.getElementById('selectedMethod').textContent = selectedMethodText;
+                document.getElementById('selectedIcon').src = selectedIconSrc;
+
+                // Đóng modal
+                closeModal();
+            }
     </script>

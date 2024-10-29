@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Order Success";
+    Layout = "~/Views/Shared/_LayoutCart.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <div class="alert alert-success" role="alert">
+                <h2 class="font-weight-semi-bold">Đặt Hàng Thành Công!</h2>
+                <p>Cảm ơn bạn đã mua sắm với chúng tôi. Đơn hàng của bạn đã được đặt thành công và sẽ được thanh toán tại cửa hàng.</p>
+            </div>
+
+            <h4 class="font-weight-bold mt-4">Thông Tin Đơn Hàng</h4>
+            <div class="order-info mt-3">
+                <p><strong>Tên Khách Hàng:</strong> @Model.TenKhachHang</p>
+                <p><strong>Ngày Sinh:</strong> @Model.NgaySinh.ToString("dd/MM/yyyy")</p>
+                <p><strong>Số Điện Thoại:</strong> @Model.SoDienThoai</p>
+                <p><strong>Địa Chỉ:</strong> @Model.DiaChi</p>
+                <p><strong>Ghi Chú:</strong> @Model.GhiChu</p>
+                <p><strong>Phương Thức Thanh Toán:</strong> Thanh toán tại cửa hàng</p>
+            </div>
+
+            <h4 class="font-weight-bold mt-4">Chi Tiết Sản Phẩm</h4>
+            <div class="product-list mt-3">
+                @foreach (var item in Model.CartItems)
+                {
+                    <div class="d-flex justify-content-between">
+                        <p>@item.TenSanPham</p>
+                        <p>@Convert.ToDouble(item.TongTien).ToString("N0") VNĐ</p>
+                    </div>
+                }
+            </div>
+
+            <hr class="my-4">
+            <div class="d-flex justify-content-between">
+                <h5>Tổng Cộng:</h5>
+                <h5>@((Model.CartItems.Sum(item => item.TongTien) + 25000).ToString("N0")) VNĐ</h5>
+            </div>
+
+            <a href="/" class="btn btn-primary mt-4">Tiếp Tục Mua Sắm</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .order-info p, .product-list p {
+        font-size: 16px;
+        color: #333;
+    }
+
+    .alert-success {
+        padding: 30px;
+        font-size: 18px;
+    }
+</style>
