@@ -1,0 +1,144 @@
+﻿@using BTLW_BDT.Models;
+@using X.PagedList.Mvc.Core;
+@model X.PagedList.IPagedList<SanPham>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "DanhMucSanPham";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h1>Danh Muc San Pham</h1>
+<p>@TempData["Messege"]</p>
+<p>
+    <a asp-action="ThemSanPhamMoi">Thêm</a>
+</p>
+<table class="table">
+    <thead>
+        <tr class="table-warning">
+            <th>
+                Tên sản phẩm
+            </th>
+            <th>
+                Thời gian BH
+            </th>
+            <th>
+                SL Tồn kho
+            </th>
+            <th>
+                Đơn giá bán gốc
+            </th>
+            <th>
+                Đơn giá bán ra
+            </th>
+            <th>
+                Khuyến mại
+            <th>
+                Hãng
+            </th>
+            <th>
+                Màn hình
+            </th>
+            <th>
+                Pin
+            </th>
+            <th>
+                Camera
+            </th>
+            <th>
+                Kích thước
+            </th>
+            <th>
+                Chip
+            </th>
+            <th>
+                Mã màu
+            </th>
+            <th>
+                Ram
+            </th>
+            <th>
+                Rom
+            </th>
+            <th>
+                Ảnh đại diện
+            </th>
+            <th>
+                
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int i = 0;
+            string @cls = "table-success";
+        }
+@foreach (var item in Model) {
+            i = i + 1;
+            cls = "table-success";
+            if (i % 2 == 0)
+            {
+                cls = "table-primary";
+            }
+            <tr class="@cls">
+            <td>
+                @Html.DisplayFor(modelItem => item.TenSanPham)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ThoiGianBaoHanh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SoLuongTonKho)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DonGiaBanGoc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DonGiaBanRa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.KhuyenMai)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Hang)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ManHinh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Camera)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.KichThuoc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Chip)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaMau)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Ram)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaRom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AnhDaiDien)
+            </td>
+            <td>
+                <a asp-action="SuaSanPham" asp-route-maSanPham="@item.MaSanPham">Sửa</a> 
+                <a asp-action="XoaSanPham" asp-route-maSanPham="@item.MaSanPham">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+ @Html.PagedListPager(Model, page => Url.Action("DanhMucSanPham", new { page = page }),
+    new X.PagedList.Web.Common.PagedListRenderOptions()
+{
+    LiElementClasses = new List<String> { "page-item" },
+    PageClasses = new List<String> { "page-link" }
+}) 

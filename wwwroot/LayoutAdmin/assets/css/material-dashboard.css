@@ -10225,7 +10225,7 @@ fieldset:disabled .btn {
 
 .py-4 {
   padding-top: 1.5rem !important;
-  padding-bottom: 1.5rem !important;
+  padding-bottom: 0 !important;
 }
 
 .py-5 {
@@ -22679,9 +22679,6 @@ label,
   transition: 0.2s ease all;
 }
 
-.form-control {
-  border: none;
-}
 
 .form-control.is-invalid {
   border: 1px solid #d2d6da;
@@ -27853,10 +27850,10 @@ pre[class*="language-"] {
   position: absolute;
 }
 
-.ps--active-x>.ps__rail-x,
-.ps--active-y>.ps__rail-y {
-  display: block;
-  background-color: transparent;
+.ps--active-x > .ps__rail-x,
+.ps--active-y > .ps__rail-y {
+    display: none;
+    background-color: transparent;
 }
 
 .ps:hover>.ps__rail-x,

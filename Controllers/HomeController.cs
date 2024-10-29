@@ -25,7 +25,13 @@ using X.PagedList;
                 _logger = logger;
            
             }
+        public IActionResult Index()
+        {
+            ViewBag.CartCount = CartCount();  // Truyền số lượng sản phẩm vào ViewBag
+            var lstSanPham = db.SanPhams.ToList();
 
+            return View(lstSanPham);
+        }
 
 
         public int CartCount()
@@ -33,27 +39,6 @@ using X.PagedList;
             var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
             return cart.Count;
         }
-
-
-
-
-
-
-
-        public IActionResult Index()
-        {
-            ViewBag.CartCount = CartCount();  // Truyền số lượng sản phẩm vào ViewBag
-            var lstSanPham = db.SanPhams.ToList();
-       
-            return View(lstSanPham);
-        }
-
-
-
-
-
-       
-      
 
 
         public IActionResult Shop(int? page)

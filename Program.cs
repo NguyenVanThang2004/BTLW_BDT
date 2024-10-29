@@ -1,4 +1,5 @@
 ﻿using BTLW_BDT.Models;
+using BTLW_BDT.Repository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,12 @@ builder.Services.AddSession();
 // Đăng ký DbContext trong DI container
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var connectionString = builder.Configuration.GetConnectionString("BtlLtwQlbdtContext");
+builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<ILoaiSpRepository, LoaiSpRepository>();
+builder.Services.AddSession();
 
 // Cấu hình Session
 builder.Services.AddSession(options =>
@@ -43,6 +50,8 @@ app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
+
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 
 app.Run();
