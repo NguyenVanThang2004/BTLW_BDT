@@ -53,6 +53,10 @@ namespace BTLW_BDT.Controllers
                 _context.KhachHangs.Add(khachHang);
                 _context.SaveChanges();
             }
+            else
+            {
+                return RedirectToAction("DetailCart","Cart");
+            }
 
             return RedirectToAction("Index","Home"); 
         }
