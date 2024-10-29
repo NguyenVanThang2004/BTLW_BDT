@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BTLW_BDT.Models.Cart;
 using BTLW_BDT.Models;
-using BTLW_BDT.Models.Cart;
+using Microsoft.AspNetCore.Authorization;
+using BTLW_BDT.Services;
+using BTLW_BDT.Models.VnPay;
 
 
 namespace BTLW_BDT.Controllers
@@ -9,99 +11,138 @@ namespace BTLW_BDT.Controllers
     public class CheckoutController : Controller
     {
         private readonly BtlLtwQlbdtContext _context;
+        private readonly IVnPayService _vnPayService;
 
-        public CheckoutController(BtlLtwQlbdtContext context)
+        public CheckoutController(BtlLtwQlbdtContext context, IVnPayService vnPayService)
         {
             _context = context;
-        } 
+            _vnPayService = vnPayService;
+        }
 
         public IActionResult DetailCheckout()
         {
             ViewData["Page"] = "Checkout";
-            // Lấy dữ liệu giỏ hàng từ Session đã lưu ở giỏ hàng của trang cart
-            var cartItems = HttpContext.Session.Get<List<CartItem>>("GioHang");
+            var cartItems = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
 
-            if (cartItems == null)
-            {
-                // Xử lý trường hợp không có giỏ hàng trong session
-                cartItems = new List<CartItem>();
-            }
-
-            return View(cartItems); 
+            return View(cartItems);
         }
 
         [HttpPost]
         public IActionResult PlaceOrder(string paymentMethod)
         {
             ViewData["Page"] = "Checkout";
+            var cartItems = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
+
+            if (!cartItems.Any())
+            {
+                return RedirectToAction("DetailCheckout");
+            }
+
             if (paymentMethod == "Pay at store")
             {
-                // Thực hiện logic đặt hàng nếu cần (lưu dữ liệu đơn hàng, cập nhật trạng thái...)
+                string maHoaDon = "HD" + new Random().Next(100, 999);
 
-                // Lấy dữ liệu giỏ hàng từ session
-                var cartItems = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
-
-                // Kiểm tra nếu giỏ hàng rỗng
-                if (!cartItems.Any())
-                {
-                    // Xử lý nếu giỏ hàng trống
-                    return RedirectToAction("DetailCheckout"); // Quay lại nếu giỏ hàng trống
-                }
-                string maHoaDon = "HD" + new Random().Next(100, 999).ToString();
-                // Tạo hóa đơn mới
                 var order = new HoaDonBan
                 {
-                    MaHoaDon = maHoaDon, // Tạo mã hóa đơn
+                    MaHoaDon = maHoaDon,
                     PhuongThucThanhToan = paymentMethod,
                     TongTien = cartItems.Sum(item => item.DonGia * item.SoLuong),
                     ThoiGianLap = DateTime.Now
-                    // Giả sử có MaNhanVien hoặc mã khách hàng khác có thể thêm vào
                 };
 
-                // Lưu hóa đơn vào database
                 _context.HoaDonBans.Add(order);
 
-                // Lưu chi tiết hóa đơn
                 foreach (var item in cartItems)
                 {
                     var orderDetail = new ChiTietHoaDonBan
                     {
                         SoLuongBan = item.SoLuong,
-                        DonGiaCuoi = item.DonGia ,
+                        DonGiaCuoi = item.DonGia,
                         MaHoaDon = order.MaHoaDon,
-                        MaSanPham = item.MaSanPham,
+                        MaSanPham = item.MaSanPham
                     };
                     _context.ChiTietHoaDonBans.Add(orderDetail);
                 }
 
-                // Lưu thay đổi vào cơ sở dữ liệu
                 _context.SaveChanges();
-
-
-
-
-
-                // sua session trong gio hang
-                // HttpContext.Session.Remove("GioHang");
-                // Điều hướng sang trang thành công
+                TempData["Message"] = "Thanh toan tai cua hang";
+                HttpContext.Session.Remove("GioHang");
                 return RedirectToAction("OrderSuccess");
             }
             else
             {
-                // Xử lý các phương thức thanh toán khác (nếu có)
-            }
+                var vnPayModel = new VnPaymentRequestModel
+                {
+                    Amount = cartItems.Sum(item => (double)(item.DonGia * item.SoLuong)),
+                    CreatedDate = DateTime.Now,
+                    Description = "Thông tin đơn hàng",
+                    FullName = "Khách hàng",
+                    OrderId = new Random().Next(1000, 100000)
+                };
 
-            return View("Checkout"); // Quay lại nếu có lỗi
+                var paymentUrl = _vnPayService.CreatePaymentUrl(HttpContext, vnPayModel);
+                return Redirect(paymentUrl);
+            }
         }
 
         public IActionResult OrderSuccess()
         {
             var cartItems = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
-
-            // Truyền cartItems vào view nếu không null
             return View(cartItems);
         }
 
        
+        public IActionResult PaymentCallBack()
+        {
+            var cartItems = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
+            var response = _vnPayService.PaymentExecute(Request.Query);
+
+            if (response == null || response.VnPayResponseCode != "00")
+            {
+                TempData["Message"] = $"Lỗi thanh toán VN Pay: {response?.VnPayResponseCode}";
+                return RedirectToAction("PaymentFail");
+            }
+
+            string maHoaDon = "HD" + new Random().Next(100, 999);
+
+            var order = new HoaDonBan
+            {
+                MaHoaDon = maHoaDon,
+                PhuongThucThanhToan = "QR",
+                TongTien = cartItems.Sum(item => item.DonGia * item.SoLuong),
+                ThoiGianLap = DateTime.Now
+            };
+
+            _context.HoaDonBans.Add(order);
+
+            foreach (var item in cartItems)
+            {
+                var orderDetail = new ChiTietHoaDonBan
+                {
+                    SoLuongBan = item.SoLuong,
+                    DonGiaCuoi = item.DonGia,
+                    MaHoaDon = order.MaHoaDon,
+                    MaSanPham = item.MaSanPham
+                };
+                _context.ChiTietHoaDonBans.Add(orderDetail);
+            }
+
+            _context.SaveChanges();
+            TempData["Message"] = "Thanh toan QR";
+            HttpContext.Session.Remove("GioHang");
+            return RedirectToAction("OrderSuccess");
+
+
+
+
+
+            
+            
+        }
+
+        public IActionResult PaymentFail()
+        {
+            return View();
+        }
     }
 }
