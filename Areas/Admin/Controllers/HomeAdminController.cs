@@ -18,8 +18,9 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         {
             return View();
         }
-        [Route("DanhMucSanPham")]
-        public IActionResult DanhMucSanPham(int? page)
+        [Route("DanhMucSanPham1")]
+
+        public IActionResult DanhMucSanPham1(int? page)
         {
             int pageSize = 15;
             int pageNumber = page == null || page < 0 ? 1 : page.Value;
@@ -31,8 +32,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult ThemSanPhamMoi()
         {
-            ViewBag.MaMau = new SelectList(db.MauSacs.ToList(), "MaMau", "TenMau");
-            ViewBag.MaRom = new SelectList(db.Roms.ToList(), "MaRom", "ThongSo");
+            ViewBag.MaHang = new SelectList(db.Hangs.ToList(), "MaHang", "TenHang");
             return View();
         }
         [Route("ThemSanPhamMoi")]
@@ -53,8 +53,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         public IActionResult SuaSanPham(string maSanPham)
         {
 
-            ViewBag.MaMau = new SelectList(db.MauSacs.ToList(), "MaMau", "TenMau");
-            ViewBag.MaRom = new SelectList(db.Roms.ToList(), "MaRom", "ThongSo");
+            ViewBag.MaHang = new SelectList(db.Hangs.ToList(), "MaHang", "TenHang");
             var sanPham = db.SanPhams.Find(maSanPham);
             return View(sanPham);
         }
