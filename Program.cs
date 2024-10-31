@@ -50,7 +50,7 @@ app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
-    //pattern: "{controller=Access}/{action=Login}/{id?}");
-    pattern: "{controller=Home}/{action=Index}");
+    pattern: "{controller=access}/{action=login}/{id?}");
+//pattern: "{controller=Home}/{action=Index}");
 
 app.Run();
