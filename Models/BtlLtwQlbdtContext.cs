@@ -44,7 +44,8 @@ public partial class BtlLtwQlbdtContext : DbContext
     public virtual DbSet<TaiKhoan> TaiKhoans { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Data Source=DESKTOP-1FDDR5U\\SQLEXPRESS;Initial Catalog=BTL_LTW_QLBDT;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=DESKTOP-CE2QC2S\\MAY1;Initial Catalog=BTL_LTW_QLBDT;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -139,7 +140,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<Hang>(entity =>
         {
-            entity.HasKey(e => e.MaHang).HasName("PK__Hang__19C0DB1DDE1C8195");
+            entity.HasKey(e => e.MaHang).HasName("PK__Hang__19C0DB1D0112018A");
 
             entity.ToTable("Hang");
 
@@ -149,7 +150,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<HoaDonBan>(entity =>
         {
-            entity.HasKey(e => e.MaHoaDon).HasName("PK__HoaDonBa__835ED13B159E4C65");
+            entity.HasKey(e => e.MaHoaDon).HasName("PK__HoaDonBa__835ED13BC2E7356D");
 
             entity.ToTable("HoaDonBan", tb => tb.HasTrigger("theoDoiCustomerMuaSanPham"));
 
@@ -172,7 +173,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<KhachHang>(entity =>
         {
-            entity.HasKey(e => e.MaKhachHang).HasName("PK__KhachHan__88D2F0E560EAE31F");
+            entity.HasKey(e => e.MaKhachHang).HasName("PK__KhachHan__88D2F0E5FEC805A0");
 
             entity.ToTable("KhachHang");
 
@@ -192,7 +193,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<LichSuHoatDong>(entity =>
         {
-            entity.HasKey(e => e.MaHoatDong).HasName("PK__LichSuHo__BD808BE7FFCD5322");
+            entity.HasKey(e => e.MaHoatDong).HasName("PK__LichSuHo__BD808BE7A4198B3C");
 
             entity.ToTable("LichSuHoatDong");
 
@@ -225,7 +226,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<NhanVien>(entity =>
         {
-            entity.HasKey(e => e.MaNhanVien).HasName("PK__NhanVien__77B2CA4712710FCE");
+            entity.HasKey(e => e.MaNhanVien).HasName("PK__NhanVien__77B2CA476A104F17");
 
             entity.ToTable("NhanVien");
 
@@ -300,7 +301,7 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<TaiKhoan>(entity =>
         {
-            entity.HasKey(e => e.TenDangNhap).HasName("PK__TaiKhoan__55F68FC111189E5C");
+            entity.HasKey(e => e.TenDangNhap).HasName("PK__TaiKhoan__55F68FC1E0969B16");
 
             entity.ToTable("TaiKhoan");
 
