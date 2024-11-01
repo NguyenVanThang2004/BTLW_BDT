@@ -9,5 +9,9 @@ public partial class Rom
 
     public string? ThongSo { get; set; }
 
-    public virtual ICollection<SanPham> SanPhams { get; set; } = new List<SanPham>();
+    public decimal? Gia { get; set; }
+
+    public string? MaSanPham { get; set; }
+
+    public virtual SanPham? MaSanPhamNavigation { get; set; }
 }

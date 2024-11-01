@@ -2,14 +2,6 @@
     ViewData["Title"] = "Shop";
     Layout = "~/Views/Shared/_LayoutShop.cshtml";
 }
-
-@* <div id="productContainer" class="row pb-3">
-    @foreach (var item in Model)
-    {
-        @await Html.PartialAsync("PartialSanPham", item)
-    }
-</div> *@
-
 <div id="productContainer" class="row pb-3">
     <!-- Sản phẩm sẽ được thêm vào đây bằng JavaScript -->
 </div>
@@ -25,49 +17,64 @@
 @section Scripts {
     <script>
         var currentPage = 1;
+        var debounceTimeout;
+        var selectedBrand = '';
 
         $(document).ready(function() {
-            // Lấy dữ liệu RAM từ API
-            $.ajax({
-                url: '/api/Phone/GetRamOptions',
-                method: 'GET',
-                success: function(data) {
-                    var ramForm = $('#ramFilterForm');
-                    data.forEach(function(ram) {
-                        var checkbox = `
-                            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                                <input type="checkbox" class="custom-control-input ram-filter" id="ram-${ram}" value="${ram}">
-                                <label class="custom-control-label" for="ram-${ram}">${ram} GB</label>
-                            </div>
-                        `;
-                        ramForm.append(checkbox);
-                    });
-                },
-                error: function(error) {
-                    console.error('Error fetching RAM options:', error);
-                }
+            // Reset các ô input về giá trị mặc định khi trang được tải
+            $(window).on('pageshow', function() {
+                $('#minPrice').val('');
+                $('#maxPrice').val('');
+                $('#searchInput').val('');
             });
 
-            // Xử lý sự kiện khi checkbox được chọn
+            // Tải các tùy chọn RAM
+            loadRamOptions();
+
+            // Tải các hãng
+            loadBrands();
+
+            // Tải sản phẩm ban đầu
+            loadProducts();
+
+            // Xử lý sự kiện khi checkbox RAM thay đổi
             $(document).on('change', '.ram-filter', function() {
-                var isAllRam = $(this).val() === 'all';
-                var isChecked = $(this).prop('checked');
+                currentPage = 1;
+                loadProducts();
+            });
 
-                if (isAllRam) {
-                    // Nếu "All RAM" được chọn, bỏ chọn tất cả các tùy chọn khác
-                    $('.ram-filter:not(#ram-all)').prop('checked', false);
-                } else {
-                    // Nếu một tùy chọn khác được chọn, bỏ chọn "All RAM"
-                    $('#ram-all').prop('checked', false);
+            // Xử lý sự kiện khi giá trị trong ô nhập thay đổi
+            $('#minPrice, #maxPrice').on('input', function() {
+                currentPage = 1;
+                loadProducts();
+            });
 
-                    // Nếu không có tùy chọn nào được chọn, chọn lại "All RAM"
-                    if ($('.ram-filter:checked').length === 0) {
-                        $('#ram-all').prop('checked', true);
-                    }
+            $('#maxPrice').on('input', function () {
+                var minPrice = parseInt($('#minPrice').val()) || 0;
+                var maxPrice = parseInt($(this).val()) || 0;
+
+                // Đảm bảo giá lớn nhất không nhỏ hơn giá nhỏ nhất
+                if (maxPrice < minPrice) {
+                    $(this).val(minPrice);
                 }
 
                 currentPage = 1;
                 loadProducts();
+            });
+
+            // Xử lý sự kiện khi nhấn nút tìm kiếm
+            $('#searchButton').on('click', function() {
+                currentPage = 1;
+                loadProducts();
+            });
+
+            // Xử lý sự kiện khi nhấn Enter trong ô tìm kiếm
+            $('#searchInput').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    currentPage = 1;
+                    loadProducts();
+                }
             });
 
             // Xử lý sự kiện khi nhấn nút phân trang
@@ -77,25 +84,96 @@
                 loadProducts();
             });
 
+            // Xử lý sự kiện khi nhấn vào hãng trong thanh điều hướng
+            $(document).on('click', '.brand-filter', function(e) {
+                e.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ a
+                selectedBrand = $(this).data('brand');
+                console.log('Selected Brand:', selectedBrand); // Kiểm tra giá trị của selectedBrand
+                currentPage = 1;
+                loadProducts();
+            });
+
+            function loadRamOptions() {
+                $.ajax({
+                    url: '/api/Phone/GetRamOptions',
+                    method: 'GET',
+                    success: function(data) {
+                        var ramForm = $('#ramFilterForm');
+                        ramForm.empty(); // Xóa các tùy chọn cũ nếu có
+                        data.forEach(function(ram) {
+                            var checkbox = `
+                                <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                    <input type="checkbox" class="custom-control-input ram-filter" id="ram-${ram}" value="${ram}">
+                                    <label class="custom-control-label" for="ram-${ram}">${ram} GB</label>
+                                </div>
+                            `;
+                            ramForm.append(checkbox);
+                        });
+                    },
+                    error: function(error) {
+                        console.error('Error fetching RAM options:', error);
+                    }
+                });
+            }
+
+            function loadBrands() {
+                $.ajax({
+                    url: '/api/phone/getbrands',
+                    method: 'GET',
+                    success: function(data) {
+                        var brandNav = $('#brandNav');
+                        brandNav.empty(); // Xóa các hãng cũ nếu có
+                        data.forEach(function(brand) {
+                            var brandLink = `
+                                <a href="#" class="nav-item nav-link brand-filter" data-brand="${brand.maHang}">${brand.tenHang}</a>
+                            `;
+                            brandNav.append(brandLink);
+                        });
+
+                        // Tính toán chiều cao dựa trên số lượng hãng
+                        var itemHeight = 40; // Chiều cao ước tính của mỗi mục
+                        var totalHeight = data.length * itemHeight;
+                        $('#navbar-vertical').css('height', totalHeight + 'px');
+                    },
+                    error: function(error) {
+                        console.error('Error fetching brands:', error);
+                    }
+                });
+            }
+
             function loadProducts() {
                 var selectedRams = $('.ram-filter:checked').map(function() {
                     return this.value;
-                }).get();
+                }).get().join(',');
 
-                // Nếu "All RAM" được chọn hoặc không có RAM nào được chọn, lấy tất cả sản phẩm
-                var url = (selectedRams.includes('all') || selectedRams.length === 0)
-                    ? `/api/Phone/GetAllPhones?page=${currentPage}`
-                    : `/api/Phone/GetPhoneByRam?rams=${selectedRams.join(',')}&page=${currentPage}`;
-                
+                var minPrice = $('#minPrice').val();
+                var maxPrice = $('#maxPrice').val();
+                var searchQuery = $('#searchInput').val();
+
+                console.log('Loading products with params:', {
+                    rams: selectedRams,
+                    minPrice: minPrice,
+                    maxPrice: maxPrice,
+                    searchQuery: searchQuery,
+                    brand: selectedBrand,
+                    page: currentPage
+                });
+
                 $.ajax({
-                    url: url,
+                    url: `/api/phone/getfilteredphones?rams=${selectedRams}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchQuery=${searchQuery}&brand=${selectedBrand}&page=${currentPage}`,
                     method: 'GET',
                     success: function(data) {
-                        updateProductList(data.products);
-                        updatePagination(data.totalPages, data.currentPage);
+                        console.log('Data received:', data); // Kiểm tra dữ liệu nhận được
+
+                        if (data && data.products && data.products.length > 0) {
+                            updateProductList(data.products);
+                            updatePagination(data.totalPages, data.currentPage);
+                        } else {
+                            $('#productContainer').html('<p>Không có sản phẩm phù hợp.</p>');
+                        }
                     },
                     error: function(error) {
-                        console.error('Error fetching products:', error);
+                        console.error('Error fetching products:', error); // Kiểm tra lỗi
                     }
                 });
             }
@@ -109,8 +187,6 @@
             }
 
             function createProductHtml(product) {
-                // Tạo HTML cho mỗi sản phẩm dựa trên dữ liệu nhận được
-                // Đảm bảo rằng cấu trúc này khớp với PartialSanPham.cshtml của bạn
                 return `
                     <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
                         <div class="card product-item border-0 mb-4">
@@ -120,11 +196,11 @@
                             <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
                                 <h6 class="text-truncate mb-3">${product.tenSanPham}</h6>
                                 <div class="d-flex justify-content-center">
-                                    <h6>${product.donGiaBanRa}</h6><h6 class="text-muted ml-2"><del>${product.donGiaBanGoc}</del></h6>
+                                    <h6>${product.donGiaBanRa.toLocaleString('vi-VN')} VNĐ </h6><h6 class="text-muted ml-2"><del>${(product.donGiaBanGoc * 1.2).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VNĐ </del></h6>
                                 </div>
                             </div>
                             <div class="card-footer d-flex justify-content-between bg-light border">
-                                <a href="/Home/ProductDetail?maSp=${product.maSanPham}&maMau=${product.maMau}&maRom=${product.maRom}" class="btn btn-sm text-dark p-0">
+                                <a href="/Home/ProductDetail?maSp=${product.maSanPham}" class="btn btn-sm text-dark p-0">
                                     <i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết
                                 </a>
                                 <a href="" class="btn btn-sm text-dark p-0"><i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng</a>
@@ -152,9 +228,6 @@
                     paginationContainer.append(pageItem);
                 }
             }
-
-            // Load sản phẩm ban đầu
-            loadProducts();
         });
     </script>
 }
