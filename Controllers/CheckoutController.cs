@@ -4,6 +4,7 @@ using BTLW_BDT.Models;
 using Microsoft.AspNetCore.Authorization;
 using BTLW_BDT.Services;
 using BTLW_BDT.Models.VnPay;
+using BTLW_BDT.Models.Order;
 
 
 namespace BTLW_BDT.Controllers

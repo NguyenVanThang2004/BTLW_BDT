@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using BTLW_BDT.Models;
 using BTLW_BDT.Models.PhoneModels;
+using System.Linq;
 
 namespace BTLW_BDT.Controllers
 {
@@ -56,49 +57,59 @@ namespace BTLW_BDT.Controllers
             
             return Json(viewModel);
         }
-        //BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
-        //[HttpGet]
-        //public ActionResult<IEnumerable<Phone>> GetAllPhones()
-        //{
-        //    try
-        //    {
-        //        var phones = (from p in db.SanPhams
-        //                      select new Phone
-        //                      {
-        //                          MaSanPham = p.MaSanPham,
-        //                          TenSanPham = p.TenSanPham,
-        //                          DonGiaBanGoc = p.DonGiaBanGoc,
-        //                          DonGiaBanRa = p.DonGiaBanRa,
-        //                          KhuyenMai = p.KhuyenMai,
-        //                          Ram = p.Ram,
-        //                          Pin = p.Pin,
-        //                          AnhDaiDien = p.AnhDaiDien
-        //                      }).ToList();
-        //        return Ok(phones);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log the exception
-        //        return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
-        //    }
-        //}
-        //[HttpGet("{ttyc}")]
-        //public IEnumerable<Phone> GetPhoneByTT(string ttyc)
-        //{
-        //    var phones = (from p in db.SanPhams
-        //                  where p.Ram == ttyc || p.Pin.Contains(ttyc) || p.TenSanPham.Contains(ttyc)
-        //                  select new Phone
-        //                  {
-        //                      MaSanPham = p.MaSanPham,
-        //                      TenSanPham = p.TenSanPham,
-        //                      DonGiaBanGoc = p.DonGiaBanGoc,
-        //                      DonGiaBanRa = p.DonGiaBanRa,
-        //                      KhuyenMai = p.KhuyenMai,
-        //                      Ram = p.Ram,
-        //                      Pin = p.Pin,
-        //                      AnhDaiDien = p.AnhDaiDien
-        //                  }).ToList();
-        //    return phones;
-        //}
+        [HttpGet("GetFilteredPhones")]
+        public IActionResult GetFilteredPhones([FromQuery] string rams = "", decimal? minPrice = null, decimal? maxPrice = null, string searchQuery = "", string brand = "", int page = 1, int pageSize = 12)
+        {
+            var ramList = string.IsNullOrEmpty(rams) ? new List<string>() : rams.Split(',').Select(r => r.Trim()).ToList();
+            var query = db.SanPhams.AsQueryable();
+
+            // Lọc theo RAM
+            if (ramList.Any() && !ramList.Contains("all"))
+            {
+                query = query.Where(p => ramList.Contains(p.Ram));
+            }
+
+            // Lọc theo giá
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.DonGiaBanRa >= minPrice.Value);
+            }
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.DonGiaBanRa <= maxPrice.Value);
+            }
+
+            // Lọc theo tên sản phẩm
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(p => p.TenSanPham.Contains(searchQuery));
+            }
+
+            // Lọc theo hãng
+            if (!string.IsNullOrEmpty(brand))
+            {
+                query = query.Where(p => p.MaHang == brand);
+            }
+
+            var totalItems = query.Count();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var phones = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var viewModel = new
+            {
+                Products = phones,
+                TotalPages = totalPages,
+                CurrentPage = page
+            };
+
+            return Json(viewModel);
+        }
+        [HttpGet("GetBrands")]
+        public IActionResult GetBrands()
+        {
+            var brands = db.Hangs.Select(h => new { h.MaHang, h.TenHang }).ToList();
+            return Ok(brands);
+        }
     }
 }

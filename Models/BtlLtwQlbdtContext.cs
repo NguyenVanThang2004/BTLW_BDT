@@ -140,7 +140,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<Hang>(entity =>
         {
-            entity.HasKey(e => e.MaHang).HasName("PK__Hang__19C0DB1D8E0D4B82");
+
+            entity.HasKey(e => e.MaHang).HasName("PK__Hang__19C0DB1D0112018A");
+
 
             entity.ToTable("Hang");
 
@@ -150,7 +152,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<HoaDonBan>(entity =>
         {
-            entity.HasKey(e => e.MaHoaDon).HasName("PK__HoaDonBa__835ED13BE936A1AB");
+
+            entity.HasKey(e => e.MaHoaDon).HasName("PK__HoaDonBa__835ED13BC2E7356D");
+
 
             entity.ToTable("HoaDonBan", tb => tb.HasTrigger("theoDoiCustomerMuaSanPham"));
 
@@ -173,7 +177,10 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<KhachHang>(entity =>
         {
-            entity.HasKey(e => e.MaKhachHang).HasName("PK__KhachHan__88D2F0E58C64C138");
+
+
+            entity.HasKey(e => e.MaKhachHang).HasName("PK__KhachHan__88D2F0E5FEC805A0");
+
 
             entity.ToTable("KhachHang");
 
@@ -193,7 +200,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<LichSuHoatDong>(entity =>
         {
-            entity.HasKey(e => e.MaHoatDong).HasName("PK__LichSuHo__BD808BE7AA9E34A5");
+
+            entity.HasKey(e => e.MaHoatDong).HasName("PK__LichSuHo__BD808BE7A4198B3C");
+
 
             entity.ToTable("LichSuHoatDong");
 
@@ -210,6 +219,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<MauSac>(entity =>
         {
+
+
+
             entity.HasKey(e => e.MaMau);
 
             entity.ToTable("MauSac");
@@ -226,7 +238,10 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<NhanVien>(entity =>
         {
-            entity.HasKey(e => e.MaNhanVien).HasName("PK__NhanVien__77B2CA4708CAB753");
+
+
+            entity.HasKey(e => e.MaNhanVien).HasName("PK__NhanVien__77B2CA476A104F17");
+
 
             entity.ToTable("NhanVien");
 
@@ -246,6 +261,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<Rom>(entity =>
         {
+
+
+
             entity.HasKey(e => e.MaRom);
 
             entity.ToTable("ROM");
@@ -265,6 +283,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<SanPham>(entity =>
         {
+
+
+
             entity.HasKey(e => e.MaSanPham);
 
             entity.ToTable("SanPham", tb => tb.HasTrigger("theoDoiAdminSanPham"));
@@ -301,7 +322,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<TaiKhoan>(entity =>
         {
-            entity.HasKey(e => e.TenDangNhap).HasName("PK__TaiKhoan__55F68FC1FB3F161F");
+
+            entity.HasKey(e => e.TenDangNhap).HasName("PK__TaiKhoan__55F68FC1E0969B16");
+
 
             entity.ToTable("TaiKhoan");
 
