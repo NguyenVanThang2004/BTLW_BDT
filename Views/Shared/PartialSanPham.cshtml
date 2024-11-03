@@ -1,25 +1,442 @@
-﻿@model SanPham
-<div class="col-lg-4 col-md-6 col-sm-12 pb-1">
-    <div class="card product-item border-0 mb-4">
-        <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-            <img class="img-fluid w-100" src="@Url.Content("../PhoneImages/Images/" + Model.AnhDaiDien)" alt="@Model.TenSanPham">
-        </div>
-        <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-            <h6 class="text-truncate mb-3">@Model.TenSanPham</h6>
-            <div class="d-flex justify-content-center">
-                <h6>@Model.DonGiaBanRa</h6>
-                <h6 class="text-muted ml-2"><del>@Model.DonGiaBanGoc</del></h6>
+﻿@using Newtonsoft.Json
+@model BTLW_BDT.ViewModels.ProductDetailViewModel
+
+<!-- Thêm các reference cần thiết -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+@{
+    // Lấy màu đầu tiên từ danh sách màu
+    var firstColor = Model.dmMauSp?.FirstOrDefault()?.MaMau ?? "defaultColor";
+}
+
+<div class="container-fluid py-5">
+    <div class="row px-xl-5">
+        <div class="col-lg-5 pb-5">
+            <div id="product-carousel" class="carousel slide">
+                <div class="carousel-inner border" id="imageContainer">
+                    @await Html.PartialAsync("_ColorImagesPartial", Model.dmAnhSp)
+                </div>
+                <!-- Thay đổi controls để không có href -->
+                <button type="button" class="carousel-control-prev">
+                    <i class="fa fa-2x fa-angle-left text-dark"></i>
+                </button>
+                <button type="button" class="carousel-control-next">
+                    <i class="fa fa-2x fa-angle-right text-dark"></i>
+                </button>
             </div>
         </div>
-        @if (Model.MaSanPham != null && Model.MaMau != null && Model.MaRom != null)
-        {   <a asp-controller="Home" asp-action="ProductDetail"
-               asp-route-maSp="@Model.MaSanPham"
-               asp-route-maMau="@Model.MaMau"
-               asp-route-maRom="@Model.MaRom"
-               class="btn btn-sm text-dark p-0">
-                <i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết
-            </a>}
-            <a href="" class="btn btn-sm text-dark p-0"><i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng</a>
+
+        <div class="col-lg-7 pb-5">
+            <h3 class="font-weight-semi-bold">@Model.dmSp.TenSanPham</h3>
+            <div class="d-flex mb-3">
+                <div class="text-primary mr-2">
+                    <small class="fas fa-star"></small>
+                    <small class="fas fa-star"></small>
+                    <small class="fas fa-star"></small>
+                    <small class="fas fa-star-half-alt"></small>
+                    <small class="far fa-star"></small>
+                </div>
+                <small class="pt-1">(50 Reviews)</small>
+            </div>
+            <h3 id="productPrice" class="font-weight-semi-bold mb-4">@Model.CurrentPrice?.ToString("#,##0") VNĐ</h3>
+            @if (Model.dmSp.SoLuongTonKho > 0)
+            {
+                <div class="alert alert-success mb-4">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Sản phẩm vẫn đang mở bán. Với số lượng lên đến <strong>@Model.dmSp.SoLuongTonKho</strong> sản phẩm.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger mb-4">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    Sản phẩm hiện đang hết hàng. Vui lòng liên hệ để được tư vấn thêm.
+                </div>
+            }
+            <div class="d-flex mb-3">
+                <p class="text-dark font-weight-medium mb-0 mr-3">Dung lượng bộ nhớ:</p>
+                <form id="romForm">
+                    @foreach (var rom in Model.dmRomSp)
+                    {
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" 
+                                   class="custom-control-input rom-select" 
+                                   id="rom-@rom.MaRom" 
+                                   name="rom" 
+                                   value="@rom.MaRom"
+                                   data-url="@Url.Action("GetRomPrice", "Home", new { maSp = Model.dmSp.MaSanPham, maRom = rom.MaRom })"
+                                   @(rom.MaRom == Model.SelectedRom ? "checked" : "")>
+                            <label class="custom-control-label" for="rom-@rom.MaRom">
+                                @rom.ThongSo 
+                            </label>
+                        </div>
+                    }
+                </form>
+            </div>
+            <div class="d-flex mb-4">
+                <p class="text-dark font-weight-medium mb-0 mr-3">Màu sắc:</p>
+                <form>
+                    @if (Model.dmMauSp != null && Model.dmMauSp.Any())
+                    {
+                        @foreach (var color in Model.dmMauSp)
+                        {
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" 
+                                       class="custom-control-input color-select" 
+                                       id="color-@color.MaMau" 
+                                       name="color" 
+                                       value="@color.MaMau"
+                                       data-url="@Url.Action("GetColorImages", "Home", new { maSp = Model.dmSp.MaSanPham, maMau = color.MaMau })"
+                                       @(color.MaMau == Model.SelectedColor ? "checked" : "")>
+                                <label class="custom-control-label" for="color-@color.MaMau">@color.TenMau</label>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No colors available.</p>
+                    }
+                </form>
+            </div>
+            <div class="d-flex align-items-center mb-4 pt-2">
+                <div class="input-group quantity mr-3" style="width: 130px;">
+                    <div class="input-group-btn">
+                        <button class="btn btn-primary btn-minus">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                    <input type="text" class="form-control bg-secondary text-center" value="1">
+                    <div class="input-group-btn">
+                        <button class="btn btn-primary btn-plus">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i>Thêm vào giỏ hàng</button>
+            </div>
+            <div class="d-flex pt-2">
+                <p class="text-dark font-weight-medium mb-0 mr-2">Chia sẻ ngay:</p>
+                <div class="d-inline-flex">
+                    <a class="text-dark px-2" href="">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a class="text-dark px-2" href="">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a class="text-dark px-2" href="">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a class="text-dark px-2" href="">
+                        <i class="fab fa-pinterest"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row px-xl-5">
+        <div class="col">
+            <div class="nav nav-tabs justify-content-center border-secondary mb-4">
+                <a class="nav-item nav-link active" data-toggle="tab" href="#tab-pane-1">Thông tin</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-3">Đánh giá</a>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-pane-1">
+                    <h4 class="mb-3 text-primary font-weight-bold"><i class="fas fa-info-circle mr-2"></i>Thông số chi tiết</h4>
+                    <div class="alert alert-info mb-4">
+                        <p><i class="fas fa-tag mr-2"></i>Sản phẩm <strong>@Model.dmSp.TenSanPham</strong> đang mở bán với <span class="badge badge-danger">khuyến mãi lên tới @Model.dmSp.KhuyenMai%</span></p>
+                        <p><i class="fas fa-shield-alt mr-2"></i>Đặc biệt sản phẩm có <span class="text-success">thời gian bảo hành lên tới @Model.dmSp.ThoiGianBaoHanh tháng</span></p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Loại Camera:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.Camera</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">RAM:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.Ram</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Công nghệ màn hình:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.CongNgheManHinh</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Độ sáng tối đa:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.DoSangToiDa</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Màn hình:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.ManHinh</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Kích thước:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.KichThuoc</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Danh Bạ:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.DanhBa</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Đèn Flash:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.DenFlash</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Loại Chip:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.Chip</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Loại Pin:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.LoaiPin</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Pin:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.Pin</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Loại Sim:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.Sim</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Loại Mạng di động:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.MangDiDong</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Bảo mật nâng cao:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.BaoMatNangCao</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Ghi âm:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.GhiAmMacDinh</span>
+                                </li>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Jack tai nghe:</span>
+                                    <span class="font-weight-bold">@Model.dmSp.JackTaiNghe</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="tab-pane-3">
+                    <div class="row">
+                        <div class="col-md-6" id="reviewsContainer">
+                        </div>
+                        <div class="col-md-6">
+                            <h4 class="mb-4">Leave a review</h4>
+                            <small>Your email address will not be published. Required fields are marked *</small>
+                            <div class="d-flex my-3">
+                                <p class="mb-0 mr-2">Your Rating * :</p>
+                                <div class="text-primary star-rating">
+                                    <i class="far fa-star" data-rate="1"></i>
+                                    <i class="far fa-star" data-rate="2"></i>
+                                    <i class="far fa-star" data-rate="3"></i>
+                                    <i class="far fa-star" data-rate="4"></i>
+                                    <i class="far fa-star" data-rate="5"></i>
+                                </div>
+                            </div>
+                            <form asp-action="SubmitReview" method="post">
+                                <input type="hidden" name="productId" value="@Model.dmSp.MaSanPham" />
+                                <input type="hidden" id="selectedRate" name="rate" value="0" />
+                                <div class="form-group">
+                                    <label for="message">Your Review *</label>
+                                    <textarea id="message" name="content" cols="30" rows="5" class="form-control"></textarea>
+                                </div>
+                                <div class="form-group mb-0">
+                                    <input type="submit" value="Leave Your Review" class="btn btn-primary px-3">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        // Khởi tạo carousel
+        var $carousel = $('#product-carousel').carousel({
+            interval: false,
+            wrap: true
+        });
+
+        // Xử lý khi chọn màu
+        $('.color-select').change(function() {
+            var url = $(this).data('url');
+            $.get(url, function(data) {
+                $('#imageContainer').html(data);
+                // Reset carousel
+                $carousel.carousel(0);
+            });
+        });
+
+        // Xử lý nút prev
+        $('.carousel-control-prev').click(function(e) {
+            e.preventDefault();
+            $carousel.carousel('prev');
+        });
+
+        // Xử lý nút next
+        $('.carousel-control-next').click(function(e) {
+            e.preventDefault();
+            $carousel.carousel('next');
+        });
+
+        $('.rom-select').change(function() {
+            var url = $(this).data('url');
+            $.get(url, function(response) {
+                if (response.success) {
+                    $('#productPrice').text(response.formattedPrice);
+                }
+            });
+        });
+    });
+    $('.star-rating .fa').on('click', function () {
+        var rate = $(this).data('rate');
+        $('#selectedRate').val(rate);
+        $('.star-rating .fa').removeClass('checked');
+        $(this).prevAll().addBack().addClass('checked');
+    });
+</script>
+<style>
+    .list-group-item {
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        border-left: 3px solid #007bff;
+        padding-left: 10px !important;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        cursor: pointer;
+        background: none;
+        border: none;
+        outline: none;
+    }
+
+    .carousel-item {
+        transition: transform 0.6s ease-in-out;
+    }
+
+    .carousel-inner {
+        overflow: hidden;
+    }
+
+    /* Kiểm soát kích thước carousel */
+    #product-carousel {
+        width: 100%;
+        height: 0;
+        padding-bottom: 100%; /* Tạo container hình vuông */
+        position: relative;
+    }
+
+    .carousel-inner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Kiểm soát kích thước v căn chỉnh ảnh */
+    .carousel-item {
+        height: 100%;
+        text-align: center;
+        background-color: #fff;
+    }
+
+    .carousel-item img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        object-fit: contain; /* Giữ tỷ lệ ảnh */
+    }
+
+    /* Style cho nút điều khiển */
+    .carousel-control-prev,
+    .carousel-control-next {
+        cursor: pointer;
+        background: none;
+        border: none;
+        outline: none;
+        width: 5%;
+        z-index: 5;
+    }
+
+    .carousel-control-prev {
+        left: 0;
+    }
+
+    .carousel-control-next {
+        right: 0;
+    }
+
+    /* Animation cho chuyển ảnh */
+    .carousel-item {
+        transition: transform 0.6s ease-in-out;
+    }
+
+    /* Container cho ảnh */
+    .color-group {
+        height: 100%;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        var productId = '@Model.dmSp.MaSanPham'; // Lấy mã sản phẩm từ model
+        loadReviews(productId);
+    });
+
+    function loadReviews(productId) {
+        $.ajax({
+            url: `/api/review/productreview?productId=${productId}`,
+            method: 'GET',
+            success: function(data) {
+                var reviewsContainer = $('#reviewsContainer');
+                reviewsContainer.empty(); // Xóa các đánh giá cũ nếu có
+
+                if (data.reviews && data.reviews.length > 0) {
+                    var reviewHtml = `<h4 class="mb-4">${data.reviews.length} reviews for "${data.dmSp.tenSanPham}"</h4>`;
+                    data.reviews.forEach(function(review) {
+                        reviewHtml += `
+                            <div class="media mb-4">
+                                <img src="" alt="Image" class="img-fluid mr-3 mt-1" style="width: 45px;">
+                                <div class="media-body">
+                                    <h6>${review.tenDangNhap}<small> - <i>${new Date(review.thoiGianDanhGia).toLocaleDateString()}</i></small></h6>
+                                    <div class="text-primary mb-2">
+                                        ${[...Array(5)].map((_, i) => i < review.rate ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>').join('')}
+                                    </div>
+                                    <p>${review.noiDung}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    reviewsContainer.append(reviewHtml);
+                } else {
+                    reviewsContainer.append('<p>Không có đánh giá nào.</p>');
+                }
+            },
+            error: function(error) {
+                console.error('Error fetching reviews:', error);
+            }
+        });
+    }
+</script>
+
+<div id="reviewsContainer"></div>
 

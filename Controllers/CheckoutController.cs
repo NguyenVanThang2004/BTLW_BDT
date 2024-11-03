@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BTLW_BDT.Models.Cart;
 using BTLW_BDT.Models;
-using BTLW_BDT.Models.Cart;
 using BTLW_BDT.Models.Order;
 
 namespace BTLW_BDT.Controllers

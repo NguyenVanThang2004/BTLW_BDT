@@ -9,5 +9,7 @@ public partial class MauSac
 
     public string? TenMau { get; set; }
 
-    public virtual ICollection<SanPham> SanPhams { get; set; } = new List<SanPham>();
+    public string? MaSanPham { get; set; }
+
+    public virtual SanPham? MaSanPhamNavigation { get; set; }
 }
