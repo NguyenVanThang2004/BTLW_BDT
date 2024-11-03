@@ -8,7 +8,7 @@ namespace BTLW_BDT.ViewModels
         [Display(Name = "Tên đăng nhập")]
         [Required(ErrorMessage = "*")]
         [MaxLength(20, ErrorMessage = "Tối đa 20 kí tự")]
-        public string MaKh { get; set; }
+        public string TaiKhoan { get; set; }
         [Display(Name = "Mật khẩu")]
         [Required(ErrorMessage = "*")]
         [DataType(DataType.Password)]
@@ -20,7 +20,7 @@ namespace BTLW_BDT.ViewModels
 
         [Display(Name = "Ngày sinh")]
         [DataType(DataType.Date)]
-        public DateTime? NgaySinh { get; set; }
+        public DateOnly? NgaySinh { get; set; }
         [Display(Name = "Địa chỉ")]
         [MaxLength(60, ErrorMessage = "Tối đa 60 kí tự")]
         public string DiaChi { get; set; }

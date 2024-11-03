@@ -1,4 +1,5 @@
-﻿using BTLW_BDT.Models;
+﻿using BTLW_BDT.Helpers;
+using BTLW_BDT.Models;
 using BTLW_BDT.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;              // Cookie là cần thiết
 });
 
+
+
 var app = builder.Build();
 
 
@@ -51,9 +54,9 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
 
-    //pattern: "{controller=access}/{action=login}/{id?}");
+    pattern: "{controller=access}/{action=login}/{id?}");
 
-    pattern: "{controller=home}/{action=index}/{id?}");
+//pattern: "{controller=home}/{action=index}/{id?}");
 
 
 app.Run();

@@ -8,7 +8,7 @@ namespace BTLW_BDT.Helpers
         {
             try
             {
-                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Hinh", folder, Hinh.FileName);
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", folder, Hinh.FileName);
                 using (var myfile = new FileStream(fullPath, FileMode.CreateNew))
                 {
                     Hinh.CopyTo(myfile);
