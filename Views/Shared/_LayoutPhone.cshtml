@@ -23,6 +23,7 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="../assets/css/style.css" rel="stylesheet">
+    <link href="../css/site.css" rel="stylesheet">
 </head>
 
 <body>
@@ -64,7 +65,7 @@
         </div>
         <div class="row align-items-center py-3 px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
-                <a href="" class="text-decoration-none">
+                <a asp-controller="Home" asp-action="index" class="text-decoration-none">
                     <h1 class="m-0 display-5 font-weight-semi-bold"><span class="text-primary font-weight-bold border px-3 mr-1">E</span>Shopper</h1>
                 </a>
             </div>
@@ -133,13 +134,13 @@
                     </button>
                     <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                         <div class="navbar-nav mr-auto py-0">
-                            <a href="index.html" class="nav-item nav-link active">Home</a>
+                            <a asp-controller="Home" asp-action="Index" class="nav-item nav-link active">Home</a>
                             <a asp-controller="Home" asp-action="Shop" class="nav-item nav-link">Shop</a>
                             @* <a href="detail.html" class="nav-item nav-link">Shop Detail</a> *@
                             <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
                                 <div class="dropdown-menu rounded-0 m-0">
-                                    <a asp-controller="Cart" asp-action="Cart" class="dropdown-item">Shopping Cart</a>
+                                    <a asp-controller="Cart" asp-action="DetailCart" class="dropdown-item">Shopping Cart</a>
                                     <a asp-controller="Checkout" asp-action="DetailCheckout" class="dropdown-item">Checkout</a>
                                 </div>
                             </div>
@@ -154,8 +155,8 @@
                                     <span>@Context.Session.GetString("HoTen")</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
+                                    <a asp-controller="User" asp-action="Profile" class="dropdown-item">Profile</a>
                                     <a asp-controller="Access" asp-action="Logout" class="dropdown-item">Logout</a>
-                                    <a asp-controller="User" asp-action="Information" class="dropdown-item">Information</a>
                                 </div>
                             </div>
                         </div>
@@ -625,68 +626,3 @@
 
 </html>
 
-<style>
-    .navbar-nav .nav-item .dropdown-toggle {
-        display: flex;
-        align-items: center;
-        color: #333;
-        text-decoration: none;
-    }
-
-        .navbar-nav .nav-item .dropdown-toggle img {
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            margin-right: 8px;
-            border: 2px solid #ccc; /* Đường viền xung quanh avatar */
-            transition: border-color 0.3s ease;
-        }
-
-        .navbar-nav .nav-item .dropdown-toggle span {
-            font-weight: 500;
-            color: #333;
-            transition: color 0.3s ease;
-        }
-
-        /* Hover effect cho icon */
-        .navbar-nav .nav-item .dropdown-toggle:hover img {
-            border-color: #007bff; /* Màu xanh dương khi hover */
-        }
-
-        .navbar-nav .nav-item .dropdown-toggle:hover span {
-            color: #007bff; /* Màu chữ khi hover */
-        }
-
-    /* CSS cho menu dropdown */
-    .navbar-nav .nav-item .dropdown-menu {
-        min-width: 150px;
-        padding: 10px 15px;
-        border-radius: 8px;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-        background-color: #ffffff;
-        border: none;
-        transition: all 0.3s ease;
-    }
-
-        /* Tùy chọn trong dropdown */
-        .navbar-nav .nav-item .dropdown-menu a.dropdown-item {
-            color: #333;
-            font-size: 14px;
-            padding: 8px 12px;
-            border-radius: 4px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-            /* Hover effect cho các tùy chọn trong dropdown */
-            .navbar-nav .nav-item .dropdown-menu a.dropdown-item:hover {
-                background-color: #007bff;
-                color: #fff;
-            }
-
-        /* CSS để căn chỉnh lại cho đẹp mắt khi menu dropdown được mở */
-        .navbar-nav .nav-item .dropdown-menu.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-</style>
