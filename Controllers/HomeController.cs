@@ -25,21 +25,11 @@ using X.PagedList;
                 _logger = logger;
            
             }
-
-
-
         public int CartCount()
         {
             var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
             return cart.Count;
         }
-
-
-
-
-
-
-
         public IActionResult Index()
         {
             ViewBag.CartCount = CartCount();  // Truyền số lượng sản phẩm vào ViewBag
@@ -47,15 +37,6 @@ using X.PagedList;
        
             return View(lstSanPham);
         }
-
-
-
-
-
-       
-      
-
-
         public IActionResult Shop(int? page)
         {
             int pageSize = 9;

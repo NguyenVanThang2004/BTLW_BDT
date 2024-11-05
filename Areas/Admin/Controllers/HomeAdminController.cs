@@ -1,7 +1,10 @@
-﻿using BTLW_BDT.Models;
+﻿
+using BTLW_BDT.Models;
+using BTLW_BDT.Models.BieuDo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks.Dataflow;
 using X.PagedList;
 
 namespace BTLW_BDT.Areas.Admin.Controllers
@@ -18,9 +21,9 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         {
             return View();
         }
-        [Route("DanhMucSanPham1")]
+        [Route("DanhMucSanPham")]
 
-        public IActionResult DanhMucSanPham1(int? page)
+        public IActionResult DanhMucSanPham(int? page)
         {
             int pageSize = 15;
             int pageNumber = page == null || page < 0 ? 1 : page.Value;
@@ -70,6 +73,36 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             }
             return View(sanPham);
         }
+        //[Route("DashBoard")]
+        
+        //public IActionResult DashBoard()
+        //{
+        //    var count_product = db.SanPhams.Count();
+        //    var count_CTHDB = db.ChiTietHoaDonBans.Count();
+        //    var count_CTGH= db.ChiTietGioHangs.Count();
+        //    ViewBag.CountProduct = count_product;
+        //    ViewBag.CountCTHDB=count_CTHDB;
+        //    ViewBag.CountCTGH=count_CTGH;
+        //    return View();
+        //}
+        [HttpPost("GetChartData")]
+        public async Task<IActionResult> GetChartData()
+        {
+            var data = await (from hdb in db.HoaDonBans join cthdb in db.ChiTietHoaDonBans on hdb.MaHoaDon equals cthdb.MaHoaDon
+                                                 join sp in db.SanPhams on cthdb.MaSanPham equals sp.MaSanPham
+                                                 join ctgh in db.ChiTietGioHangs on sp.MaSanPham equals ctgh.MaSanPham
+                                                 join gh in db.GioHangs on ctgh.MaGioHang equals gh.MaGioHang
+                       select new BieuDo
+                       {
+                           
+                           NgayBan=hdb.ThoiGianLap,
+                           SoLuongBan=cthdb.SoLuongBan,
+                           TongTien = hdb.TongTien,
+                           LoiNhuan=cthdb.DonGiaCuoi
+                       }).ToListAsync();
+            return Json(data);
+
+        }
         [Route("XoaSanPham")]
         [HttpGet]
         public IActionResult XoaSanPham(string maSanPham)
@@ -84,6 +117,11 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             var anhSanPhams = db.AnhSanPhams.Where(x => x.MaSanPham == maSanPham);
             if (anhSanPhams.Any()) db.RemoveRange(anhSanPhams);
 
+            var rom = db.Roms.Where(x => x.MaSanPham == maSanPham);
+            if (rom.Any()) db.RemoveRange(rom);
+
+            var mausac = db.MauSacs.Where(x => x.MaSanPham == maSanPham);
+            if (mausac.Any()) db.RemoveRange(mausac);
             db.Remove(db.SanPhams.Find(maSanPham));
             db.SaveChanges();
             TempData["Message"] = "San pham da duoc xoa";
