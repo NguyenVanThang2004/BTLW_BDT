@@ -1,0 +1,93 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model BTLW_BDT.Models.KhachHang
+@{
+
+    ViewData["Title"] = "Profile";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+
+
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Image Section -->
+            <div class="col-md-4 text-center">
+            <img src="@Context.Session.GetString("Avatar")" alt="Avatar" class="img-fluid rounded">
+            </div>
+
+            <!-- Profile Information Section -->
+            <div class="col-md-8">
+                <h1 class="text-center mb-4">Your Profile</h1>
+            <form>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="customerName" class="form-label">Tên Khách Hàng</label>
+                        <input type="text" class="form-control" id="customerName" value="@Context.Session.GetString("HoTen")" readonly>
+                    </div>
+                    <div class="col">
+                        <label for="birthDate" class="form-label">Ngày Sinh</label>
+                        <input type="text" class="form-control" id="birthDate" value="@Context.Session.GetString("NgaySinh")" readonly>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="phoneNumber" class="form-label">Số Điện Thoại</label>
+                        <input type="text" class="form-control" id="phoneNumber" value="@Context.Session.GetString("SoDienThoai")" readonly>
+                    </div>
+                    <div class="col">
+                        <label for="address" class="form-label">Địa chỉ</label>
+                        <input type="text" class="form-control" id="address" value="@Context.Session.GetString("DiaChi")" readonly>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Ghi Chú</label>
+                    <textarea class="form-control" id="notes" rows="3" placeholder="@Context.Session.GetString("GhiChu")" readonly></textarea>
+                </div>
+
+                <a asp-action="EditProfile" class="btn btn-outline-dark" role="button">Chỉnh sửa</a>
+               
+            </form>
+            </div>
+        </div>
+    </div>
+   
+
+<style>
+
+    .container {
+        max-width: 900px;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    .form-label {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-control {
+        background-color: #fdfdfd;
+        border: 1px solid #ddd;
+    }
+
+    textarea.form-control {
+        resize: none;
+    }
+
+    .btn-outline-dark {
+        font-weight: bold;
+        padding: 8px 20px;
+    }
+
+</style>
+

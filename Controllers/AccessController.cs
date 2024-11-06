@@ -1,6 +1,7 @@
 ﻿using BTLW_BDT.Helpers;
 using BTLW_BDT.Models;
 using BTLW_BDT.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BTLW_BDT.Controllers
@@ -44,13 +45,31 @@ namespace BTLW_BDT.Controllers
                                 {
                                     tk.TenDangNhap,
                                     kh.AnhDaiDien,
-                                    kh.TenKhachHang
+                                    kh.MaKhachHang,
+                                    kh.TenKhachHang,
+                                    kh.NgaySinh,
+                                    kh.SoDienThoai,
+                                    kh.DiaChi, 
+                                    kh.GhiChu
                                 }).FirstOrDefault();
 
                 if (userInfo != null)
                 {
                     HttpContext.Session.SetString("Username", userInfo.TenDangNhap);
+                    HttpContext.Session.SetString("MaKhachHang", userInfo.MaKhachHang);
                     HttpContext.Session.SetString("HoTen", userInfo.TenKhachHang);
+                    HttpContext.Session.SetString("NgaySinh", $"{userInfo.NgaySinh}");
+
+                    HttpContext.Session.SetString("SoDienThoai", userInfo.SoDienThoai);
+                    HttpContext.Session.SetString("DiaChi", userInfo.DiaChi);
+                    if (!string.IsNullOrEmpty(userInfo.GhiChu))
+                    {
+                        HttpContext.Session.SetString("GhiChu", userInfo.GhiChu);
+                    }
+                    else
+                    {
+                        HttpContext.Session.SetString("GhiChu", ""); // hoặc đặt giá trị mặc định nếu cần
+                    }
                     HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + userInfo.AnhDaiDien)); // Lưu đường dẫn ảnh vào Session
                     return RedirectToAction("Index", "Home");
                 }
@@ -117,5 +136,11 @@ namespace BTLW_BDT.Controllers
             }
             return View(model);
         }
+
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
     }
 }

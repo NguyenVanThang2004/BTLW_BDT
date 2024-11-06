@@ -85,10 +85,11 @@
                                         @* <button type="button" class="btn bg-gradient-primary w-100 my-4 mb-2">Sign in</button> *@
                                         <button type="submit" class="btn bg-gradient-primary w-100 my-4 mb-2">Sign in</button>
                                     </div>
-                                    <p class="mt-4 text-sm text-center">
-                                        Don't have an account?
-                                        <a asp-controller="Access" asp-action="Register" class="text-primary text-gradient font-weight-bold">Sign up</a>
-                                    </p>
+                                    <div class="d-flex justify-content-center mt-4 text-center">
+                                        <a asp-controller="Access" asp-action="ForgotPassword" class="text-secondary text-decoration-none mx-3">Forgot Password?</a>
+                                        <span class="text-muted">|</span>
+                                        <a asp-controller="Access" asp-action="Register" class="text-primary text-gradient font-weight-bold mx-3">Sign up</a>
+                                    </div>
                             }
                                 @* </form> *@
                             </div>
