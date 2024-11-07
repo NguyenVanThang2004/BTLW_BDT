@@ -5,6 +5,7 @@ namespace BTLW_BDT.ViewModels
     public class ProductDetailViewModel
     {
         public SanPham dmSp { get; set; } = new SanPham();
+    
         public List<AnhSanPham> dmAnhSp { get; set; } = new List<AnhSanPham>();
         public List<MauSac> dmMauSp { get; set; } = new List<MauSac>();
         public List<Rom> dmRomSp { get; set; } = new List<Rom>();

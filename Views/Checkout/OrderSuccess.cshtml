@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_LayoutCart.cshtml";
 }
 @model List<BTLW_BDT.Models.Cart.CartItem>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-8 text-center">
@@ -11,7 +12,7 @@
                 <p>Cảm ơn bạn đã mua sắm với chúng tôi. Đơn hàng của bạn đã được đặt thành công và sẽ được thanh toán tại cửa hàng.</p>
             </div>
 
-             <!-- Thông Tin Đơn Hàng -->
+            <!-- Thông Tin Đơn Hàng -->
             <div class="order-info mt-5 p-4 rounded shadow-sm">
                 <h4 class="font-weight-bold">Thông Tin Đơn Hàng</h4>
                 <hr>
@@ -20,7 +21,7 @@
                 <p><strong>Số Điện Thoại:</strong> 12345678</p>
                 <p><strong>Địa Chỉ:</strong> Số 3, Ngõ 79, Cầu Giấy, Hà Nội</p>
                 <p><strong>Ghi Chú:</strong> Mua Kẹo</p>
-                <p><strong>Phương Thức Thanh Toán:</strong>TempData["Message"]</p>
+                <p><strong>Phương Thức Thanh Toán:</strong> @TempData["Message"]</p>
             </div>
 
             <!-- Chi Tiết Sản Phẩm -->
@@ -29,10 +30,10 @@
                 <hr>
                 @foreach (var item in Model)
                 {
-                        <div class="d-flex justify-content-between mb-3">
-                            <p class="mb-0">@item.TenSanPham</p>
-                            <p class="mb-0">@Convert.ToDouble(item.TongTien).ToString("N0") VNĐ</p>
-                        </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <p class="mb-0">@item.TenSanPham</p>
+                        <p class="mb-0">@Convert.ToDouble(item.TongTien).ToString("N0") VNĐ</p>
+                    </div>
                 }
             </div>
 
@@ -41,7 +42,6 @@
                 <h5>Tổng Cộng:</h5>
                 <h5>@((Model.Sum(item => item.TongTien) + 25000).ToString("N0")) VNĐ</h5>
             </div>
-
 
             <a asp-controller="Cart" asp-action="ClearCart" class="btn btn-primary mt-4">Tiếp Tục Mua Sắm</a>
         </div>
