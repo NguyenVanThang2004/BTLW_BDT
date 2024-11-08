@@ -61,7 +61,7 @@ namespace BTLW_BDT.Controllers
                     //    existingCustomer.AnhDaiDien = MyUtil.UploadHinh(Hinh, "Customer");
                     //}
 
-                    //await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
 
                     // Cập nhật lại session sau khi lưu
                     HttpContext.Session.SetString("HoTen", khachHang.TenKhachHang);
