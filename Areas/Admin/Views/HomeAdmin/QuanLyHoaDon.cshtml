@@ -1,0 +1,71 @@
+﻿@using BTLW_BDT.Models;
+@using X.PagedList.Mvc.Core;
+@model X.PagedList.IPagedList<dynamic>
+
+@{
+    ViewData["Title"] = "Danh Mục Hóa Đơn";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2>Quản lý Hóa Đơn</h2>
+
+<!-- Form tìm kiếm -->
+<form method="get" asp-action="QuanLyHoaDon">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Tìm kiếm tất cả thông tin..." name="searchQuery" value="@ViewData["searchQuery"]" />
+        <button class="btn btn-outline-secondary" type="submit">Tìm kiếm</button>
+    </div>
+</form>
+
+<!-- Bảng danh sách hóa đơn -->
+<table class="table table-bordered">
+    <thead>
+        <tr class="table-warning">
+            <th  style="text-align:center">STT</th>
+            <th  style="text-align:center">Mã hóa đơn</th>
+            <th  style="text-align:center">Chi tiết hóa đơn</th>
+            <th  style="text-align:center">Thời gian lập</th>
+            <th  style="text-align:center">Khuyến mại</th>
+            <th  style="text-align:center">Tổng tiền</th>
+            <th  style="text-align:center">Phương thức thanh toán</th>
+            <th  style="text-align:center">Khách hàng</th>
+            <th  style="text-align:center">Nhân viên</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int i = 0;
+            string cls = "table-success";
+        }
+        @foreach (var item in Model)
+        {
+            i++;
+            cls = i % 2 == 0 ? "table-primary" : "table-success";
+            <tr class="@cls">
+                <td  style="text-align:center">@i</td>
+                <td  style="text-align:center">@item.MaHDB</td>
+                <td  style="text-align:center">
+                    @foreach (var product in item.ProductDetails)
+                    {
+                        <div>
+                            MaSp: @product.MaSp - SL: @product.SL 
+                        </div>
+                    }
+                </td>
+                <td  style="text-align:center">@item.Time</td>
+                <td  style="text-align:center">@item.KM</td>
+                <td  style="text-align:center">@item.TT</td>
+                <td  style="text-align:center">@item.PTTT</td>
+                <td  style="text-align:center">@item.TenKH <br /> @item.SDT <br /> @item.DC</td>
+                <td  style="text-align:center">@item.MaNV</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@Html.PagedListPager(Model, page => Url.Action("QuanLyHoaDon", new { page = page }),
+        new X.PagedList.Web.Common.PagedListRenderOptions
+    {
+        LiElementClasses = new List<String> { "page-item" },
+        PageClasses = new List<String> { "page-link" }
+    })
