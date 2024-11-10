@@ -35,6 +35,11 @@
                         <input type="text" class="form-control" id="phoneNumber" value="@Context.Session.GetString("SoDienThoai")" readonly>
                     </div>
                     <div class="col">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" value="@Context.Session.GetString("Email")" readonly>
+                    </div>
+
+                    <div class="col">
                         <label for="address" class="form-label">Địa chỉ</label>
                         <input type="text" class="form-control" id="address" value="@Context.Session.GetString("DiaChi")" readonly>
                     </div>
