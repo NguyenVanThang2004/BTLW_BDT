@@ -35,51 +35,62 @@ namespace BTLW_BDT.Controllers
                 SoDienThoai = HttpContext.Session.GetString("SoDienThoai"),
                 DiaChi = HttpContext.Session.GetString("DiaChi"),
                 GhiChu = HttpContext.Session.GetString("GhiChu"),
-                //AnhDaiDien = HttpContext.Session.GetString("AnhDaiDien")
+                AnhDaiDien = HttpContext.Session.GetString("Avatar")
             };
             return View(model);
         }
 
         // Action lưu thông tin chỉnh sửa của khách hàng
         [HttpPost]
-        //public async Task<IActionResult> EditProfile(KhachHang khachHang, IFormFile Hinh)
-        public async Task<IActionResult> EditProfile(KhachHang khachHang)
+        public async Task<IActionResult> EditProfile(KhachHang khachHang, IFormFile Hinh)
         {
             if (ModelState.IsValid)
             {
                 var existingCustomer = await _context.KhachHangs.FindAsync(khachHang.MaKhachHang);
                 if (existingCustomer != null)
                 {
-                    existingCustomer.TenKhachHang = khachHang.TenKhachHang;
-                    existingCustomer.NgaySinh = khachHang.NgaySinh;
-                    existingCustomer.SoDienThoai = khachHang.SoDienThoai;
-                    existingCustomer.DiaChi = khachHang.DiaChi;
-                    existingCustomer.GhiChu = khachHang.GhiChu;
+                    // Chỉ cập nhật các trường có thay đổi
+                    if (existingCustomer.TenKhachHang != khachHang.TenKhachHang)
+                        existingCustomer.TenKhachHang = khachHang.TenKhachHang;
 
-                    //if (Hinh != null)
-                    //{
-                    //    existingCustomer.AnhDaiDien = MyUtil.UploadHinh(Hinh, "Customer");
-                    //}
+                    if (existingCustomer.NgaySinh != khachHang.NgaySinh)
+                        existingCustomer.NgaySinh = khachHang.NgaySinh;
 
+                    if (existingCustomer.SoDienThoai != khachHang.SoDienThoai)
+                        existingCustomer.SoDienThoai = khachHang.SoDienThoai;
+
+                    if (existingCustomer.DiaChi != khachHang.DiaChi)
+                        existingCustomer.DiaChi = khachHang.DiaChi;
+
+                    if (existingCustomer.GhiChu != khachHang.GhiChu)
+                        existingCustomer.GhiChu = khachHang.GhiChu;
+
+                    // Kiểm tra nếu người dùng chọn ảnh mới
+                    if (Hinh != null && Hinh.Length > 0)
+                    {
+                        // Upload ảnh mới và cập nhật đường dẫn ảnh
+                        string newAvatarPath = MyUtil.UploadHinh(Hinh, "Customer");
+                        existingCustomer.AnhDaiDien = newAvatarPath;
+
+                        // Cập nhật session Avatar nếu có ảnh mới
+                        HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + newAvatarPath));
+                    }
+
+                    // Lưu thay đổi vào database
                     await _context.SaveChangesAsync();
 
-                    // Cập nhật lại session sau khi lưu
-                    HttpContext.Session.SetString("HoTen", khachHang.TenKhachHang);
-                    HttpContext.Session.SetString("NgaySinh", khachHang.NgaySinh.ToString());
-                    HttpContext.Session.SetString("SoDienThoai", khachHang.SoDienThoai);
-                    HttpContext.Session.SetString("DiaChi", khachHang.DiaChi);
-                    if (!string.IsNullOrEmpty(khachHang.GhiChu))
-                    {
-                        HttpContext.Session.SetString("GhiChu", khachHang.GhiChu);
-                    }
-                    else
-                    {
-                        HttpContext.Session.SetString("GhiChu", ""); // hoặc đặt giá trị mặc định nếu cần
-                    }
-                    //HttpContext.Session.SetString("AnhDaiDien", Url.Content("~/Images/Customer/" + khachHang.AnhDaiDien));
+                    // Cập nhật lại các thông tin khác trong session
+                    HttpContext.Session.SetString("HoTen", existingCustomer.TenKhachHang);
+                    HttpContext.Session.SetString("NgaySinh", existingCustomer.NgaySinh.ToString());
+                    HttpContext.Session.SetString("SoDienThoai", existingCustomer.SoDienThoai);
+                    HttpContext.Session.SetString("DiaChi", existingCustomer.DiaChi);
+                    HttpContext.Session.SetString("GhiChu", existingCustomer.GhiChu ?? "");
+
+                    return RedirectToAction("Profile");
                 }
-                return RedirectToAction("Profile");
             }
+
+            // Trả về view nếu model không hợp lệ
             return View(khachHang);
         }
     }

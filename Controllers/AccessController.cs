@@ -59,7 +59,6 @@ namespace BTLW_BDT.Controllers
                     HttpContext.Session.SetString("MaKhachHang", userInfo.MaKhachHang);
                     HttpContext.Session.SetString("HoTen", userInfo.TenKhachHang);
                     HttpContext.Session.SetString("NgaySinh", $"{userInfo.NgaySinh}");
-
                     HttpContext.Session.SetString("SoDienThoai", userInfo.SoDienThoai);
                     HttpContext.Session.SetString("DiaChi", userInfo.DiaChi);
                     if (!string.IsNullOrEmpty(userInfo.GhiChu))
@@ -84,6 +83,13 @@ namespace BTLW_BDT.Controllers
         {
             HttpContext.Session.Clear();
             HttpContext.Session.Remove("Username");
+            HttpContext.Session.Remove("MaKhachHang");
+            HttpContext.Session.Remove("HoTen");
+            HttpContext.Session.Remove("NgaySinh");
+            HttpContext.Session.Remove("SoDienThoai");
+            HttpContext.Session.Remove("DiaChi");
+            HttpContext.Session.Remove("GhiChu");
+            HttpContext.Session.Remove("Avatar");
             return RedirectToAction("Login", "Access");
         }
 
@@ -127,12 +133,31 @@ namespace BTLW_BDT.Controllers
                     db.KhachHangs.Add(khachHang);
                     db.TaiKhoans.Add(taiKhoan);
                     db.SaveChanges();
+
+
+                    HttpContext.Session.SetString("HoTen", khachHang.TenKhachHang);
+                    HttpContext.Session.SetString("NgaySinh", khachHang.NgaySinh.ToString());
+                    HttpContext.Session.SetString("SoDienThoai", khachHang.SoDienThoai);
+                    HttpContext.Session.SetString("DiaChi", khachHang.DiaChi);
+                    if (!string.IsNullOrEmpty(khachHang.GhiChu))
+                    {
+                        HttpContext.Session.SetString("GhiChu", khachHang.GhiChu);
+                    }
+                    else
+                    {
+                        HttpContext.Session.SetString("GhiChu", ""); // hoặc đặt giá trị mặc định nếu cần
+                    }
+
+                    HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + khachHang.AnhDaiDien));
+
                     return RedirectToAction("Index", "Home");
                 }
                 catch (Exception ex)
                 {
                     ModelState.AddModelError("", $"Error: {ex.Message}");
                 }
+
+
             }
             return View(model);
         }

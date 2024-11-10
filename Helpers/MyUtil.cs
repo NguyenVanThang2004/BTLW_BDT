@@ -8,18 +8,34 @@ namespace BTLW_BDT.Helpers
         {
             try
             {
-                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", folder, Hinh.FileName);
-                using (var myfile = new FileStream(fullPath, FileMode.CreateNew))
+                // Tạo tên file duy nhất bằng cách sử dụng Guid kết hợp với tên file gốc
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + Hinh.FileName;
+
+                // Đường dẫn lưu file
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", folder, uniqueFileName);
+
+                // Tạo thư mục nếu chưa tồn tại
+                var directory = Path.GetDirectoryName(fullPath);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                // Lưu file vào thư mục
+                using (var myfile = new FileStream(fullPath, FileMode.Create))
                 {
                     Hinh.CopyTo(myfile);
                 }
-                return Hinh.FileName;
+
+                return uniqueFileName; // Trả về tên file duy nhất
             }
             catch (Exception ex)
             {
+                // Xử lý lỗi nếu cần, ghi log hoặc thông báo lỗi
                 return string.Empty;
             }
         }
+
         public static string GenerateRamdomKey(int length = 5)
         {
             var pattern = @"qazwsxedcrfvtgbyhnujmiklopQAZWSXEDCRFVTGBYHNUJMIKLOP!";
