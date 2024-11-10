@@ -34,6 +34,7 @@ namespace BTLW_BDT.Controllers
                 NgaySinh = DateOnly.Parse(HttpContext.Session.GetString("NgaySinh") ?? DateOnly.MinValue.ToString()),
                 SoDienThoai = HttpContext.Session.GetString("SoDienThoai"),
                 DiaChi = HttpContext.Session.GetString("DiaChi"),
+                Email = HttpContext.Session.GetString("Email"),
                 GhiChu = HttpContext.Session.GetString("GhiChu"),
                 AnhDaiDien = HttpContext.Session.GetString("Avatar")
             };
@@ -62,6 +63,9 @@ namespace BTLW_BDT.Controllers
                     if (existingCustomer.DiaChi != khachHang.DiaChi)
                         existingCustomer.DiaChi = khachHang.DiaChi;
 
+                    if (existingCustomer.Email != khachHang.Email)
+                        existingCustomer.Email = khachHang.Email;
+
                     if (existingCustomer.GhiChu != khachHang.GhiChu)
                         existingCustomer.GhiChu = khachHang.GhiChu;
 
@@ -84,6 +88,7 @@ namespace BTLW_BDT.Controllers
                     HttpContext.Session.SetString("NgaySinh", existingCustomer.NgaySinh.ToString());
                     HttpContext.Session.SetString("SoDienThoai", existingCustomer.SoDienThoai);
                     HttpContext.Session.SetString("DiaChi", existingCustomer.DiaChi);
+                    HttpContext.Session.SetString("Email", existingCustomer.Email);
                     HttpContext.Session.SetString("GhiChu", existingCustomer.GhiChu ?? "");
 
                     return RedirectToAction("Profile");

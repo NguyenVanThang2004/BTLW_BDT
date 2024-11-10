@@ -39,7 +39,10 @@
                         <input type="text" class="form-control" id="address" value="@Context.Session.GetString("DiaChi")" readonly>
                     </div>
                 </div>
-
+                <div class="mb-3">
+                    <label for="address" class="form-label">Email</label>
+                    <input type="text" class="form-control" id="address" value="@Context.Session.GetString("Email")" readonly>
+                </div>
                 <div class="mb-3">
                     <label for="notes" class="form-label">Ghi Chú</label>
                     <textarea class="form-control" id="notes" rows="3" placeholder="@Context.Session.GetString("GhiChu")" readonly></textarea>

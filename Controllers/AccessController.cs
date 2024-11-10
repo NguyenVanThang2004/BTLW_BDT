@@ -3,6 +3,9 @@ using BTLW_BDT.Models;
 using BTLW_BDT.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
+using System.Net.Mail;
+using System.Net;
 
 namespace BTLW_BDT.Controllers
 {
@@ -50,6 +53,7 @@ namespace BTLW_BDT.Controllers
                                     kh.NgaySinh,
                                     kh.SoDienThoai,
                                     kh.DiaChi, 
+                                    kh.Email,
                                     kh.GhiChu
                                 }).FirstOrDefault();
 
@@ -61,6 +65,7 @@ namespace BTLW_BDT.Controllers
                     HttpContext.Session.SetString("NgaySinh", $"{userInfo.NgaySinh}");
                     HttpContext.Session.SetString("SoDienThoai", userInfo.SoDienThoai);
                     HttpContext.Session.SetString("DiaChi", userInfo.DiaChi);
+                    HttpContext.Session.SetString("Email", userInfo.Email);
                     if (!string.IsNullOrEmpty(userInfo.GhiChu))
                     {
                         HttpContext.Session.SetString("GhiChu", userInfo.GhiChu);
@@ -88,6 +93,7 @@ namespace BTLW_BDT.Controllers
             HttpContext.Session.Remove("NgaySinh");
             HttpContext.Session.Remove("SoDienThoai");
             HttpContext.Session.Remove("DiaChi");
+            HttpContext.Session.Remove("Email");
             HttpContext.Session.Remove("GhiChu");
             HttpContext.Session.Remove("Avatar");
             return RedirectToAction("Login", "Access");
@@ -112,6 +118,7 @@ namespace BTLW_BDT.Controllers
                         NgaySinh = model.NgaySinh,
                         SoDienThoai = model.DienThoai,
                         DiaChi = model.DiaChi,
+                        Email = model.Email,
                         TenDangNhap = model.TaiKhoan 
                     };
 
@@ -130,6 +137,10 @@ namespace BTLW_BDT.Controllers
                     {
                         khachHang.AnhDaiDien = MyUtil.UploadHinh(Hinh, "Customer");
                     }
+                    //else
+                    //{
+                    //    khachHang.AnhDaiDien = "default-avatar.jpg"; // Set default avatar if no image uploaded
+                    //}
                     db.KhachHangs.Add(khachHang);
                     db.TaiKhoans.Add(taiKhoan);
                     db.SaveChanges();
@@ -139,13 +150,14 @@ namespace BTLW_BDT.Controllers
                     HttpContext.Session.SetString("NgaySinh", khachHang.NgaySinh.ToString());
                     HttpContext.Session.SetString("SoDienThoai", khachHang.SoDienThoai);
                     HttpContext.Session.SetString("DiaChi", khachHang.DiaChi);
+                    HttpContext.Session.SetString("Email", khachHang.Email);
                     if (!string.IsNullOrEmpty(khachHang.GhiChu))
                     {
                         HttpContext.Session.SetString("GhiChu", khachHang.GhiChu);
                     }
                     else
                     {
-                        HttpContext.Session.SetString("GhiChu", ""); // hoặc đặt giá trị mặc định nếu cần
+                        HttpContext.Session.SetString("GhiChu", "");
                     }
 
                     HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + khachHang.AnhDaiDien));
@@ -162,10 +174,76 @@ namespace BTLW_BDT.Controllers
             return View(model);
         }
 
+        [HttpGet]
         public IActionResult ForgotPassword()
         {
             return View();
         }
 
+        //[HttpPost]
+        //public IActionResult ForgotPassword(ForgotPasswordVM model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        // Kiểm tra email có tồn tại trong hệ thống không
+        //        var khachHang = db.KhachHangs.FirstOrDefault(kh => kh.Email == model.Email);
+        //        if (khachHang == null)
+        //        {
+        //            ModelState.AddModelError("", "Email này không tồn tại trong hệ thống.");
+        //            return View(model);
+        //        }
+
+        //        // Tạo mã xác thực ngẫu nhiên
+        //        var code = new Random().Next(100000, 999999).ToString();
+
+        //        // Lưu mã xác thực vào hệ thống, có thể lưu vào bảng mã xác thực
+        //        //khachHang.ResetCode = code;  // cần có cột `ResetCode` trong bảng KhachHang
+        //        //db.SaveChanges();
+
+        //        // Gửi mã xác thực qua email
+        //        try
+        //        {
+        //            //SendResetCodeEmail(model.Email, code);
+        //            TempData["Message"] = "Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra email.";
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            ModelState.AddModelError("", "Không thể gửi mã xác thực. Vui lòng thử lại.");
+        //            return View(model);
+        //        }
+
+        //        return RedirectToAction("VerifyResetCode"); // Điều hướng đến trang nhập mã xác thực
+        //    }
+        //    return View(model);
+        //}
+
+        //private void SendResetCodeEmail(string email, string code)
+        //{
+        //    var fromAddress = new MailAddress("your-email@example.com", "Your App Name");
+        //    var toAddress = new MailAddress(email);
+        //    const string fromPassword = "your-email-password"; // Mật khẩu email của bạn
+        //    const string subject = "Reset mật khẩu - Mã xác thực";
+        //    string body = $"Mã xác thực của bạn là: {code}";
+
+        //    var smtp = new SmtpClient
+        //    {
+        //        Host = "smtp.gmail.com",
+        //        Port = 587,
+        //        EnableSsl = true,
+        //        DeliveryMethod = SmtpDeliveryMethod.Network,
+        //        UseDefaultCredentials = false,
+        //        Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+        //    };
+        //    using (var message = new MailMessage(fromAddress, toAddress)
+        //    {
+        //        Subject = subject,
+        //        Body = body
+        //    })
+        //    {
+        //        smtp.Send(message);
+        //    }
+        //}
+
+       
     }
 }
