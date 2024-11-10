@@ -1,7 +1,7 @@
 ﻿@model BTLW_BDT.Models.KhachHang
 
 @{
-    ViewData["Title"] = "Chỉnh sửa thông tin cá nhân";
+    ViewData["Title"] = "Edit Profile";
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
 
@@ -11,7 +11,7 @@
 
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <form asp-action="EditProfile" class="needs-validation" novalidate>
+            <form asp-action="EditProfile" class="needs-validation" novalidate enctype="multipart/form-data">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <input type="hidden" asp-for="MaKhachHang" />
@@ -53,15 +53,19 @@
                 </div>
 
                 <!-- Ảnh Đại Diện -->
-                <div class="form-group mb-3">
+                @* <div class="form-group mb-3">
                     <label asp-for="AnhDaiDien" class="form-label fw-bold">Ảnh Đại Diện</label>
                     <input asp-for="AnhDaiDien" class="form-control" type="file" />
                     <span asp-validation-for="AnhDaiDien" class="text-danger"></span>
-                </div>
-               @*  <div class="form-item">
-                    <label class="form-label my-3" for="Hinh">Hình<sup>*</sup></label>
-                    <input type="file" name="Hinh" class="form-control" />
                 </div> *@
+                <!-- Ảnh Đại Diện -->
+                <div class="form-group mb-3">
+                    <label asp-for="AnhDaiDien" class="form-label fw-bold">Ảnh Đại Diện</label>
+                    <input type="file" name="Hinh" class="form-control" />
+                    <span asp-validation-for="AnhDaiDien" class="text-danger"></span>
+                </div>
+
+               
 
                 <!-- Nút Lưu -->
                 <div class="d-flex justify-content-between">
@@ -73,8 +77,4 @@
     </div>
 </div>
 
-@* @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-} *@
+
