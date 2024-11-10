@@ -20,3 +20,34 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.navbar-nav .nav-item .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    color: #333;
+    text-decoration: none;
+}
+
+    .navbar-nav .nav-item .dropdown-toggle img {
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        margin-right: 8px;
+        border: 2px solid #ccc; /* ???ng vi?n xung quanh avatar */
+        transition: border-color 0.3s ease;
+    }
+
+    .navbar-nav .nav-item .dropdown-toggle span {
+        font-weight: 500;
+        color: #333;
+        transition: color 0.3s ease;
+    }
+
+    /* Hover effect cho icon */
+    .navbar-nav .nav-item .dropdown-toggle:hover img {
+        border-color: #D81B60; /* Màu xanh d??ng khi hover */
+    }
+
+    .navbar-nav .nav-item .dropdown-toggle:hover span {
+        color: #D81B60; /* Màu ch? khi hover */
+    }

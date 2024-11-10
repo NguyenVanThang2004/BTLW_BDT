@@ -1,4 +1,5 @@
-﻿using BTLW_BDT.Models;
+﻿using BTLW_BDT.Helpers;
+using BTLW_BDT.Models;
 using BTLW_BDT.Repository;
 using BTLW_BDT.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -26,13 +27,16 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;              // Cookie là cần thiết
 });
 
-// Cấu hình Authentication nếu bạn sử dụng [Authorize]
-builder.Services.AddAuthentication("SessionScheme")
-    .AddScheme<AuthenticationSchemeOptions,SessionAuthHandler>("SessionScheme", null);
+// Đăng ký IHttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
+
+var app = builder.Build();
+
 
 builder.Services.AddAuthorization();
 
-var app = builder.Build();
+
 
 if (!app.Environment.IsDevelopment())
 {
@@ -52,6 +56,10 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
+    pattern: "{controller=access}/{action=login}/{id?}");
+
+
 
 app.Run();

@@ -24,6 +24,7 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="../assets/css/style.css" rel="stylesheet">
+    <link href="../css/site.css" rel="stylesheet">
 </head>
 
 <body>
@@ -130,8 +131,8 @@
                     </button>
                     <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                         <div class="navbar-nav mr-auto py-0">
-                            <a href="index.html" class="nav-item nav-link">Home</a>
-                            <a href="shop.html" class="nav-item nav-link">Shop</a>
+                            <a asp-controller="Home" asp-action="Index" class="nav-item nav-link active">Home</a>
+                            <a asp-controller="Home" asp-action="Shop" class="nav-item nav-link">Shop</a>
                             <a href="detail.html" class="nav-item nav-link">Shop Detail</a>
                             <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle active" data-toggle="dropdown">Pages</a>
@@ -143,8 +144,18 @@
                             <a href="contact.html" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0">
-                            <a asp-controller="Access" asp-action="Logout" class="nav-item nav-link">Logout</a>
-                            <a href="" class="nav-item nav-link">Register</a>
+                            <!-- Dropdown tài khoản -->
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown">
+                                    <!-- Icon hoặc ảnh đại diện của khách hàng -->
+                                    <img src="@Context.Session.GetString("Avatar")" alt="Avatar" class="rounded-circle" width="30" height="30" style="margin-right: 8px;">
+                                    <span>@Context.Session.GetString("HoTen")</span>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a asp-controller="User" asp-action="Profile" class="dropdown-item">Profile</a>
+                                    <a asp-controller="Access" asp-action="Logout" class="dropdown-item">Logout</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </nav>
@@ -258,3 +269,4 @@
 </body>
 
 </html>
+

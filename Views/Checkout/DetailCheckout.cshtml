@@ -2,6 +2,22 @@
     ViewData["Title"] = "Checkout";
     Layout = "~/Views/Shared/_LayoutCart.cshtml";
 }
+@{
+    // Lấy giá trị ngày sinh từ Session
+    var ngaySinh = Context.Session.GetString("NgaySinh");
+    var ngaySinhFormatted = "";
+
+    // Kiểm tra và chuyển đổi ngày sinh về định dạng yyyy-MM-dd
+    if (!string.IsNullOrEmpty(ngaySinh))
+    {
+        // Giả sử ngày sinh trong session là dạng MM/dd/yyyy hoặc yyyy/MM/dd
+        DateTime date;
+        if (DateTime.TryParse(ngaySinh, out date))
+        {
+            ngaySinhFormatted = date.ToString("yyyy-MM-dd");
+        }
+    }
+}
 
 @model List<BTLW_BDT.Models.Cart.CartItem>
 
@@ -12,30 +28,37 @@
 
 
 
-                <div class="row">
-                    <div class="col-md-6 form-group">
-                        <label>Tên Khách Hàng</label>
-                        <input class="form-control" type="text"   placeholder="NGUYEN VAN A">
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Ngày Sinh</label>
-                        <input class="form-control" type="date">
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Số Điện Thoại</label>
-                        <input class="form-control" type="text" placeholder="+123 456 789">
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Địa chỉ</label>
-                        <input class="form-control" type="text"  placeholder="So nha 8 , Ngo 79 , Cau Giay , Ha Noi">
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Ghi Chú</label>
-                        <textarea class="form-control"  placeholder="Ghi chú" rows="4" cols="50"></textarea>
-                    </div>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Tên Khách Hàng</label>
+                    <input class="form-control" type="text"
+                           value="@Context.Session.GetString("HoTen")"
+                           readonly>
                 </div>
+                <div class="col-md-6 form-group">
+                    <label>Ngày Sinh</label>
+                    <input class="form-control" type="date"
+                           value="@ngaySinhFormatted">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Số Điện Thoại</label>
+                    <input class="form-control" type="text"
+                           value="@Context.Session.GetString("SoDienThoai")"
+                           readonly>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Địa chỉ</label>
+                    <input class="form-control" type="text"
+                           value="@Context.Session.GetString("DiaChi")">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Ghi Chú</label>
+                    <textarea class="form-control" rows="4" cols="50">@Context.Session.GetString("GhiChu")</textarea>
+                </div>
+            </div>
 
-                <
+
+                
                 
             
 

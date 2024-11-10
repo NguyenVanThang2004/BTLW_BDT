@@ -7,7 +7,7 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-8 text-center">
-            <div class="alert alert-success" role="alert">
+             <div class="alert alert-success" role="alert">
                 <h2 class="font-weight-semi-bold">Đặt Hàng Thành Công!</h2>
                 <p>Cảm ơn bạn đã mua sắm với chúng tôi. Đơn hàng của bạn đã được đặt thành công và sẽ được thanh toán tại cửa hàng.</p>
             </div>
@@ -16,10 +16,10 @@
             <div class="order-info mt-5 p-4 rounded shadow-sm">
                 <h4 class="font-weight-bold">Thông Tin Đơn Hàng</h4>
                 <hr>
-                <p><strong>Tên Khách Hàng:</strong> NGUYEN VAN A</p>
-                <p><strong>Ngày Sinh:</strong> 23-05-2024</p>
-                <p><strong>Số Điện Thoại:</strong> 12345678</p>
-                <p><strong>Địa Chỉ:</strong> Số 3, Ngõ 79, Cầu Giấy, Hà Nội</p>
+                <p><strong>Tên Khách Hàng:</strong> @Context.Session.GetString("HoTen")</p>
+                <p><strong>Ngày Sinh:</strong>@Context.Session.GetString("NgaySinh")</p>
+                <p><strong>Số Điện Thoại:</strong> @Context.Session.GetString("SoDienThoai")</p>
+                <p><strong>Địa Chỉ:</strong> @Context.Session.GetString("DiaChi")</p>
                 <p><strong>Ghi Chú:</strong> Mua Kẹo</p>
                 <p><strong>Phương Thức Thanh Toán:</strong> @TempData["Message"]</p>
             </div>

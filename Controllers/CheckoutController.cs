@@ -78,13 +78,15 @@ namespace BTLW_BDT.Controllers
                     newMaHoaDon = "HD001";
                 }
 
+                
 
                 var order = new HoaDonBan
                 {
-                    MaHoaDon =newMaHoaDon,
+                    MaHoaDon = newMaHoaDon,
                     PhuongThucThanhToan = paymentMethod,
                     TongTien = cartItems.Sum(item => item.DonGia * item.SoLuong),
-                    ThoiGianLap = DateTime.Now
+                    ThoiGianLap = DateTime.Now,
+                    
 
                 };
 
@@ -101,6 +103,8 @@ namespace BTLW_BDT.Controllers
                     };
                     _context.ChiTietHoaDonBans.Add(orderDetail);
                 }
+
+                
 
                 _context.SaveChanges();
                 // Gọi UpdateInventory để cập nhật số lượng tồn kho

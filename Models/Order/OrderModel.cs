@@ -13,7 +13,6 @@
         public string? DiaChi { get; set; }
 
         public string? LoaiKhachHang { get; set; }
-
         public string? GhiChu { get; set; }
     }
 }
