@@ -1,0 +1,36 @@
+@using BTLW_BDT.ViewModels
+@model List<ReviewViewModel>
+
+<div class="reviews-container">
+    <h4 class="mb-4">Đánh giá sản phẩm</h4>
+    @if (Model != null && Model.Any())
+    {
+        foreach (var review in Model)
+        {
+            <div class="review-item mb-3">
+                <div class="d-flex">
+                    <h6>@review.TenDangNhap</h6>
+                    <div class="text-primary ml-2">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= review.Rate)
+                            {
+                                <small class="fas fa-star"></small>
+                            }
+                            else
+                            {
+                                <small class="far fa-star"></small>
+                            }
+                        }
+                    </div>
+                </div>
+                <p>@review.NoiDung</p>
+                <small class="text-muted">@review.ThoiGianDanhGia.ToString("dd/MM/yyyy HH:mm")</small>
+            </div>
+        }
+    }
+    else
+    {
+        <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+    }
+</div> 

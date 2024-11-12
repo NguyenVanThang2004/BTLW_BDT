@@ -1,0 +1,36 @@
+@* @model BTLW_BDT.ViewModels.ReviewViewModel
+
+<div class="review-form">
+    @using (Html.BeginForm("SaveReview", "Review", FormMethod.Post, new { @class = "review-form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.MaSanPham)
+        
+        <div class="form-group">
+            <label>Đánh giá sao:</label>
+            <div class="star-rating mb-3">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <i class="fa fa-star @(Model.Rate >= i ? "checked" : "")" data-rate="@i"></i>
+                }
+            </div>
+            @Html.HiddenFor(m => m.Rate, new { @id = "selectedRate" })
+        </div>
+
+        <div class="form-group">
+            <label>Nội dung đánh giá:</label>
+            @Html.TextAreaFor(m => m.NoiDung, new { @class = "form-control", rows = "5" })
+            @Html.ValidationMessageFor(m => m.NoiDung, "", new { @class = "text-danger" })
+        </div>
+
+        @if (Model.IsEdit)
+        {
+            <button type="submit" class="btn btn-primary">Cập nhật đánh giá</button>
+            <button type="button" class="btn btn-danger" onclick="confirmDelete('@Model.MaSanPham')">Xóa đánh giá</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+        }
+    }
+</div>  *@

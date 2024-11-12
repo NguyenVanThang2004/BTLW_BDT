@@ -1,6 +1,7 @@
 ﻿using BTLW_BDT.Helpers;
 using BTLW_BDT.Models;
 using BTLW_BDT.Repository;
+using BTLW_BDT.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,7 @@ var connectionString = builder.Configuration.GetConnectionString("BtlLtwQlbdtCon
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<ILoaiSpRepository, LoaiSpRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddSession();
 
 // Cấu hình Session
@@ -26,8 +28,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;                 // Cookie chỉ có thể truy cập qua HTTP (bảo mật)
     options.Cookie.IsEssential = true;              // Cookie là cần thiết
 });
-
-
 
 var app = builder.Build();
 
@@ -43,13 +43,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-
-// Kích hoạt middleware session
-app.UseSession(); // Thêm dòng này để kích hoạt session
-
-app.UseAuthorization();
 app.UseSession();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

@@ -61,6 +61,8 @@ public partial class SanPham
 
     public virtual ICollection<ChiTietHoaDonBan> ChiTietHoaDonBans { get; set; } = new List<ChiTietHoaDonBan>();
 
+    public virtual ICollection<DanhGium> DanhGia { get; set; } = new List<DanhGium>();
+
     public virtual Hang? MaHangNavigation { get; set; }
 
     public virtual ICollection<MauSac> MauSacs { get; set; } = new List<MauSac>();

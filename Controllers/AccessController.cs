@@ -16,8 +16,6 @@ namespace BTLW_BDT.Controllers
             db = context;
 
         }
-
-
         [HttpGet]
         public IActionResult Login()
         {
@@ -54,8 +52,9 @@ namespace BTLW_BDT.Controllers
                                 }).FirstOrDefault();
 
                 if (userInfo != null)
-                {
+                { 
                     HttpContext.Session.SetString("Username", userInfo.TenDangNhap);
+                    Console.WriteLine($"Debug - Login successful. Username set to: {userInfo.TenDangNhap}");
                     HttpContext.Session.SetString("MaKhachHang", userInfo.MaKhachHang);
                     HttpContext.Session.SetString("HoTen", userInfo.TenKhachHang);
                     HttpContext.Session.SetString("NgaySinh", $"{userInfo.NgaySinh}");
@@ -72,8 +71,6 @@ namespace BTLW_BDT.Controllers
                     HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + userInfo.AnhDaiDien)); // Lưu đường dẫn ảnh vào Session
                     return RedirectToAction("Index", "Home");
                 }
-
-                
             }
 
             return View();

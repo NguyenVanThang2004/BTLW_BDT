@@ -13,9 +13,9 @@ public partial class DanhGium
 
     public DateTime ThoiGianDanhGia { get; set; }
 
-    public string MaHoaDon { get; set; } = null!;
+    public string MaSanPham { get; set; } = null!;
 
-    public virtual HoaDonBan MaHoaDonNavigation { get; set; } = null!;
+    public virtual SanPham MaSanPhamNavigation { get; set; } = null!;
 
     public virtual TaiKhoan TenDangNhapNavigation { get; set; } = null!;
 }
