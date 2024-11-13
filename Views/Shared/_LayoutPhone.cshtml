@@ -154,7 +154,7 @@
                                     <img src="@Context.Session.GetString("Avatar")" alt="Avatar" class="rounded-circle" width="30" height="30" style="margin-right: 8px;">
                                     <span>@Context.Session.GetString("HoTen")</span>
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-right">
+                                <div class="dropdown-menu dropdown-menu-right" style="top: 90%">
                                     <a asp-controller="User" asp-action="Profile" class="dropdown-item">Profile</a>
                                     <a asp-controller="User" asp-action="ChangePassword" class="dropdown-item">Change Password</a>
                                     <a asp-controller="Access" asp-action="Logout" class="dropdown-item">Logout</a>
