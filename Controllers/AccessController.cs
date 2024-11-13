@@ -77,8 +77,12 @@ namespace BTLW_BDT.Controllers
                     HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + userInfo.AnhDaiDien)); // Lưu đường dẫn ảnh vào Session
                     return RedirectToAction("Index", "Home");
                 }
+                else
+                {
+                    ViewBag.ErrorMessage = "Tên đăng nhập hoặc mật khẩu không đúng.";
+                }
 
-                
+
             }
 
             return View();

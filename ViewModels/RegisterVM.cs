@@ -15,6 +15,12 @@ namespace BTLW_BDT.ViewModels
         [DataType(DataType.Password)]
         public string MatKhau { get; set; }
 
+        [Display(Name = "Xác nhận mật khẩu")]
+        [Required(ErrorMessage = "*")]
+        [DataType(DataType.Password)]
+        [Compare("MatKhau", ErrorMessage = "Mật khẩu xác nhận không khớp")]
+        public string XacNhanMatKhau { get; set; }
+
         [Display(Name = "Họ tên")]
         [Required(ErrorMessage = "*")]
         [MaxLength(50, ErrorMessage = "Tối đa 50 kí tự")]

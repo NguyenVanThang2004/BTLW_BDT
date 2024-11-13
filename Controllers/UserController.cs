@@ -1,5 +1,6 @@
 ﻿using BTLW_BDT.Helpers;
 using BTLW_BDT.Models;
+using BTLW_BDT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -91,12 +92,62 @@ namespace BTLW_BDT.Controllers
                     HttpContext.Session.SetString("Email", existingCustomer.Email);
                     HttpContext.Session.SetString("GhiChu", existingCustomer.GhiChu ?? "");
 
+                    TempData["SuccessMessage"] = "Chỉnh sửa profile thành công!";
+
                     return RedirectToAction("Profile");
                 }
             }
 
             // Trả về view nếu model không hợp lệ
             return View(khachHang);
+        }
+
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        // Action xử lý đổi mật khẩu
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordVM model)
+        {
+            if (ModelState.IsValid)
+            {
+                string userId = HttpContext.Session.GetString("MaKhachHang");
+
+                var user = await (from tk in _context.TaiKhoans
+                                  join kh in _context.KhachHangs on tk.TenDangNhap equals kh.TenDangNhap
+                                  where kh.MaKhachHang == userId
+                                  select tk).FirstOrDefaultAsync();
+
+
+                if (user != null)
+                {
+                    // Hash mật khẩu hiện tại và so sánh
+                    string hashedCurrentPassword = model.CurrentPassword.ToSHA256Hash("MySaltKey");
+                    if (user.MatKhau == hashedCurrentPassword)
+                    {
+                        // Cập nhật mật khẩu mới sau khi hash
+                        user.MatKhau = model.NewPassword.ToSHA256Hash("MySaltKey");
+                        await _context.SaveChangesAsync();
+
+                        // Thêm thông báo thành công vào TempData
+                        TempData["SuccessMessage"] = "Đổi mật khẩu thành công!";
+
+                        return RedirectToAction("Profile");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("CurrentPassword", "Mật khẩu hiện tại không đúng.");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("CurrentPassword", "Không tìm thấy tài khoản người dùng.");
+                }
+            }
+            return View(model);
         }
     }
 
