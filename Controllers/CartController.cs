@@ -65,7 +65,9 @@ namespace BTLW_BDT.Controllers
 
         // Thêm sản phẩm vào giỏ hàng
 
+
         //[Authentication]
+
         public IActionResult AddToCart(string id)
         {
             var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
@@ -148,6 +150,14 @@ namespace BTLW_BDT.Controllers
             return RedirectToAction("DetailCart"); // Trở lại trang giỏ hàng
 
         }
+
+        // xoa session
+        public IActionResult ClearCart()
+        {
+            HttpContext.Session.Remove("GioHang");
+            return RedirectToAction("Index", "Home");
+        }
+
 
 
 

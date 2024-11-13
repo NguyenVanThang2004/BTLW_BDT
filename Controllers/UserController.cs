@@ -4,6 +4,7 @@ using BTLW_BDT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using BTLW_BDT.ViewModels;
 
 namespace BTLW_BDT.Controllers
 {
@@ -49,6 +50,26 @@ namespace BTLW_BDT.Controllers
             if (ModelState.IsValid)
             {
                 var existingCustomer = await _context.KhachHangs.FindAsync(khachHang.MaKhachHang);
+
+                //// Kiểm tra tính hợp lệ của số điện thoại
+                //RegisterVM registerVM = new RegisterVM(); // Tạo đối tượng RegisterVM
+                //bool isPhoneValid = registerVM.IsPhoneValid(); // Gọi phương thức IsPhoneValid()
+
+                //if (!isPhoneValid)
+                //{
+                //    ModelState.AddModelError("SoDienThoai", "Số điện thoại không hợp lệ.");
+                //    return View(khachHang);  // Nếu số điện thoại không hợp lệ, trả về view với thông báo lỗi
+                //}
+              
+                
+                ////Kiểm tra tính hợp lệ của email
+                //bool isEmailValid = registerVM.IsEmailValid();
+                //if (!isEmailValid)
+                //{
+                //    ModelState.AddModelError("Email", "Email không hợp lệ hoặc không thể gửi .");
+                //    return View(khachHang);  // Nếu email không hợp lệ, trả về view với thông báo lỗi
+                //}
+
                 if (existingCustomer != null)
                 {
                     // Chỉ cập nhật các trường có thay đổi

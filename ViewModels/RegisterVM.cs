@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BTLW_BDT.APIS;
+using System.ComponentModel.DataAnnotations;
 
 namespace BTLW_BDT.ViewModels
 {
@@ -39,13 +40,32 @@ namespace BTLW_BDT.ViewModels
         [RegularExpression(@"0[9875]\d{8}", ErrorMessage = "Chưa đúng định dạng di động Việt Nam")]
         public string DienThoai { get; set; }
 
-        [Display(Name = "Email")]
-        [Required(ErrorMessage = "*")]
+        [StringLength(320, ErrorMessage = "Email không được vượt quá 320 ký tự.")]
         [EmailAddress(ErrorMessage = "Định dạng email không hợp lệ")]
         public string Email { get; set; }
 
         [Display(Name = "Hình")]
         [DataType(DataType.Upload)]
         public string? Hinh { get; set; }
+
+
+        public int TinhId { get; set; }  // Thêm thuộc tính để lưu ID Tỉnh Thành
+        public int QuanId { get; set; }  // Thêm thuộc tính để lưu ID Quận Huyện
+        public int PhuongId { get; set; } // Thêm thuộc tính để lưu ID Phường Xã
+
+
+        // Phương thức kiểm tra email hợp lệ
+        public bool IsEmailValid()
+        {
+            // Kiểm tra tính hợp lệ của email qua API (phương thức ValidateEmail đã đồng bộ)
+            return EmailValidator.ValidateEmail(this.Email);
+        }
+
+        public bool IsPhoneValid()
+        {
+
+            return PhoneValidator.ValidatePhoneNumber(this.DienThoai);
+        }
+
     }
 }

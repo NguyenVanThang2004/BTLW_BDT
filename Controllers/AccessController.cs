@@ -111,11 +111,37 @@ namespace BTLW_BDT.Controllers
 
         public IActionResult Register(RegisterVM  model, IFormFile Hinh)
         {
-            if(ModelState.IsValid)
+
+           
+
+           
+
+            if (ModelState.IsValid)
             {
-                try
+                // Kiểm tra trùng tên đăng nhập trong cơ sở dữ liệu
+                var existingAccount = db.TaiKhoans.FirstOrDefault(x => x.TenDangNhap == model.TaiKhoan);
+                if (existingAccount != null)
                 {
-                    var khachHang = new KhachHang
+                    ModelState.AddModelError("TaiKhoan", "Tên đăng nhập đã tồn tại.");
+                    return View(model);  // Nếu tên đăng nhập đã tồn tại, trả về view với thông báo lỗi
+                }
+
+                // Kiểm tra tính hợp lệ của số điện thoại
+                //bool isPhoneValid = model.IsPhoneValid();
+                //if (!isPhoneValid)
+                //{
+                //    ModelState.AddModelError("DienThoai", "Số điện thoại không hợp lệ.");
+                //    return View(model);  // Nếu số điện thoại không hợp lệ, trả về view với thông báo lỗi
+                //}
+
+                //// Kiểm tra tính hợp lệ của email
+                //bool isEmailValid = model.IsEmailValid();
+                //if (!isEmailValid)
+                //{
+                //    ModelState.AddModelError("Email", "Email không hợp lệ hoặc không thể gửi .");
+                //    return View(model);  // Nếu email không hợp lệ, trả về view với thông báo lỗi
+                //}
+                var khachHang = new KhachHang
                     {
                         MaKhachHang = MyUtil.GenerateRamdomKey(),
                         TenKhachHang = model.HoTen,
@@ -168,86 +194,116 @@ namespace BTLW_BDT.Controllers
 
                     return RedirectToAction("Index", "Home");
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Error: {ex.Message}");
-                }
 
 
-            }
             return View(model);
+
+
+
         }
 
-        [HttpGet]
+
+
         public IActionResult ForgotPassword()
         {
             return View();
         }
 
-        //[HttpPost]
-        //public IActionResult ForgotPassword(ForgotPasswordVM model)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        // Kiểm tra email có tồn tại trong hệ thống không
-        //        var khachHang = db.KhachHangs.FirstOrDefault(kh => kh.Email == model.Email);
-        //        if (khachHang == null)
-        //        {
-        //            ModelState.AddModelError("", "Email này không tồn tại trong hệ thống.");
-        //            return View(model);
-        //        }
+        [HttpPost]
+        public IActionResult ForgotPassword(ForgotPasswordVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
 
-        //        // Tạo mã xác thực ngẫu nhiên
-        //        var code = new Random().Next(100000, 999999).ToString();
+            var user = db.KhachHangs.SingleOrDefault(x => x.Email == model.Email);
+            if (user != null)
+            {
+                // Tạo mã xác thực
+                var code = GenerateResetCode();
 
-        //        // Lưu mã xác thực vào hệ thống, có thể lưu vào bảng mã xác thực
-        //        //khachHang.ResetCode = code;  // cần có cột `ResetCode` trong bảng KhachHang
-        //        //db.SaveChanges();
+                // Lưu mã xác thực và thời gian hết hạn vào bảng KhachHang
+                user.ResetCode = code;
+               // user.ResetCodeExpiry = DateTime.Now.AddMinutes(30); // Mã sẽ hết hạn sau 30 phút
+                db.SaveChanges();
 
-        //        // Gửi mã xác thực qua email
-        //        try
-        //        {
-        //            //SendResetCodeEmail(model.Email, code);
-        //            TempData["Message"] = "Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra email.";
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            ModelState.AddModelError("", "Không thể gửi mã xác thực. Vui lòng thử lại.");
-        //            return View(model);
-        //        }
+                // Gửi mã qua email
+                SendResetCodeEmail(model.Email, code);
 
-        //        return RedirectToAction("VerifyResetCode"); // Điều hướng đến trang nhập mã xác thực
-        //    }
-        //    return View(model);
-        //}
+                // Thông báo thành công
+                TempData["SuccessMessage"] = "Mã đặt lại mật khẩu đã được gửi đến email của bạn.";
+            }
+            else
+            {
+                // Nếu không tìm thấy email, thông báo lỗi
+                ModelState.AddModelError(string.Empty, "Email không tồn tại.");
+            }
 
-        //private void SendResetCodeEmail(string email, string code)
-        //{
-        //    var fromAddress = new MailAddress("your-email@example.com", "Your App Name");
-        //    var toAddress = new MailAddress(email);
-        //    const string fromPassword = "your-email-password"; // Mật khẩu email của bạn
-        //    const string subject = "Reset mật khẩu - Mã xác thực";
-        //    string body = $"Mã xác thực của bạn là: {code}";
+            return View(model);
+        }
 
-        //    var smtp = new SmtpClient
-        //    {
-        //        Host = "smtp.gmail.com",
-        //        Port = 587,
-        //        EnableSsl = true,
-        //        DeliveryMethod = SmtpDeliveryMethod.Network,
-        //        UseDefaultCredentials = false,
-        //        Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
-        //    };
-        //    using (var message = new MailMessage(fromAddress, toAddress)
-        //    {
-        //        Subject = subject,
-        //        Body = body
-        //    })
-        //    {
-        //        smtp.Send(message);
-        //    }
-        //}
+        [HttpPost]
+        public IActionResult ResetPassword(string email, int code, string newPassword)
+        {
+            var user = db.KhachHangs.SingleOrDefault(x => x.Email == email && x.ResetCode == code);
+            if (user != null)
+            {
 
-       
+                var account = db.TaiKhoans.SingleOrDefault(x=>x.TenDangNhap.Equals(user.TenDangNhap));
+               
+                db.SaveChanges();
+
+                TempData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
+                return RedirectToAction("Login");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Mã xác thực không hợp lệ hoặc đã hết hạn.";
+                return View();
+            }
+        }
+
+        private void SendResetCodeEmail(string email, int code)
+        {
+            var fromAddress = new MailAddress("thangdepzai38@gmail.com", "Your App Name");
+            var toAddress = new MailAddress(email);
+            const string fromPassword = "your-email-password";
+            const string subject = "Reset mật khẩu - Mã xác thực";
+            string body = $"Mã xác thực của bạn là: {code}";
+
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            };
+            using (var message = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                Body = body
+            })
+            {
+                smtp.Send(message);
+            }
+        }
+        private int GenerateResetCode()
+        {
+            var rng = new Random();
+            var code = rng.Next(100000, 999999); // Tạo mã ngẫu nhiên 6 chữ số
+            return code;
+        }
+
+        
+
+
+
+
+
+
+
     }
 }

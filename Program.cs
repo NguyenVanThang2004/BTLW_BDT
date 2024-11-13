@@ -1,11 +1,13 @@
 ﻿using BTLW_BDT.Helpers;
 using BTLW_BDT.Models;
 using BTLW_BDT.Repository;
+using BTLW_BDT.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+// Đăng ký các dịch vụ cần thiết
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 
@@ -13,11 +15,12 @@ builder.Services.AddSession();
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-var connectionString = builder.Configuration.GetConnectionString("BtlLtwQlbdtContext");
-builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(connectionString));
-
+// Đăng ký Repository và Service trong DI container
 builder.Services.AddScoped<ILoaiSpRepository, LoaiSpRepository>();
-builder.Services.AddSession();
+builder.Services.AddScoped<IVnPayService, VnPayService>();
+
+// Đăng ký IHttpClientFactory
+builder.Services.AddHttpClient();  // Thêm dòng này để đăng ký IHttpClientFactory
 
 // Cấu hình Session
 builder.Services.AddSession(options =>
@@ -27,15 +30,19 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;              // Cookie là cần thiết
 });
 
+// Đăng ký IHttpContextAccessor
+builder.Services.AddHttpContextAccessor();
 
 
 var app = builder.Build();
 
 
+builder.Services.AddAuthorization();
+
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -44,19 +51,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
-// Kích hoạt middleware session
-app.UseSession(); // Thêm dòng này để kích hoạt session
-
-app.UseAuthorization();
+// Kích hoạt middleware cho session, authentication và authorization
 app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-
     pattern: "{controller=access}/{action=login}/{id?}");
-
-//pattern: "{controller=home}/{action=index}/{id?}");
-
 
 app.Run();
