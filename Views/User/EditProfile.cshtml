@@ -38,15 +38,18 @@
                 </div>
 
 
-               
-
-
-
                 <!-- Địa Chỉ -->
                 <div class="form-group mb-3">
                     <label asp-for="DiaChi" class="form-label fw-bold">Địa chỉ</label>
                     <input asp-for="DiaChi" class="form-control" />
                     <span asp-validation-for="DiaChi" class="text-danger"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group mb-3">
+                    <label asp-for="Email" class="form-label fw-bold">Email</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
 
@@ -56,6 +59,8 @@
                     <textarea asp-for="GhiChu" class="form-control" rows="3"></textarea>
                     <span asp-validation-for="GhiChu" class="text-danger"></span>
                 </div>
+
+
 
                 <!-- Ảnh Đại Diện -->
                 @* <div class="form-group mb-3">

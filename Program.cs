@@ -19,6 +19,9 @@ builder.Services.AddDbContext<BtlLtwQlbdtContext>(options =>
 builder.Services.AddScoped<ILoaiSpRepository, LoaiSpRepository>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 
+// Đăng ký IHttpClientFactory
+builder.Services.AddHttpClient();  // Thêm dòng này để đăng ký IHttpClientFactory
+
 // Cấu hình Session
 builder.Services.AddSession(options =>
 {
@@ -35,7 +38,6 @@ var app = builder.Build();
 
 
 builder.Services.AddAuthorization();
-
 
 
 if (!app.Environment.IsDevelopment())
@@ -56,10 +58,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-
-
     pattern: "{controller=access}/{action=login}/{id?}");
-
-
 
 app.Run();

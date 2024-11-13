@@ -13,7 +13,7 @@ public partial class HoaDonBan
 
     public decimal? KhuyenMai { get; set; }
 
-    public DateTime ThoiGianLap { get; set; }
+    public DateTime? ThoiGianLap { get; set; }
 
     public string? MaNhanVien { get; set; }
 

@@ -23,6 +23,10 @@ public partial class KhachHang
 
     public string? TenDangNhap { get; set; }
 
+    public string? Email { get; set; }
+
+    public int? ResetCode { get; set; }
+
     public virtual ICollection<HoaDonBan> HoaDonBans { get; set; } = new List<HoaDonBan>();
 
     public virtual TaiKhoan? TenDangNhapNavigation { get; set; }
