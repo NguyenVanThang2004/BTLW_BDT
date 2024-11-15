@@ -1,0 +1,647 @@
+﻿@using BTLW_BDT.Models;
+@using X.PagedList.Mvc.Core;
+@model X.PagedList.IPagedList<SanPham>
+
+@{
+    ViewData["Title"] = "DanhMucSanPham";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h1>Danh Muc San Pham</h1>
+<form method="get" asp-action="QuanLyHoaDon">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Tìm kiếm tất cả thông tin..." name="searchQuery" value="@ViewData["searchQuery"]" />
+        <button class="btn btn-outline-secondary" type="submit">Tìm kiếm</button>
+    </div>
+</form>
+
+<p>@TempData["Messege"]</p>
+<a onclick="showHideDiveInsertData('displayForm'); return false;" class="btn btn-primary">Thêm sản phẩm bằng API</a>
+
+<div id="displayForm" style="display: none;">
+    <form id="formAddProduct" method="post">
+        <div class="form-group">
+            <label class="control-label">Mã sản phẩm</label>
+            <input type="text" class="form-control" id="MaSanPham" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Tên sản phẩm</label>
+            <input type="text" class="form-control" id="TenSanPham" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Ảnh đại diện</label>
+            <input type="text" class="form-control" id="AnhDaiDien" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Thời gian bảo hành</label>
+            <input type="text" class="form-control" id="ThoiGianBaoHanh" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Số lượng tồn kho</label>
+            <input type="text" class="form-control" id="SoLuongTonKho" />
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Đơn giá bán gốc</label>
+            <input id="DonGiaBanGoc" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Đơn giá bán ra</label>
+            <input id="DonGiaBanRa" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Khuyến mại</label>
+            <input id="KhuyenMai" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Danh bạ</label>
+            <input id="DanhBa" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Đèn flash</label>
+            <input id="DenFlash" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Công nghệ màn hình</label>
+            <input id="CongNgheManHinh" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Độ sáng tối đa</label>
+            <input id="DoSangToiDa" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Loại pin</label>
+            <input id="LoaiPin" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Bảo mật nâng cao</label>
+            <input id="BaoMatNangCao" type="text" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Ghi âm mặc định</label>
+            <input id="GhiAmMacDinh" type="text" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Jack tai nghe</label>
+            <input id="JackTaiNghe" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Mạng di động</label>
+            <input id="MangDiDong" type="text" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Sim</label>
+            <input id="Sim" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Mã hãng</label>
+            <select id="MaHang" class="form-control">
+                <option value="">-- Chọn hãng sản xuất --</option>
+                @foreach (var item in ViewBag.MaHang as SelectList)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="control-label">Màn hình</label>
+            <input id="ManHinh" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Pin</label>
+            <input id="Pin" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Camera</label>
+            <input id="Camera" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Kích thước</label>
+            <input id="KichThuoc" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Chip</label>
+            <input id="Chip" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Ram</label>
+            <input id="RAM" type="text" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <input onclick="addANewProduct('https://localhost:7040/api/product/'); return false;" value="Create" class="btn btn-primary" />
+        </div>
+    </form>
+</div>
+<div id="editForm" style="display: none;">
+    <h2>Sửa sản phẩm</h2>
+    <form id="formEditProduct" method="post">
+        <div class="form-group">
+            <label class="control-label">Mã sản phẩm</label>
+            <input type="text" class="form-control" id="editMaSanPham" disabled />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Tên sản phẩm</label>
+            <input type="text" class="form-control" id="editTenSanPham" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Ảnh đại diện</label>
+            <input type="text" class="form-control" id="editAnhDaiDien" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Thời gian bảo hành</label>
+            <input type="text" class="form-control" id="editThoiGianBaoHanh" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Số lượng tồn kho</label>
+            <input type="text" class="form-control" id="editSoLuongTonKho" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Đơn giá bán gốc</label>
+            <input type="text" class="form-control" id="editDonGiaBanGoc" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Đơn giá bán ra</label>
+            <input type="text" class="form-control" id="editDonGiaBanRa" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Khuyến mại</label>
+            <input type="text" class="form-control" id="editKhuyenMai" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Danh bạ</label>
+            <input type="text" class="form-control" id="editDanhBa" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Đèn flash</label>
+            <input type="text" class="form-control" id="editDenFlash" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Công nghệ màn hình</label>
+            <input type="text" class="form-control" id="editCongNgheManHinh" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Độ sáng tối đa</label>
+            <input type="text" class="form-control" id="editDoSangToiDa" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Loại pin</label>
+            <input type="text" class="form-control" id="editLoaiPin" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Bảo mật nâng cao</label>
+            <input type="text" class="form-control" id="editBaoMatNangCao" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Ghi âm mặc định</label>
+            <input type="text" class="form-control" id="editGhiAmMacDinh" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Jack tai nghe</label>
+            <input type="text" class="form-control" id="editJackTaiNghe" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Mạng di động</label>
+            <input type="text" class="form-control" id="editMangDiDong" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Sim</label>
+            <input type="text" class="form-control" id="editSim" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Mã hãng</label>
+            <select id="editMaHang" class="form-control">
+                <option value="">-- Chọn hãng sản xuất --</option>
+                @foreach (var item in ViewBag.MaHang as SelectList)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="control-label">Màn hình</label>
+            <input type="text" class="form-control" id="editManHinh" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Pin</label>
+            <input type="text" class="form-control" id="editPin" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Camera</label>
+            <input type="text" class="form-control" id="editCamera" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Kích thước</label>
+            <input type="text" class="form-control" id="editKichThuoc" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Chip</label>
+            <input type="text" class="form-control" id="editChip" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">RAM</label>
+            <input type="text" class="form-control" id="editRAM" />
+        </div>
+        <div class="form-group">
+            <button type="button" onclick="submitEditProduct()" class="btn btn-danger delete-btn">Lưu</button>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    function addANewProduct(apiUrl) {
+        // Thu thập dữ liệu từ form
+        console.log('AAAA:', apiUrl);
+        var duLieuSanPham = {
+            MaSanPham: $('#MaSanPham').val(),
+            TenSanPham: $('#TenSanPham').val(),
+            AnhDaiDien: $('#AnhDaiDien').val(),
+            ThoiGianBaoHanh: parseInt($('#ThoiGianBaoHanh').val()),
+            SoLuongTonKho: parseInt($('#SoLuongTonKho').val()),
+            DonGiaBanGoc: parseFloat($('#DonGiaBanGoc').val()),
+            DonGiaBanRa: parseFloat($('#DonGiaBanRa').val()),
+            KhuyenMai: parseFloat($('#KhuyenMai').val()),
+            DanhBa: $('#DanhBa').val(),
+            DenFlash: $('#DenFlash').val(),
+            CongNgheManHinh: $('#CongNgheManHinh').val(),
+            DoSangToiDa: parseInt($('#DoSangToiDa').val()),
+            LoaiPin: $('#LoaiPin').val(),
+            BaoMatNangCao: $('#BaoMatNangCao').val(),
+            GhiAmMacDinh: $('#GhiAmMacDinh').val(),
+            JackTaiNghe: $('#JackTaiNghe').val(),
+            MangDiDong: $('#MangDiDong').val(),
+            Sim: $('#Sim').val(),
+            MaHang: $('#MaHang').val(),
+            ManHinh: $('#ManHinh').val(),
+            Pin: $('#Pin').val(),
+            Camera: $('#Camera').val(),
+            KichThuoc: $('#KichThuoc').val(),
+            Chip: $('#Chip').val(),
+            RAM: $('#RAM').val()
+
+        };
+        console.log('jQuery version:', $.fn.jquery); // Kiểm tra version jQuery
+        console.log('Data being sent:', duLieuSanPham); // Kiểm tra dữ liệu gửi đi
+        // Gửi yêu cầu AJAX
+        $.ajax({
+            type: 'POST',
+            url: apiUrl,
+            data: JSON.stringify(duLieuSanPham),
+            contentType: 'application/json',
+            dataType: 'json',
+            timeout: 30000,
+            success: function (phanHoi) {
+                alert('Thêm sản phẩm thành công!');
+                window.location.href = 'https://localhost:7244/admin/DanhMucSanPham'; // Chuyển hướng sau khi thêm thành công
+            },
+            error: function (xhr, status, error) {
+                // Log chi tiết thông tin lỗi
+                console.log('XHR:', xhr);
+                console.log('Status:', status);
+                console.log('Error:', error);
+                console.log('Response Text:', xhr.responseText);
+
+                // Log dữ liệu gửi đi
+                console.log('Dữ liệu gửi đi:', duLieuSanPham);
+
+                // Hiển thị thông báo lỗi chi tiết
+                let errorMessage = 'Lỗi khi gọi API:\n';
+                errorMessage += 'Status: ' + status + '\n';
+                errorMessage += 'Error: ' + error + '\n';
+
+                if (xhr.responseText) {
+                    try {
+                        // Thử parse responseText nếu là JSON
+                        const responseObj = JSON.parse(xhr.responseText);
+                        errorMessage += 'Response: ' + JSON.stringify(responseObj, null, 2);
+                    } catch (e) {
+                        // Nếu không phải JSON thì hiện text gốc
+                        errorMessage += 'Response: ' + xhr.responseText;
+                    }
+                }
+                alert(errorMessage);
+            }
+        });
+    }
+    function showHideDiveInsertData(activeDiv) {
+        if ($(document.getElementById(activeDiv)).is(":visible")) {
+            $(document.getElementById(activeDiv)).hide('slow');
+        }
+        else {
+            $(document.getElementById(activeDiv)).show('slow');
+        }
+    }
+    
+</script>
+<script>
+    function submitEditProduct() {
+        var sanPham = {
+            maSanPham: $('#editMaSanPham').val(),
+            tenSanPham: $('#editTenSanPham').val(),
+            anhDaiDien: $('#editAnhDaiDien').val(),
+            thoiGianBaoHanh: parseInt($('#editThoiGianBaoHanh').val()),
+            soLuongTonKho: parseInt($('#editSoLuongTonKho').val()),
+            donGiaBanGoc: parseFloat($('#editDonGiaBanGoc').val()),
+            donGiaBanRa: parseFloat($('#editDonGiaBanRa').val()),
+            khuyenMai: parseFloat($('#editKhuyenMai').val()),
+            danhBa: $('#editDanhBa').val(),
+            denFlash: $('#editDenFlash').val(),
+            congNgheManHinh: $('#editCongNgheManHinh').val(),
+            doSangToiDa: parseInt($('#editDoSangToiDa').val()),
+            loaiPin: $('#editLoaiPin').val(),
+            baoMatNangCao: $('#editBaoMatNangCao').val(),
+            ghiAmMacDinh: $('#editGhiAmMacDinh').val(),
+            jackTaiNghe: $('#editJackTaiNghe').val(),
+            mangDiDong: $('#editMangDiDong').val(),
+            sim: $('#editSim').val(),
+            maHang: $('#editMaHang').val(),
+            manHinh: $('#editManHinh').val(),
+            pin: $('#editPin').val(),
+            camera: $('#editCamera').val(),
+            kichThuoc: $('#editKichThuoc').val(),
+            chip: $('#editChip').val(),
+            ram: $('#editRAM').val()
+
+        };
+        $.ajax({
+            url: 'https://localhost:7040/api/Product/SuaSanPham',  // Đảm bảo endpoint đúng với phương thức sửa sản phẩm
+            method: 'PUT',       // Hoặc 'PUT' tùy cấu hình API của bạn
+            contentType: 'application/json',
+            data: JSON.stringify(sanPham),
+            success: function () {
+                alert("Sửa sản phẩm thành công!");
+                $('edit#MaSanPham').hide();
+                location.reload(); // Tải lại danh sách sản phẩm (nếu cần)
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 400) {
+                    alert("Dữ liệu không hợp lệ: " + xhr.responseText);
+                } else if (xhr.status === 404) {
+                    alert("Sản phẩm không tồn tại.");
+                } else if (xhr.status === 500) {
+                    alert("Đã xảy ra lỗi trên server: " + xhr.responseText);
+                } else {
+                    alert("Không thể sửa sản phẩm: " + error);
+                }
+                console.error(xhr.responseText);
+            }
+        });
+    }
+</script>
+
+<script>
+    function deleteProduct(apiUrl, maSanPham) {
+        if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+            $.ajax({
+                url: apiUrl + '/' + maSanPham,
+                type: 'DELETE',
+                success: function (response) {
+                    alert('Xóa sản phẩm thành công!');
+                    location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Lỗi:', error);
+                    alert('Lỗi khi xóa sản phẩm: ' + error);
+                }
+            });
+        }
+    }
+</script>
+<script>
+    function editProduct(maSanPham) {
+        $.ajax({
+            url: `https://localhost:7040/api/Product/GetProductsById/${maSanPham}`, // Đảm bảo URL chính xác
+            type: 'GET',
+            timeout:10000,
+            success: function (data) {
+                console.log('Dữ liệu nhận được từ API:', data);
+                console.log('masp',(data.maSanPham))
+                console.log('ténp',(data.tenSanPham))
+                console.log('ténp',(data.thoiGianBaoHanh))
+                // Điền dữ liệu vào form
+                $('#editMaSanPham').val(data.maSanPham).prop('disabled', true);
+                $('#editTenSanPham').val(data.tenSanPham);
+                $('#editAnhDaiDien').val(data.anhDaiDien);
+                $('#editThoiGianBaoHanh').val(data.thoiGianBaoHanh);
+                $('#editSoLuongTonKho').val(data.soLuongTonKho);
+                $('#editDonGiaBanGoc').val(data.donGiaBanGoc);
+                $('#editDonGiaBanRa').val(data.donGiaBanRa);
+                $('#editKhuyenMai').val(data.khuyenMai);
+                $('#editDanhBa').val(data.danhBa);
+                $('#editDenFlash').val(data.denFlash);
+                $('#editCongNgheManHinh').val(data.congNgheManHinh);
+                $('#editDoSangToiDa').val(data.doSangToiDa);
+                $('#editLoaiPin').val(data.loaiPin);
+                $('#editBaoMatNangCao').val(data.baoMatNangCao);
+                $('#editGhiAmMacDinh').val(data.ghiAmMacDinh);
+                $('#editJackTaiNghe').val(data.jackTaiNghe);
+                $('#editMangDiDong').val(data.mangDiDong);
+                $('#editSim').val(data.sim);
+                $('#editMaHang').val(data.maHang);
+                $('#editManHinh').val(data.manHinh);
+                $('#editPin').val(data.pin);
+                $('#editCamera').val(data.camera);
+                $('#editKichThuoc').val(data.kichThuoc);
+                $('#editChip').val(data.chip);
+                $('#editRAM').val(data.ram);
+
+                // Hiển thị form sửa
+                $('#editForm').show();
+            },
+            error: function (xhr, status, error) {
+                console.error('Lỗi khi gọi API:', error); // Log lỗi
+                console.log('Chi tiết lỗi:', xhr); // Log chi tiết lỗi
+                alert('Lỗi khi lấy thông tin sản phẩm: ' + error);
+            }
+        });
+    }
+</script>
+
+<table class="table table-bordered">
+    <thead>
+        <tr class="table-warning">
+            <th  style="text-align:center">
+                STT
+            </th>
+            <th  style="text-align:center">
+                Mã sản phẩm
+            </th>
+            <th  style="text-align:center">
+                Tên sản phẩm
+            </th>
+            <th  style="text-align:center">
+                Ảnh đại diện
+            </th>
+            <th  style="text-align:center">
+                Thời gian BH
+            </th>
+            <th  style="text-align:center">
+                SL Tồn kho
+            </th>
+            <th  style="text-align:center">
+                Đơn giá bán gốc
+            </th>
+            <th  style="text-align:center">
+                Đơn giá bán ra
+            </th>
+            <th  style="text-align:center">
+                Khuyến mại
+            <th  style="text-align:center">
+                Mã Hãng
+            </th>
+
+            <th  style="text-align:center">
+                Màn hình
+            </th>
+            <th  style="text-align:center">
+                Pin
+            </th>
+            <th  style="text-align:center">
+                Camera
+            </th>
+            <th  style="text-align:center">
+                Kích thước
+            </th>
+            <th  style="text-align:center">
+                Chip
+            </th>
+            <th  style="text-align:center">
+                Ram
+            </th>
+
+            <th>
+
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int i = 0;
+            string @cls = "table-success";
+        }
+        @foreach (var item in Model)
+        {
+            i = i + 1;
+            cls = "table-success";
+            if (i % 2 == 0)
+            {
+                cls = "table-primary";
+            }
+            <tr class="@cls">
+                <td  style="text-align:center">
+                    @i
+                </td>
+                <td style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.MaSanPham)
+                </td >
+                <td style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.TenSanPham)
+                </td>
+               <td class="d-flex justify-content-center align-items-center" >
+                    <img class="img-fluid" style="width:35px;height:50px;" src="@Url.Content("~/PhoneImages/anh/" + item.AnhDaiDien)" alt="Product Image">
+                </td>
+
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.ThoiGianBaoHanh)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.SoLuongTonKho)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.DonGiaBanGoc)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.DonGiaBanRa)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.KhuyenMai)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.MaHang)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.ManHinh)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.Pin)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.Camera)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.KichThuoc)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.Chip)
+                </td>
+                <td  style="text-align:center">
+                    @Html.DisplayFor(modelItem => item.Ram)
+                </td>
+
+
+                <td>
+                    <a href="#" onclick="editProduct('@item.MaSanPham'); return false;" class="btn btn-danger delete-btn">Sửa</a>
+                    <a onclick="deleteProduct('https://localhost:7040/api/product','@item.MaSanPham'); return false;" value="Delete" class="btn btn-danger delete-btn" >Xóa</a>
+                </td>
+
+               <td>
+
+               </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@Html.PagedListPager(Model, page => Url.Action("DanhMucSanPham", new { page = page }),
+        new X.PagedList.Web.Common.PagedListRenderOptions()
+    {
+        LiElementClasses = new List<String> { "page-item" },
+        PageClasses = new List<String> { "page-link" }
+    })
+
+
+
+
+    <style>
+        /* Styling the Edit link */
+.edit-link {
+    color: #007bff; /* Bootstrap primary color */
+    text-decoration: none; /* Remove underline */
+    font-weight: bold; /* Make the text bold */
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease; /* Smooth hover transition */
+}
+
+.edit-link:hover {
+    background-color: #f0f8ff; /* Light blue background on hover */
+    color: #0056b3; /* Darker text color on hover */
+}
+
+/* Styling the Delete button */
+.delete-btn {
+    padding: 5px 15px;
+    border-radius: 4px;
+    border: none; /* Remove default border */
+    background-color: #dc3545; /* Red background for delete */
+    color: white; /* White text */
+    font-weight: bold; /* Make the text bold */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth hover transition */
+}
+
+.delete-btn:hover {
+    background-color: #c82333; /* Darker red background on hover */
+}
+
+.delete-btn:focus {
+    outline: none; /* Remove outline on focus */
+}
+
+.delete-btn:active {
+    background-color: #bd2130; /* Slightly darker red when clicked */
+}
+
+    </style>
