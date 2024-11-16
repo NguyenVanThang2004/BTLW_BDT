@@ -21,8 +21,6 @@ public partial class HoaDonBan
 
     public virtual ICollection<ChiTietHoaDonBan> ChiTietHoaDonBans { get; set; } = new List<ChiTietHoaDonBan>();
 
-    public virtual ICollection<DanhGium> DanhGia { get; set; } = new List<DanhGium>();
-
     public virtual KhachHang? MaKhachHangNavigation { get; set; }
 
     public virtual NhanVien? MaNhanVienNavigation { get; set; }
