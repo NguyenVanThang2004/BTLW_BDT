@@ -222,35 +222,7 @@
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tab-pane-3">
-                    <div class="row">
-                        <div class="col-md-6" id="reviewsContainer">
-                        </div>
-                        <div class="col-md-6">
-                            <h4 class="mb-4">Leave a review</h4>
-                            <small>Your email address will not be published. Required fields are marked *</small>
-                            <div class="d-flex my-3">
-                                <p class="mb-0 mr-2">Your Rating * :</p>
-                                <div class="text-primary star-rating">
-                                    <i class="far fa-star" data-rate="1"></i>
-                                    <i class="far fa-star" data-rate="2"></i>
-                                    <i class="far fa-star" data-rate="3"></i>
-                                    <i class="far fa-star" data-rate="4"></i>
-                                    <i class="far fa-star" data-rate="5"></i>
-                                </div>
-                            </div>
-                            <form asp-action="SubmitReview" method="post">
-                                <input type="hidden" name="productId" value="@Model.dmSp.MaSanPham" />
-                                <input type="hidden" id="selectedRate" name="rate" value="0" />
-                                <div class="form-group">
-                                    <label for="message">Your Review *</label>
-                                    <textarea id="message" name="content" cols="30" rows="5" class="form-control"></textarea>
-                                </div>
-                                <div class="form-group mb-0">
-                                    <input type="submit" value="Leave Your Review" class="btn btn-primary px-3">
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    @await Html.PartialAsync("_ReviewSection", Model)
                 </div>
             </div>
         </div>
@@ -259,29 +231,25 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-        // Khởi tạo carousel
+        // Giữ lại các xử lý carousel và ROM/Color cũ
         var $carousel = $('#product-carousel').carousel({
             interval: false,
             wrap: true
         });
 
-        // Xử lý khi chọn màu
         $('.color-select').change(function() {
             var url = $(this).data('url');
             $.get(url, function(data) {
                 $('#imageContainer').html(data);
-                // Reset carousel
                 $carousel.carousel(0);
             });
         });
 
-        // Xử lý nút prev
         $('.carousel-control-prev').click(function(e) {
             e.preventDefault();
             $carousel.carousel('prev');
         });
 
-        // Xử lý nút next
         $('.carousel-control-next').click(function(e) {
             e.preventDefault();
             $carousel.carousel('next');
@@ -295,14 +263,39 @@
                 }
             });
         });
+
+        // Thêm xử lý cho phần review
+        var productId = '@Model.dmSp.MaSanPham';
+        loadReviews(productId);
+        
+        // Nếu user đã đăng nhập
+        @if (!string.IsNullOrEmpty(Context.Session.GetString("Username")))
+        {
+            <text>
+            loadReviewForm(productId);
+            </text>
+        }
+
+        // Xử lý form submit review
+        $(document).on('submit', '#reviewForm', function(e) {
+            e.preventDefault();
+            var formData = {
+                maSanPham: productId,
+                rate: $('#selectedRate').val(),
+                noiDung: $('#reviewContent').val()
+            };
+
+            handleReviewSubmit(formData, $(this).data('is-update'));
+        });
     });
-    $('.star-rating .fa').on('click', function () {
-        var rate = $(this).data('rate');
-        $('#selectedRate').val(rate);
-        $('.star-rating .fa').removeClass('checked');
-        $(this).prevAll().addBack().addClass('checked');
-    });
+
+    // Thêm biến global để kiểm tra user hiện tại
+    var currentUsername = '@Context.Session.GetString("Username")';
 </script>
+
+<!-- Thêm reference đến file review.js -->
+<script src="~/js/review.js"></script>
+
 <style>
     .list-group-item {
         transition: all 0.3s ease;

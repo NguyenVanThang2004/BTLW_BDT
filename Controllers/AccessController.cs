@@ -20,7 +20,6 @@ namespace BTLW_BDT.Controllers
 
         }
 
-
         [HttpGet]
         public IActionResult Login()
         {
@@ -111,11 +110,6 @@ namespace BTLW_BDT.Controllers
 
         public IActionResult Register(RegisterVM  model, IFormFile Hinh)
         {
-
-           
-
-           
-
             if (ModelState.IsValid)
             {
                 // Kiểm tra trùng tên đăng nhập trong cơ sở dữ liệu
@@ -194,15 +188,8 @@ namespace BTLW_BDT.Controllers
 
                     return RedirectToAction("Index", "Home");
                 }
-
-
             return View(model);
-
-
-
         }
-
-
 
         public IActionResult ForgotPassword()
         {
@@ -296,14 +283,5 @@ namespace BTLW_BDT.Controllers
             var code = rng.Next(100000, 999999); // Tạo mã ngẫu nhiên 6 chữ số
             return code;
         }
-
-        
-
-
-
-
-
-
-
     }
 }
