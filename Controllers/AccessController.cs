@@ -205,6 +205,7 @@ namespace BTLW_BDT.Controllers
             return View();
         }
 
+        
         [HttpPost]
         public IActionResult ForgotPassword(ForgotPasswordVM model)
         {
@@ -219,52 +220,118 @@ namespace BTLW_BDT.Controllers
                 // Tạo mã xác thực
                 var code = GenerateResetCode();
 
-                // Lưu mã xác thực và thời gian hết hạn vào bảng KhachHang
+                // Lưu mã xác thực vào cơ sở dữ liệu
                 user.ResetCode = code;
-               // user.ResetCodeExpiry = DateTime.Now.AddMinutes(30); // Mã sẽ hết hạn sau 30 phút
+              //  user.ResetCodeExpiry = DateTime.Now.AddMinutes(30); // Hết hạn sau 30 phút
                 db.SaveChanges();
 
                 // Gửi mã qua email
                 SendResetCodeEmail(model.Email, code);
 
-                // Thông báo thành công
-                TempData["SuccessMessage"] = "Mã đặt lại mật khẩu đã được gửi đến email của bạn.";
+                // Chuyển email vào TempData để dùng ở bước kiểm tra mã
+                TempData["Email"] = model.Email;
+
+                // Chuyển sang trang kiểm tra mã
+                return RedirectToAction("CheckCode");
             }
             else
             {
-                // Nếu không tìm thấy email, thông báo lỗi
                 ModelState.AddModelError(string.Empty, "Email không tồn tại.");
             }
 
             return View(model);
         }
 
-        [HttpPost]
-        public IActionResult ResetPassword(string email, int code, string newPassword)
+
+        [HttpGet]
+        public IActionResult CheckCode()
         {
-            var user = db.KhachHangs.SingleOrDefault(x => x.Email == email && x.ResetCode == code);
+            var email = TempData["Email"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            var model = new CheckCodeVM
+            {
+                Email = email
+            };
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public IActionResult CheckCode(CheckCodeVM model)
+        {
+            var email = TempData["Email"]?.ToString();
+
+            var user = db.KhachHangs.SingleOrDefault(x => x.Email ==model.Email && x.ResetCode == model.Code);
             if (user != null)
             {
-
-                var account = db.TaiKhoans.SingleOrDefault(x=>x.TenDangNhap.Equals(user.TenDangNhap));
-               
-                db.SaveChanges();
-
-                TempData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
-                return RedirectToAction("Login");
+                TempData["Email"] = model.Email;
+                return RedirectToAction("NewPassword");
             }
             else
             {
-                TempData["ErrorMessage"] = "Mã xác thực không hợp lệ hoặc đã hết hạn.";
-                return View();
+                ModelState.AddModelError(string.Empty, "Mã xác thực không hợp lệ");
+                return View(model);
             }
         }
 
+
+        [HttpGet]
+        public IActionResult NewPassword()
+        {
+            var email = TempData["Email"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            var model = new NewPasswordVM
+            {
+                Email = email
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult NewPassword(NewPasswordVM model)
+        {
+            if (!ModelState.IsValid || model.NewPassword != model.ConfirmPassword)
+            {
+                ModelState.AddModelError(string.Empty, "Mật khẩu không khớp.");
+                return View(model);
+            }
+
+            var user = db.KhachHangs.SingleOrDefault(x => x.Email == model.Email);
+            if (user != null)
+            {
+                var account = db.TaiKhoans.SingleOrDefault(x => x.TenDangNhap == user.TenDangNhap);
+                if (account != null)
+                {
+                    account.MatKhau = model.NewPassword.ToSHA256Hash("MySaltKey");
+                    user.ResetCode = null; // Xóa mã sau khi dùng
+                    db.SaveChanges();
+
+                    TempData["SuccessMessage"] = "Đặt lại mật khẩu thành công!";
+                    return RedirectToAction("Login");
+                }
+            }
+
+            TempData["ErrorMessage"] = "Đã xảy ra lỗi. Vui lòng thử lại.";
+            return RedirectToAction("ForgotPassword");
+        }
+
+
+
+
+
         private void SendResetCodeEmail(string email, int code)
         {
-            var fromAddress = new MailAddress("thangdepzai38@gmail.com", "Your App Name");
+            var fromAddress = new MailAddress("thangdepzai38@gmail.com", "Admin");
             var toAddress = new MailAddress(email);
-            const string fromPassword = "your-email-password";
+            const string fromPassword = "iflx rhxm wyjf hlbw";
             const string subject = "Reset mật khẩu - Mã xác thực";
             string body = $"Mã xác thực của bạn là: {code}";
 

@@ -11,8 +11,15 @@
         public int SoLuong { get; set; }
 
         public decimal DonGia { get; set; }
-        public decimal TongTien => SoLuong * DonGia;
+        public decimal TongTien => CurrentPrice * SoLuong;
 
-       
+        // Thêm thông tin từ ProductDetailViewModel
+        public string? MaMau { get; set; }
+        public string? TenMau { get; set; }
+        public string? MaRom { get; set; }
+        public string? DungLuongRom { get; set; }
+        public decimal CurrentPrice { get; set; } // Giá hiện tại của cấu hình đã chọn
+
+
     }
 }
