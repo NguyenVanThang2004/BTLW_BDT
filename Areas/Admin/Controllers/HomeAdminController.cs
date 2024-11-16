@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Threading.Tasks.Dataflow;
 using X.PagedList;
+using X.PagedList.Extensions;
 
 namespace BTLW_BDT.Areas.Admin.Controllers
 {
@@ -33,6 +34,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             ViewData["searchQuery"] = searchQuery;
 
             // Initialize the product list and apply filters based on the searchQuery
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var lstSanPham = db.SanPhams.AsNoTracking()
                 .Where(x => string.IsNullOrEmpty(searchQuery)
                             || x.MaSanPham.Contains(searchQuery)
@@ -61,6 +63,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
                             || x.Chip.Contains(searchQuery)
                             || x.Ram.Contains(searchQuery))
                 .OrderBy(x => x.TenSanPham);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             PagedList<SanPham> lst = new PagedList<SanPham>(lstSanPham, pageNumber, pageSize);
 
@@ -125,7 +128,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> GetChartData()
+        public Task<IActionResult> GetChartData()
         {
             var data = (from hdb in db.HoaDonBans
                         join cthdb in db.ChiTietHoaDonBans on hdb.MaHoaDon equals cthdb.MaHoaDon
@@ -146,12 +149,12 @@ namespace BTLW_BDT.Areas.Admin.Controllers
                             profit = x.LoiNhuan
                         }).ToList();
             Console.WriteLine(JsonConvert.SerializeObject(data));
-            return Json(data);
+            return Task.FromResult<IActionResult>(Json(data));
 
         }
         [HttpPost]
         [Route("GetChartDataBySelect")]
-        public async Task<IActionResult> GetChartDataBySelect(DateTime startDate, DateTime endDate)
+        public Task<IActionResult> GetChartDataBySelect(DateTime startDate, DateTime endDate)
         {
             var data = (from hdb in db.HoaDonBans
                         join cthdb in db.ChiTietHoaDonBans on hdb.MaHoaDon equals cthdb.MaHoaDon
@@ -173,7 +176,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
                             profit = x.LoiNhuan
                         }).ToList();
             Console.WriteLine(JsonConvert.SerializeObject(data));
-            return Json(data);
+            return Task.FromResult<IActionResult>(Json(data));
 
         }
         //[Route("XoaSanPham")]
@@ -216,6 +219,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
                 searchDate = parsedDate.Date; // Lấy chỉ phần ngày, bỏ giờ phút giây
             }
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var lstSanPham = from hdb in db.HoaDonBans
                              join kh in db.KhachHangs on hdb.MaKhachHang equals kh.MaKhachHang
                              where string.IsNullOrEmpty(searchQuery)
@@ -248,6 +252,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
                                                         MaSp = cthdb.MaSanPham
                                                     }).ToList()
                              };
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             var pagedList = lstSanPham.ToPagedList(pageNumber, pageSize);
             return View(pagedList);
