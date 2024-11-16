@@ -128,6 +128,13 @@ using X.PagedList;
             }
             public IActionResult Contact()
             {
+                // Kiểm tra xem người dùng đã đăng nhập chưa
+                var username = HttpContext.Session.GetString("Username");
+                if (string.IsNullOrEmpty(username))
+                {
+                    return RedirectToAction("Login", "Access");
+                }
+                
                 return View();
             }
         }

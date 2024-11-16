@@ -142,10 +142,103 @@
     }
 </style>
 
-<!-- Đặt ở cuối file, trước thẻ đóng </body> -->
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
 
-<!-- Thêm thư viện SignalR -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+<script>
+    let connection = null;
+    let currentCustomerId = '@Context.Session.GetString("Username")';
 
-<!-- Sau đó mới đến file signalr.js của bạn -->
-<script src="~/js/signalr.js"></script>
+    async function initializeConnection() {
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        // Xử lý nhận tin nhắn
+        connection.on("ReceiveMessage", function (loaiNguoiGui, message, thoiGian) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${loaiNguoiGui === 'admin' ? 'received' : 'sent'}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">${message}</div>
+                <div class="message-time">${new Date(thoiGian).toLocaleTimeString()}</div>
+            `;
+            
+            document.getElementById("messagesList").appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: "smooth" });
+        });
+
+        // Xử lý load lịch sử tin nhắn
+        connection.on("LoadMessageHistory", function (messages) {
+            const messagesList = document.getElementById("messagesList");
+            messagesList.innerHTML = '';
+            
+            messages.forEach(msg => {
+                const messageDiv = document.createElement("div");
+                messageDiv.className = `message ${msg.loaiNguoiGui === 'admin' ? 'received' : 'sent'}`;
+                
+                messageDiv.innerHTML = `
+                    <div class="message-content">${msg.noiDung}</div>
+                    <div class="message-time">${new Date(msg.thoiGian).toLocaleTimeString()}</div>
+                `;
+                
+                messagesList.appendChild(messageDiv);
+            });
+            
+            // Cuộn xuống tin nhắn cuối cùng
+            const lastMessage = messagesList.lastElementChild;
+            if (lastMessage) {
+                lastMessage.scrollIntoView({ behavior: "smooth" });
+            }
+        });
+
+        try {
+            await connection.start();
+            console.log("SignalR Connected.");
+            
+            // Load tin nhắn sau khi kết nối thành công
+            if (currentCustomerId) {
+                await connection.invoke("LoadMessages", currentCustomerId);
+            }
+        } catch (err) {
+            console.error(err);
+            setTimeout(initializeConnection, 5000);
+        }
+    }
+
+    async function sendMessage() {
+        const messageInput = document.getElementById("messageInput");
+        const message = messageInput.value.trim();
+        
+        if (message && currentCustomerId && connection) {
+            try {
+                await connection.invoke("SendMessage", message, currentCustomerId);
+                messageInput.value = '';
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const sendButton = document.getElementById("sendButton");
+        const messageInput = document.getElementById("messageInput");
+        
+        if (sendButton) {
+            sendButton.addEventListener("click", sendMessage);
+        }
+        
+        if (messageInput) {
+            messageInput.addEventListener("keypress", function(e) {
+                if (e.key === "Enter") {
+                    sendMessage();
+                }
+            });
+        }
+
+        if (currentCustomerId) {
+            initializeConnection();
+        }
+    });
+</script>

@@ -40,7 +40,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins("https://localhost:7244")
+        builder.SetIsOriginAllowed(origin => true) // Cho phép tất cả origin trong development
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();
@@ -48,10 +48,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
-
-builder.Services.AddAuthorization();
-
 
 if (!app.Environment.IsDevelopment())
 {
@@ -62,17 +58,21 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseSession();
+
 app.UseRouting();
 
-// Kích hoạt middleware cho session, authentication và authorization
-app.UseSession();
+app.UseCors();
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors();
-app.MapControllers();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=access}/{action=login}/{id?}");
-app.MapHub<ChatHub>("/chatHub");
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=access}/{action=login}/{id?}");
+    endpoints.MapHub<ChatHub>("/chatHub");
+});
 
 app.Run();
