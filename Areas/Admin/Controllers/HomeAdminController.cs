@@ -1,5 +1,4 @@
-﻿
-using Azure;
+﻿using Azure;
 using BTLW_BDT.Models;
 using BTLW_BDT.Models.BieuDo;
 using Microsoft.AspNetCore.Mvc;
@@ -116,7 +115,6 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         //    return View(sanPham);
         //}
         [Route("DashBoard")]
-
         public IActionResult DashBoard()
         {
             var count_product = db.SanPhams.Count();
@@ -127,6 +125,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             ViewBag.CountCTGH = count_CTGH;
             return View();
         }
+
         [HttpPost]
         public Task<IActionResult> GetChartData()
         {
@@ -291,7 +290,11 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         //    return View(pagedList);
         //}
 
-
+        [Route("Chat")]
+        public IActionResult Chat()
+        {
+            return View();
+        }
 
     }
 }

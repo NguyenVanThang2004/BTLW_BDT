@@ -1,0 +1,154 @@
+﻿@{
+    ViewData["Title"] = "Chat Support";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Danh sách người dùng -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header pb-0 p-3">
+                    <h6 class="mb-0">Danh sách người dùng</h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="user-list" style="height: 600px; overflow-y: auto;">
+                        <!-- Danh sách người dùng sẽ được thêm vào đây -->
+                        <div class="user-item d-flex align-items-center p-2 border-bottom active-chat">
+                            <img src="~/Images/Customer/default-avatar.jpg" class="avatar avatar-sm me-3">
+                            <div class="d-flex flex-column">
+                                <h6 class="mb-1 text-sm">Khách hàng 1</h6>
+                                <span class="text-xs">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Khung chat -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header pb-0 p-3">
+                    <div class="d-flex align-items-center">
+                        <img src="~/Images/Customer/default-avatar.jpg" class="avatar avatar-sm me-3">
+                        <h6 class="mb-0">Khách hàng 1</h6>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    <!-- Khung chat -->
+                    <div class="chat-messages" id="messagesList" style="height: 500px; overflow-y: auto;">
+                        <!-- Tin nhắn sẽ được thêm vào đây -->
+                    </div>
+
+                    <!-- Input chat -->
+                    <div class="chat-input mt-3">
+                        <div class="input-group">
+                            <input type="text" id="messageInput" class="form-control" placeholder="Nhập tin nhắn...">
+                            <button class="btn btn-primary mb-0" id="sendButton">
+                                <i class="material-icons">send</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-item {
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .user-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .active-chat {
+        background-color: #e9ecef;
+    }
+
+    .chat-messages {
+        padding: 1rem;
+    }
+
+    .message {
+        margin-bottom: 1rem;
+        max-width: 80%;
+    }
+
+    .message.received {
+        margin-right: auto;
+    }
+
+    .message.sent {
+        margin-left: auto;
+    }
+
+    .message-content {
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+    }
+
+    .message.received .message-content {
+        background-color: #f8f9fa;
+    }
+
+    .message.sent .message-content {
+        background-color: #7b809a;
+        color: white;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+<script>
+    var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+    connection.on("ReceiveMessage", function (user, message) {
+        var messagesList = document.getElementById("messagesList");
+        var messageDiv = document.createElement("div");
+        
+        var isReceived = user === "User";
+        messageDiv.className = `message ${isReceived ? 'received' : 'sent'}`;
+        
+        var currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        messageDiv.innerHTML = `
+            <div class="message-content">${message}</div>
+            <div class="message-time">${currentTime}</div>
+        `;
+        
+        messagesList.appendChild(messageDiv);
+        messagesList.scrollTop = messagesList.scrollHeight;
+    });
+
+    document.getElementById("sendButton").addEventListener("click", function (event) {
+        var message = document.getElementById("messageInput").value;
+        if (message.trim() !== "") {
+            connection.invoke("SendMessage", "Admin", message).catch(function (err) {
+                return console.error(err.toString());
+            });
+            document.getElementById("messageInput").value = "";
+        }
+    });
+
+    document.getElementById("messageInput").addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.getElementById("sendButton").click();
+        }
+    });
+
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });
+</script>
