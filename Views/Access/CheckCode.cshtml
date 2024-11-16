@@ -1,6 +1,6 @@
 ﻿@model BTLW_BDT.ViewModels.CheckCodeVM
 @{
-    ViewData["Title"] = "Check Code";
+    ViewData["Title"] = "Xác thực mã";
     Layout = null;
 }
 
@@ -11,8 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="apple-touch-icon" sizes="76x76" href="../LayoutAdmin/assets/img/apple-icon.png">
     <link rel="icon" type="image/png" href="../LayoutAdmin/assets/img/favicon.png">
-    <title>Material Dashboard 2 by Creative Tim</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900|Roboto+Slab:400,700" />
+    <title>Xác thực mã</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,Roboto+Slab:400,700" />
     <link href="../LayoutAdmin/assets/css/nucleo-icons.css" rel="stylesheet" />
     <link href="../LayoutAdmin/assets/css/nucleo-svg.css" rel="stylesheet" />
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
@@ -29,24 +29,39 @@
                         <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column ms-auto me-auto ms-lg-auto me-lg-5">
                             <div class="card card-plain">
                                 <div class="card-header">
-                                    <h4 class="font-weight-bolder">Reset Password</h4>
-                                    <p class="mb-0">Enter the code sent to your email and your new password</p>
+                                    <h4 class="font-weight-bolder">Xác thực mã</h4>
+                                    <p class="mb-0">Nhập mã xác thực đã được gửi đến email: @Model.Email</p>
                                 </div>
                                 <div class="card-body">
-                                    <form asp-action="CheckCode" method="post">
-                                        <div asp-validation-summary="All" class="text-danger"></div>
-
-                                        <!-- Code -->
-                                        <div class="form-item w-100">
-                                            <label for="Code" class="form-label my-3">Reset Code</label><sup>*</sup>
-                                            <input type="text" id="Code" name="code" class="form-control" required />
-                                            <span class="text-danger"></span>
+                                    @if (TempData["ErrorMessage"] != null)
+                                    {
+                                        <div class="alert alert-danger">
+                                            @TempData["ErrorMessage"]
                                         </div>
+                                    }
+                                    <form asp-action="CheckCode" method="post">
+                                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                        <input type="hidden" asp-for="Email" />
 
-                                        <div class="row g-4 text-center align-items-center justify-content-center pt-4">
-                                            <button type="submit" class="btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0">Submit</button>
+                                        <div class="input-group input-group-outline mb-3">
+                                            <label asp-for="Code" class="form-label">Mã xác thực</label>
+                                            <input asp-for="Code" type="text" class="form-control" required />
+                                        </div>
+                                        <span asp-validation-for="Code" class="text-danger"></span>
+
+                                        <div class="text-center">
+                                            <button type="submit" class="btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0">
+                                                Xác nhận
+                                            </button>
                                         </div>
                                     </form>
+                                </div>
+                                <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                                    <p class="mb-2 text-sm mx-auto">
+                                        <a asp-action="ForgotPassword" class="text-primary font-weight-bold">
+                                            Gửi lại mã
+                                        </a>
+                                    </p>
                                 </div>
                             </div>
                         </div>

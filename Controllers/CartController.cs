@@ -44,8 +44,8 @@ public class CartController : Controller
         ViewData["Page"] = "Shopping Cart";
         return View(Carts);
     }
-
-    public IActionResult AddToCart(string id, string? maMau = null, string? maRom = null)
+    
+    public IActionResult AddToCart(string id, decimal? currentPrice = null,string? maMau = null, string? maRom = null, int quantity = 1)
     {
         var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
 
@@ -99,19 +99,19 @@ public class CartController : Controller
                 MaSanPham = id,
                 TenSanPham = sanPham.TenSanPham,
                 DonGia = sanPham.DonGiaBanRa ?? 0,
-                SoLuong = 1,
+                SoLuong = quantity,
                 Anh = sanPham.AnhDaiDien,
                 MaMau = mauSac?.MaMau,
                 TenMau = mauSac?.TenMau,
                 MaRom = rom?.MaRom,
                 DungLuongRom = rom?.ThongSo,
-                CurrentPrice = sanPham.DonGiaBanRa ?? 0 
+                CurrentPrice = currentPrice ?? sanPham.DonGiaBanRa 
             };
             cart.Add(item);
         }
         else
         {
-            item.SoLuong++;
+            item.SoLuong+=quantity;
         }
 
         HttpContext.Session.Set("GioHang", cart);
@@ -158,6 +158,16 @@ public class CartController : Controller
         HttpContext.Session.Set("GioHang", myCart);
         return RedirectToAction("DetailCart");
     }
+
+
+
+
+
+
+   
+
+
+
 
     public IActionResult ClearCart()
     {

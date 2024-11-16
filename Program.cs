@@ -30,6 +30,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;              // Cookie là cần thiết
 });
 
+
+
 // Đăng ký IHttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
@@ -38,8 +40,12 @@ var app = builder.Build();
 
 
 builder.Services.AddAuthorization();
-
-
+// tao router cho chi tiet san pham
+app.MapControllerRoute(
+    name: "productDetail",
+    pattern: "san-pham/{id}",
+    defaults: new { controller = "Home", action = "ProductDetail" }
+);
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

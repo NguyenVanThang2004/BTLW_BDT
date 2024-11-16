@@ -40,7 +40,7 @@
             <hr class="my-4">
             <div class="d-flex justify-content-between font-weight-bold total-amount">
                 <h5>Tổng Cộng:</h5>
-                <h5>@((Model.Sum(item => item.TongTien) + 25000).ToString("N0")) VNĐ</h5>
+                <h5>@((Model.Sum(item => item.TongTien) + 25000)) VNĐ</h5>
             </div>
 
             <a asp-controller="Cart" asp-action="ClearCart" class="btn btn-primary mt-4">Tiếp Tục Mua Sắm</a>

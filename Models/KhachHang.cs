@@ -27,6 +27,8 @@ public partial class KhachHang
 
     public int? ResetCode { get; set; }
 
+    public DateTime? ResetCodeExpiry { get; set; }
+
     public virtual ICollection<HoaDonBan> HoaDonBans { get; set; } = new List<HoaDonBan>();
 
     public virtual TaiKhoan? TenDangNhapNavigation { get; set; }

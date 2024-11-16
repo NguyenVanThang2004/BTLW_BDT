@@ -28,9 +28,11 @@
                 {
                     <tr>
                         <td class="align-middle">
-                            <img src="@Url.Content("../PhoneImages/Images/"+item.Anh)" alt="@item.TenSanPham" style="width: 50px;">
-                            @item.TenSanPham
-                        </td>
+                            <a href="@Url.RouteUrl("productDetaill", new { id = item.MaSanPham, maMau = item.MaMau, maRom = item.MaRom })" class="text-dark">
+                                <img src="@Url.Content("../PhoneImages/Images/"+item.Anh)" alt="@item.TenSanPham" style="width: 50px;">
+                                @item.TenSanPham
+                            </a>
+                        </td>   
                         <td class="align-middle">
                             @(item.TenMau ?? "N/A")
                         </td>
@@ -43,30 +45,41 @@
                           
                         </td>
                         <td class="align-middle">
-                            <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display:inline;">
-                                <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
-                                <input type="hidden" name="quantity" value="@item.SoLuong" />
-                                <div class="input-group quantity mx-auto" style="width: 100px;">
-                                    <div class="input-group-btn">
-                                        <button type="submit" name="action" value="decrease" class="btn btn-sm btn-primary btn-minus">
+                            <div class="input-group quantity mx-auto" style="width: 100px;">
+                                <div class="input-group-btn">
+                                    <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display: inline;">
+                                        <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
+                                        <input type="hidden" name="maMau" value="@item.MaMau" />
+                                        <input type="hidden" name="maRom" value="@item.MaRom" />
+                                        <input type="hidden" name="action" value="decrease" />
+                                        <button type="submit" class="btn btn-sm btn-primary">
                                             <i class="fa fa-minus"></i>
                                         </button>
-                                    </div>
-                                    <input type="text" class="form-control form-control-sm bg-secondary text-center" value="@item.SoLuong" readonly>
-                                    <div class="input-group-btn">
-                                        <button type="submit" name="action" value="increase" class="btn btn-sm btn-primary btn-plus">
+                                    </form>
+                                </div>
+                                <input type="text" class="form-control form-control-sm bg-secondary text-center" value="@item.SoLuong" readonly>
+                                <div class="input-group-btn">
+                                    <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display: inline;">
+                                        <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
+                                        <input type="hidden" name="maMau" value="@item.MaMau" />
+                                        <input type="hidden" name="maRom" value="@item.MaRom" />
+                                        <input type="hidden" name="action" value="increase" />
+                                        <button type="submit" class="btn btn-sm btn-primary">
                                             <i class="fa fa-plus"></i>
                                         </button>
-                                    </div>
+                                    </form>
                                 </div>
-                            </form>
+                            </div>
                         </td>
                         <td class="align-middle">
                             @Convert.ToDouble(item.TongTien).ToString("N0") VNĐ
                         </td>
                         <td class="align-middle">
                             <form asp-controller="Cart" asp-action="RemoveFromCart" method="post">
+                                
                                 <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
+                                <input type="hidden" name="maMau" value="@item.MaMau" />
+                                <input type="hidden" name="maRom" value="@item.MaRom" />
                                 <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="fa fa-times"></i>
                                 </button>
@@ -98,7 +111,9 @@
                     <h6 class="font-weight-medium">Subtotal</h6>
                     <h6 class="font-weight-medium">
 
-                        <h5>@((Model.Sum(item => item.TongTien) + 25000).ToString("N0")) VNĐ</h5>
+                      @*   <h5>@((Model.Sum(item => item.TongTien))) VNĐ</h5> *@
+                        <h5>@Convert.ToDouble(((Model.Sum(item => item.TongTien)))) VNĐ</h5>
+
                         
                     </h6>
                 </div>
@@ -112,7 +127,8 @@
                     <h5 class="font-weight-bold">Total</h5>
                     <h5 class="font-weight-bold">
 
-                        @((Model.Sum(item => item.DonGia * item.SoLuong) + 25000).ToString("N0")) VNĐ
+                        @* @((Model.Sum(item => item.DonGia * item.SoLuong) + 25000).ToString("N0")) VNĐ *@
+                        <h5>@Convert.ToDouble(((Model.Sum(item => item.TongTien)))) VNĐ</h5>
 
                        
                     </h5>

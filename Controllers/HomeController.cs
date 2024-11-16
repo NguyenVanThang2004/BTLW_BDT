@@ -75,7 +75,9 @@ using X.PagedList;
                 };
                 return View(detailView);
             }
-            public IActionResult GetColorImages(string maSp, string maMau)
+       
+
+        public IActionResult GetColorImages(string maSp, string maMau)
             {
                 var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp && x.MaMau == maMau).ToList();
                 return PartialView("_ColorImagesPartial", anhSanPham);

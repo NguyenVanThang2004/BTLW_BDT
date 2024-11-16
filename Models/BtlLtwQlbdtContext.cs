@@ -180,9 +180,10 @@ public partial class BtlLtwQlbdtContext : DbContext
             entity.Property(e => e.MaKhachHang).HasMaxLength(50);
             entity.Property(e => e.AnhDaiDien).HasMaxLength(255);
             entity.Property(e => e.DiaChi).HasMaxLength(255);
-            entity.Property(e => e.Email).HasMaxLength(20);
+            entity.Property(e => e.Email).HasMaxLength(320);
             entity.Property(e => e.GhiChu).HasMaxLength(255);
             entity.Property(e => e.LoaiKhachHang).HasMaxLength(100);
+            entity.Property(e => e.ResetCodeExpiry).HasColumnType("datetime");
             entity.Property(e => e.SoDienThoai).HasMaxLength(20);
             entity.Property(e => e.TenDangNhap).HasMaxLength(100);
             entity.Property(e => e.TenKhachHang).HasMaxLength(100);

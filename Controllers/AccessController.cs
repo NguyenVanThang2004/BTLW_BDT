@@ -205,7 +205,6 @@ namespace BTLW_BDT.Controllers
             return View();
         }
 
-        
         [HttpPost]
         public IActionResult ForgotPassword(ForgotPasswordVM model)
         {
@@ -220,28 +219,27 @@ namespace BTLW_BDT.Controllers
                 // Tạo mã xác thực
                 var code = GenerateResetCode();
 
+               
+               
+
                 // Lưu mã xác thực vào cơ sở dữ liệu
                 user.ResetCode = code;
-              //  user.ResetCodeExpiry = DateTime.Now.AddMinutes(30); // Hết hạn sau 30 phút
+                user.ResetCodeExpiry = DateTime.Now.AddMinutes(5);
+
                 db.SaveChanges();
 
-                // Gửi mã qua email
+                // Gửi mã qua email 
                 SendResetCodeEmail(model.Email, code);
 
                 // Chuyển email vào TempData để dùng ở bước kiểm tra mã
                 TempData["Email"] = model.Email;
 
-                // Chuyển sang trang kiểm tra mã
                 return RedirectToAction("CheckCode");
             }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Email không tồn tại.");
-            }
 
+            ModelState.AddModelError(string.Empty, "Email không tồn tại.");
             return View(model);
         }
-
 
         [HttpGet]
         public IActionResult CheckCode()
@@ -252,30 +250,44 @@ namespace BTLW_BDT.Controllers
                 return RedirectToAction("ForgotPassword");
             }
 
-            var model = new CheckCodeVM
-            {
-                Email = email
-            };
-            return View(model);
+            TempData.Keep("Email"); // Giữ lại giá trị cho POST request
+            return View(new CheckCodeVM { Email = email });
         }
-
 
         [HttpPost]
         public IActionResult CheckCode(CheckCodeVM model)
         {
-            var email = TempData["Email"]?.ToString();
-
-            var user = db.KhachHangs.SingleOrDefault(x => x.Email ==model.Email && x.ResetCode == model.Code);
-            if (user != null)
+            if (!ModelState.IsValid)
             {
-                TempData["Email"] = model.Email;
-                return RedirectToAction("NewPassword");
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Mã xác thực không hợp lệ");
                 return View(model);
             }
+
+            var user = db.KhachHangs.SingleOrDefault(x =>
+                x.Email == model.Email &&
+                x.ResetCode.ToString() == model.Code);
+
+            if (user != null)
+            {
+                // Kiểm tra thời gian hết hạn
+                if (user.ResetCodeExpiry.Value > DateTime.Now)
+                {
+                    TempData["Email"] = model.Email;
+                    return RedirectToAction("NewPassword");
+                }
+                else
+                {
+                    // Mã đã hết hạn
+                    user.ResetCode = null;
+                    user.ResetCodeExpiry = null;
+                    db.SaveChanges();
+
+                    ModelState.AddModelError(string.Empty, "Mã xác thực đã hết hạn. Vui lòng yêu cầu mã mới.");
+                    return View(model);
+                }
+            }
+
+            ModelState.AddModelError(string.Empty, "Mã xác thực không hợp lệ");
+            return View(model);
         }
 
 
@@ -288,19 +300,15 @@ namespace BTLW_BDT.Controllers
                 return RedirectToAction("ForgotPassword");
             }
 
-            var model = new NewPasswordVM
-            {
-                Email = email
-            };
-            return View(model);
+            TempData.Keep("Email");
+            return View(new NewPasswordVM { Email = email });
         }
 
         [HttpPost]
         public IActionResult NewPassword(NewPasswordVM model)
         {
-            if (!ModelState.IsValid || model.NewPassword != model.ConfirmPassword)
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty, "Mật khẩu không khớp.");
                 return View(model);
             }
 
@@ -323,10 +331,6 @@ namespace BTLW_BDT.Controllers
             return RedirectToAction("ForgotPassword");
         }
 
-
-
-
-
         private void SendResetCodeEmail(string email, int code)
         {
             var fromAddress = new MailAddress("thangdepzai38@gmail.com", "Admin");
@@ -344,6 +348,7 @@ namespace BTLW_BDT.Controllers
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
             };
+
             using (var message = new MailMessage(fromAddress, toAddress)
             {
                 Subject = subject,
@@ -353,14 +358,14 @@ namespace BTLW_BDT.Controllers
                 smtp.Send(message);
             }
         }
+
         private int GenerateResetCode()
         {
             var rng = new Random();
-            var code = rng.Next(100000, 999999); // Tạo mã ngẫu nhiên 6 chữ số
-            return code;
+            return rng.Next(100000, 999999); // Tạo mã ngẫu nhiên 6 chữ số
         }
 
-        
+
 
 
 
