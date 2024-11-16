@@ -126,5 +126,9 @@ using X.PagedList;
                     formattedPrice = formattedPrice
                 });
             }
+            public IActionResult Contact()
+            {
+                return View();
+            }
         }
     }
