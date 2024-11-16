@@ -45,9 +45,9 @@ body {
 
     /* Hover effect cho icon */
     .navbar-nav .nav-item .dropdown-toggle:hover img {
-        border-color: #D81B60; /* Màu xanh d??ng khi hover */
+        border-color: #D81B60; /* Mï¿½u xanh d??ng khi hover */
     }
 
     .navbar-nav .nav-item .dropdown-toggle:hover span {
-        color: #D81B60; /* Màu ch? khi hover */
+        color: #D81B60; /* Mï¿½u ch? khi hover */
     }

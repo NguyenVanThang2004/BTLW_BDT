@@ -1,5 +1,7 @@
-using BTLW_BDT.Models;
-namespace BTLW_BDT.ViewModels {
+using System;
+
+namespace BTLW_BDT.ViewModels
+{
     public class ReviewViewModel
     {
         public string TenDangNhap { get; set; }
@@ -13,7 +15,7 @@ namespace BTLW_BDT.ViewModels {
     public class ReviewFormViewModel
     {
         public string MaSanPham { get; set; }
-        public DanhGium ExistingReview { get; set; }
+        public Models.DanhGium ExistingReview { get; set; }
     }
 
     public class ReviewCreateModel
