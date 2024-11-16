@@ -38,50 +38,87 @@ namespace BTLW_BDT.Controllers
             if (HttpContext.Session.GetString("Username") == null)
             {
                 string hashedPassword = user.MatKhau.ToSHA256Hash("MySaltKey");
+                
+                // Kiểm tra tài khoản tồn tại
+                var taiKhoan = db.TaiKhoans.FirstOrDefault(tk => 
+                    tk.TenDangNhap == user.TenDangNhap && 
+                    tk.MatKhau == hashedPassword);
 
-
-                var userInfo = (from tk in db.TaiKhoans
-                                join kh in db.KhachHangs on tk.TenDangNhap equals kh.TenDangNhap
-                                where tk.TenDangNhap == user.TenDangNhap && tk.MatKhau == hashedPassword
-                                select new
-                                {
-                                    tk.TenDangNhap,
-                                    kh.AnhDaiDien,
-                                    kh.MaKhachHang,
-                                    kh.TenKhachHang,
-                                    kh.NgaySinh,
-                                    kh.SoDienThoai,
-                                    kh.DiaChi, 
-                                    kh.Email,
-                                    kh.GhiChu
-                                }).FirstOrDefault();
-
-                if (userInfo != null)
+                if (taiKhoan != null)
                 {
-                    HttpContext.Session.SetString("Username", userInfo.TenDangNhap);
-                    HttpContext.Session.SetString("MaKhachHang", userInfo.MaKhachHang);
-                    HttpContext.Session.SetString("HoTen", userInfo.TenKhachHang);
-                    HttpContext.Session.SetString("NgaySinh", $"{userInfo.NgaySinh}");
-                    HttpContext.Session.SetString("SoDienThoai", userInfo.SoDienThoai);
-                    HttpContext.Session.SetString("DiaChi", userInfo.DiaChi);
-                    HttpContext.Session.SetString("Email", userInfo.Email);
-                    if (!string.IsNullOrEmpty(userInfo.GhiChu))
+                    if (taiKhoan.LoaiTaiKhoan == "customer")
                     {
-                        HttpContext.Session.SetString("GhiChu", userInfo.GhiChu);
+                        // Xử lý đăng nhập cho khách hàng
+                        var userInfo = (from tk in db.TaiKhoans
+                                    join kh in db.KhachHangs on tk.TenDangNhap equals kh.TenDangNhap
+                                    where tk.TenDangNhap == user.TenDangNhap
+                                    select new
+                                    {
+                                        tk.TenDangNhap,
+                                        kh.AnhDaiDien,
+                                        kh.MaKhachHang,
+                                        kh.TenKhachHang,
+                                        kh.NgaySinh,
+                                        kh.SoDienThoai,
+                                        kh.DiaChi,
+                                        kh.Email,
+                                        kh.GhiChu
+                                    }).FirstOrDefault();
+
+                        if (userInfo != null)
+                        {
+                            HttpContext.Session.SetString("Username", userInfo.TenDangNhap);
+                            HttpContext.Session.SetString("MaKhachHang", userInfo.MaKhachHang);
+                            HttpContext.Session.SetString("HoTen", userInfo.TenKhachHang);
+                            HttpContext.Session.SetString("NgaySinh", $"{userInfo.NgaySinh}");
+                            HttpContext.Session.SetString("SoDienThoai", userInfo.SoDienThoai);
+                            HttpContext.Session.SetString("DiaChi", userInfo.DiaChi);
+                            HttpContext.Session.SetString("Email", userInfo.Email);
+                            HttpContext.Session.SetString("GhiChu", userInfo.GhiChu ?? "");
+                            HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + userInfo.AnhDaiDien));
+                            HttpContext.Session.SetString("Role", "Customer");
+                            
+                            return RedirectToAction("Index", "Home");
+                        }
                     }
-                    else
+                    else if (taiKhoan.LoaiTaiKhoan == "admin")
                     {
-                        HttpContext.Session.SetString("GhiChu", ""); // hoặc đặt giá trị mặc định nếu cần
+                        // Xử lý đăng nhập cho admin
+                        var adminInfo = (from tk in db.TaiKhoans
+                                     join nv in db.NhanViens on tk.TenDangNhap equals nv.TenDangNhap
+                                     where tk.TenDangNhap == user.TenDangNhap
+                                     select new
+                                     {
+                                         tk.TenDangNhap,
+                                         nv.AnhDaiDien,
+                                         nv.MaNhanVien,
+                                         nv.TenNhanVien,
+                                         nv.NgaySinh,
+                                         nv.SoDienThoai,
+                                         nv.DiaChi,
+                                         nv.ChucVu,
+                                         nv.GhiChu
+                                     }).FirstOrDefault();
+
+                        if (adminInfo != null)
+                        {
+                            HttpContext.Session.SetString("Username", adminInfo.TenDangNhap);
+                            HttpContext.Session.SetString("MaNhanVien", adminInfo.MaNhanVien);
+                            HttpContext.Session.SetString("HoTen", adminInfo.TenNhanVien);
+                            HttpContext.Session.SetString("NgaySinh", $"{adminInfo.NgaySinh}");
+                            HttpContext.Session.SetString("SoDienThoai", adminInfo.SoDienThoai);
+                            HttpContext.Session.SetString("DiaChi", adminInfo.DiaChi);
+                            HttpContext.Session.SetString("ChucVu", adminInfo.ChucVu);
+                            HttpContext.Session.SetString("GhiChu", adminInfo.GhiChu ?? "");
+                            HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Admin/" + adminInfo.AnhDaiDien));
+                            HttpContext.Session.SetString("Role", "Admin");
+
+                            return RedirectToAction("Index", "HomeAdmin", new { area = "Admin" });
+                        }
                     }
-                    HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + userInfo.AnhDaiDien)); // Lưu đường dẫn ảnh vào Session
-                    return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    ViewBag.ErrorMessage = "Tên đăng nhập hoặc mật khẩu không đúng.";
                 }
 
-
+                ViewBag.ErrorMessage = "Tên đăng nhập hoặc mật khẩu không đúng.";
             }
 
             return View();
@@ -154,7 +191,7 @@ namespace BTLW_BDT.Controllers
                     {
                         TenDangNhap = model.TaiKhoan,
                         MatKhau = hashedPassword,
-                        LoaiTaiKhoan = "Customer" 
+                        LoaiTaiKhoan = "customer" 
                     };
 
                     if (Hinh != null)
