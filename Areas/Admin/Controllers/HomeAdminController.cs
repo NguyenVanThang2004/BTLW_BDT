@@ -291,9 +291,22 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         //}
 
         [Route("Chat")]
-        public IActionResult Chat()
+        public async Task<IActionResult> Chat()
         {
-            return View();
+            var customers = await db.KhachHangs
+                .Include(k => k.TinNhans) // Include để lấy tin nhắn cuối cùng
+                .Select(k => new KhachHang
+                {
+                    MaKhachHang = k.MaKhachHang,
+                    TenKhachHang = k.TenKhachHang,
+                    AnhDaiDien = k.AnhDaiDien,
+                    LastMessage = k.TinNhans
+                        .OrderByDescending(t => t.ThoiGian)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return View(customers);
         }
 
     }

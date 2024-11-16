@@ -1,8 +1,10 @@
-﻿@{
+﻿@model IEnumerable<BTLW_BDT.Models.KhachHang>
+@{
     ViewData["Title"] = "Chat Support";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 <div class="container-fluid">
     <div class="row">
         <!-- Danh sách người dùng -->
@@ -13,14 +15,21 @@
                 </div>
                 <div class="card-body p-3">
                     <div class="user-list" style="height: 600px; overflow-y: auto;">
-                        <!-- Danh sách người dùng sẽ được thêm vào đây -->
-                        <div class="user-item d-flex align-items-center p-2 border-bottom active-chat">
-                            <img src="~/Images/Customer/default-avatar.jpg" class="avatar avatar-sm me-3">
-                            <div class="d-flex flex-column">
-                                <h6 class="mb-1 text-sm">Khách hàng 1</h6>
-                                <span class="text-xs">Online</span>
+                        @foreach (var customer in Model)
+                        {
+                            <div class="user-item d-flex align-items-center p-2 border-bottom" 
+                                 data-customer-id="@customer.MaKhachHang"
+                                 onclick="selectCustomer('@customer.MaKhachHang', '@customer.TenKhachHang')">
+                                <img src="@(customer.AnhDaiDien ?? "/Images/Customer/default-avatar.jpg")" class="avatar avatar-sm me-3">
+                                <div class="d-flex flex-column">
+                                    <h6 class="mb-1 text-sm">@customer.TenKhachHang</h6>
+                                    @if (customer.LastMessage != null)
+                                    {
+                                        <span class="text-xs">@customer.LastMessage.NoiDung</span>
+                                    }
+                                </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -108,47 +117,96 @@
     }
 </style>
 
-<script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
 <script>
-    var connection = new signalR.HubConnectionBuilder()
-        .withUrl("/chatHub")
-        .build();
+    document.addEventListener('DOMContentLoaded', function () {
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
 
-    connection.on("ReceiveMessage", function (user, message) {
-        var messagesList = document.getElementById("messagesList");
-        var messageDiv = document.createElement("div");
-        
-        var isReceived = user === "User";
-        messageDiv.className = `message ${isReceived ? 'received' : 'sent'}`;
-        
-        var currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        messageDiv.innerHTML = `
-            <div class="message-content">${message}</div>
-            <div class="message-time">${currentTime}</div>
-        `;
-        
-        messagesList.appendChild(messageDiv);
-        messagesList.scrollTop = messagesList.scrollHeight;
-    });
+        // Xử lý nhận tin nhắn
+        connection.on("ReceiveMessage", function (loaiNguoiGui, message, thoiGian) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${loaiNguoiGui === 'admin' ? 'sent' : 'received'}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">${message}</div>
+                <div class="message-time">${new Date(thoiGian).toLocaleTimeString()}</div>
+            `;
+            
+            document.getElementById("messagesList").appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: "smooth" });
+        });
 
-    document.getElementById("sendButton").addEventListener("click", function (event) {
-        var message = document.getElementById("messageInput").value;
-        if (message.trim() !== "") {
-            connection.invoke("SendMessage", "Admin", message).catch(function (err) {
-                return console.error(err.toString());
+        // Xử lý load lịch sử tin nhắn
+        connection.on("LoadMessageHistory", function (messages) {
+            const messagesList = document.getElementById("messagesList");
+            messagesList.innerHTML = '';
+            
+            messages.forEach(msg => {
+                const messageDiv = document.createElement("div");
+                messageDiv.className = `message ${msg.loaiNguoiGui === 'admin' ? 'sent' : 'received'}`;
+                
+                messageDiv.innerHTML = `
+                    <div class="message-content">${msg.noiDung}</div>
+                    <div class="message-time">${new Date(msg.thoiGian).toLocaleTimeString()}</div>
+                `;
+                
+                messagesList.appendChild(messageDiv);
             });
-            document.getElementById("messageInput").value = "";
+            
+            messagesList.scrollTop = messagesList.scrollHeight;
+        });
+
+        // Xử lý gửi tin nhắn
+        document.getElementById("sendButton").addEventListener("click", async function() {
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value.trim();
+            const currentCustomerId = "current-customer-id"; // Cần thay đổi để lấy ID của khách hàng đang chat
+
+            if (message) {
+                try {
+                    await connection.invoke("SendMessage", message, currentCustomerId);
+                    messageInput.value = '';
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        });
+
+        // Bắt đầu kết nối
+        async function startConnection() {
+            try {
+                await connection.start();
+                console.log("SignalR Connected.");
+                
+                // Load tin nhắn sau khi kết nối thành công
+                const currentCustomerId = "current-customer-id"; // Cần thay đổi để lấy ID của khách hàng đang chat
+                await connection.invoke("LoadMessages", currentCustomerId);
+            } catch (err) {
+                console.log(err);
+                setTimeout(startConnection, 5000);
+            }
         }
+
+        startConnection();
     });
 
-    document.getElementById("messageInput").addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            document.getElementById("sendButton").click();
-        }
-    });
-
-    connection.start().catch(function (err) {
-        return console.error(err.toString());
-    });
+    function selectCustomer(customerId, customerName) {
+        // Cập nhật UI
+        document.querySelector('.card-header h6').textContent = customerName;
+        
+        // Xóa class active-chat cũ
+        document.querySelector('.active-chat')?.classList.remove('active-chat');
+        
+        // Thêm class active-chat mới
+        event.currentTarget.classList.add('active-chat');
+        
+        // Load tin nhắn của khách hàng được chọn
+        connection.invoke("LoadMessages", customerId);
+        
+        // Lưu customerId hiện tại
+        currentCustomerId = customerId;
+    }
 </script>

@@ -43,7 +43,10 @@ public partial class BtlLtwQlbdtContext : DbContext
 
     public virtual DbSet<TaiKhoan> TaiKhoans { get; set; }
 
+    public virtual DbSet<TinNhan> TinNhans { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=DESKTOP-B6IH00B\\SQLEXPRESS;Initial Catalog=BTL_LTW_QLBDT;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -304,6 +307,27 @@ public partial class BtlLtwQlbdtContext : DbContext
             entity.Property(e => e.TenDangNhap).HasMaxLength(100);
             entity.Property(e => e.LoaiTaiKhoan).HasMaxLength(50);
             entity.Property(e => e.MatKhau).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<TinNhan>(entity =>
+        {
+            entity.HasKey(e => e.MaTinNhan).HasName("PK__TinNhan__E5B3062AB0149873");
+
+            entity.ToTable("TinNhan");
+
+            entity.Property(e => e.LoaiNguoiGui)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.MaKhachHang).HasMaxLength(50);
+            entity.Property(e => e.ThoiGian)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.TrangThai).HasDefaultValue(false);
+
+            entity.HasOne(d => d.MaKhachHangNavigation).WithMany(p => p.TinNhans)
+                .HasForeignKey(d => d.MaKhachHang)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__TinNhan__MaKhach__09A971A2");
         });
 
         OnModelCreatingPartial(modelBuilder);
