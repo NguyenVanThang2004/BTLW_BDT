@@ -48,11 +48,8 @@ namespace BTLW_BDT.ViewModels
         [DataType(DataType.Upload)]
         public string? Hinh { get; set; }
 
-
-        public int TinhId { get; set; }  // Thêm thuộc tính để lưu ID Tỉnh Thành
-        public int QuanId { get; set; }  // Thêm thuộc tính để lưu ID Quận Huyện
-        public int PhuongId { get; set; } // Thêm thuộc tính để lưu ID Phường Xã
-
+        public decimal? DiaChiLatitude { get; set; }
+        public decimal? DiaChiLongitude { get; set; }
 
         // Phương thức kiểm tra email hợp lệ
         public bool IsEmailValid()

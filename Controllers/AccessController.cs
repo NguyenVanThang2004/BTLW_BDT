@@ -146,86 +146,63 @@ namespace BTLW_BDT.Controllers
             return View();
         }
 
-        public IActionResult Register(RegisterVM  model, IFormFile Hinh)
+        [HttpPost]
+        public IActionResult Register(RegisterVM model, IFormFile Hinh)
         {
             if (ModelState.IsValid)
             {
-                // Kiểm tra trùng tên đăng nhập trong cơ sở dữ liệu
+                // Kiểm tra trùng tên đăng nhập
                 var existingAccount = db.TaiKhoans.FirstOrDefault(x => x.TenDangNhap == model.TaiKhoan);
                 if (existingAccount != null)
                 {
                     ModelState.AddModelError("TaiKhoan", "Tên đăng nhập đã tồn tại.");
-                    return View(model);  // Nếu tên đăng nhập đã tồn tại, trả về view với thông báo lỗi
+                    return View(model);
                 }
 
-                // Kiểm tra tính hợp lệ của số điện thoại
-                //bool isPhoneValid = model.IsPhoneValid();
-                //if (!isPhoneValid)
-                //{
-                //    ModelState.AddModelError("DienThoai", "Số điện thoại không hợp lệ.");
-                //    return View(model);  // Nếu số điện thoại không hợp lệ, trả về view với thông báo lỗi
-                //}
-
-                //// Kiểm tra tính hợp lệ của email
-                //bool isEmailValid = model.IsEmailValid();
-                //if (!isEmailValid)
-                //{
-                //    ModelState.AddModelError("Email", "Email không hợp lệ hoặc không thể gửi .");
-                //    return View(model);  // Nếu email không hợp lệ, trả về view với thông báo lỗi
-                //}
                 var khachHang = new KhachHang
-                    {
-                        MaKhachHang = MyUtil.GenerateRamdomKey(),
-                        TenKhachHang = model.HoTen,
-                        NgaySinh = model.NgaySinh,
-                        SoDienThoai = model.DienThoai,
-                        DiaChi = model.DiaChi,
-                        Email = model.Email,
-                        TenDangNhap = model.TaiKhoan 
-                    };
+                {
+                    MaKhachHang = MyUtil.GenerateRamdomKey(),
+                    TenKhachHang = model.HoTen,
+                    NgaySinh = model.NgaySinh,
+                    SoDienThoai = model.DienThoai,
+                    DiaChi = model.DiaChi,
+                    Email = model.Email,
+                    TenDangNhap = model.TaiKhoan,
+                    // Thêm 2 trường tọa độ
+                    DiaChiLatitude = model.DiaChiLatitude,
+                    DiaChiLongitude = model.DiaChiLongitude
+                };
 
-                    
-                    string hashedPassword = model.MatKhau.ToSHA256Hash("MySaltKey");
+                string hashedPassword = model.MatKhau.ToSHA256Hash("MySaltKey");
+                var taiKhoan = new TaiKhoan
+                {
+                    TenDangNhap = model.TaiKhoan,
+                    MatKhau = hashedPassword,
+                    LoaiTaiKhoan = "customer"
+                };
 
-                    
-                    var taiKhoan = new TaiKhoan
-                    {
-                        TenDangNhap = model.TaiKhoan,
-                        MatKhau = hashedPassword,
-                        LoaiTaiKhoan = "customer" 
-                    };
-
-                    if (Hinh != null)
-                    {
-                        khachHang.AnhDaiDien = MyUtil.UploadHinh(Hinh, "Customer");
-                    }
-                    //else
-                    //{
-                    //    khachHang.AnhDaiDien = "default-avatar.jpg"; // Set default avatar if no image uploaded
-                    //}
-                    db.KhachHangs.Add(khachHang);
-                    db.TaiKhoans.Add(taiKhoan);
-                    db.SaveChanges();
-
-
-                    HttpContext.Session.SetString("HoTen", khachHang.TenKhachHang);
-                    HttpContext.Session.SetString("NgaySinh", khachHang.NgaySinh.ToString());
-                    HttpContext.Session.SetString("SoDienThoai", khachHang.SoDienThoai);
-                    HttpContext.Session.SetString("DiaChi", khachHang.DiaChi);
-                    HttpContext.Session.SetString("Email", khachHang.Email);
-                    if (!string.IsNullOrEmpty(khachHang.GhiChu))
-                    {
-                        HttpContext.Session.SetString("GhiChu", khachHang.GhiChu);
-                    }
-                    else
-                    {
-                        HttpContext.Session.SetString("GhiChu", "");
-                    }
-
-                    HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + khachHang.AnhDaiDien));
-
-                    return RedirectToAction("Index", "Home");
+                if (Hinh != null)
+                {
+                    khachHang.AnhDaiDien = MyUtil.UploadHinh(Hinh, "Customer");
                 }
+
+                db.KhachHangs.Add(khachHang);
+                db.TaiKhoans.Add(taiKhoan);
+                db.SaveChanges();
+
+                // Set session values
+                HttpContext.Session.SetString("Username", khachHang.TenDangNhap);
+                HttpContext.Session.SetString("HoTen", khachHang.TenKhachHang);
+                HttpContext.Session.SetString("NgaySinh", khachHang.NgaySinh.ToString());
+                HttpContext.Session.SetString("SoDienThoai", khachHang.SoDienThoai);
+                HttpContext.Session.SetString("DiaChi", khachHang.DiaChi);
+                HttpContext.Session.SetString("Email", khachHang.Email);
+                HttpContext.Session.SetString("GhiChu", khachHang.GhiChu ?? "");
+                HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + khachHang.AnhDaiDien));
+                HttpContext.Session.SetString("Role", "Customer");
+
+                return RedirectToAction("Index", "Home");
+            }
             return View(model);
         }
 
