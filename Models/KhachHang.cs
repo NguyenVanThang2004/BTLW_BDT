@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BTLW_BDT.Models;
 
@@ -14,8 +13,6 @@ public partial class KhachHang
 
     public string? SoDienThoai { get; set; }
 
-    public string? DiaChi { get; set; }
-
     public string? LoaiKhachHang { get; set; }
 
     public string? GhiChu { get; set; }
@@ -28,8 +25,11 @@ public partial class KhachHang
 
     public int? ResetCode { get; set; }
 
-    [NotMapped]
-    public TinNhan LastMessage { get; set; }
+    public string? DiaChi { get; set; }
+
+    public decimal? DiaChiLatitude { get; set; }
+
+    public decimal? DiaChiLongitude { get; set; }
 
     public virtual ICollection<HoaDonBan> HoaDonBans { get; set; } = new List<HoaDonBan>();
 
