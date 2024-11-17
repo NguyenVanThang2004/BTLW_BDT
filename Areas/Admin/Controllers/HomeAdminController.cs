@@ -311,5 +311,21 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             return View(customers);
         }
 
+        [Route("Profile")]
+        public async Task<IActionResult> Profile()
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+            {
+                return RedirectToAction("Login", "Access", new { area = "" });
+            }
+
+            var nhanVien = await db.NhanViens
+                .Include(nv => nv.TenDangNhapNavigation)
+                .FirstOrDefaultAsync(nv => nv.TenDangNhap == username);
+
+            return View(nhanVien);
+        }
+
     }
 }
