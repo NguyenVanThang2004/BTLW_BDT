@@ -126,6 +126,8 @@ namespace BTLW_BDT.Controllers
                     return View(model);  // Nếu tên đăng nhập đã tồn tại, trả về view với thông báo lỗi
                 }
 
+                string diaChiDayDu = $"{model.DiaChi}, {model.TenPhuong}, {model.TenQuan}, {model.TenTinh}";
+
                 // Kiểm tra tính hợp lệ của số điện thoại
                 //bool isPhoneValid = model.IsPhoneValid();
                 //if (!isPhoneValid)
@@ -147,7 +149,7 @@ namespace BTLW_BDT.Controllers
                         TenKhachHang = model.HoTen,
                         NgaySinh = model.NgaySinh,
                         SoDienThoai = model.DienThoai,
-                        DiaChi = model.DiaChi,
+                        DiaChi = diaChiDayDu,
                         Email = model.Email,
                         TenDangNhap = model.TaiKhoan 
                     };

@@ -82,24 +82,29 @@
                                                 <!-- Thêm các dropdown Tỉnh Thành, Quận Huyện, Phường Xã -->
                                                 <div class="form-item">
                                                     <label class="form-label my-3">Tỉnh Thành</label><sup>*</sup>
-                                                    <select class="css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
+                                                    <select class="css_select" id="tinh" name="TinhId" title="Chọn Tỉnh Thành">
                                                         <option value="0">Tỉnh Thành</option>
                                                     </select>
                                                 </div>
 
                                                 <div class="form-item">
                                                     <label class="form-label my-3">Quận Huyện</label><sup>*</sup>
-                                                    <select class="css_select" id="quan" name="quan" title="Chọn Quận Huyện">
+                                                    <select class="css_select" id="quan" name="QuanId" title="Chọn Quận Huyện">
                                                         <option value="0">Quận Huyện</option>
                                                     </select>
                                                 </div>
 
                                                 <div class="form-item">
                                                     <label class="form-label my-3">Phường Xã</label><sup>*</sup>
-                                                    <select class="css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
+                                                    <select class="css_select" id="phuong" name="PhuongId" title="Chọn Phường Xã">
                                                         <option value="0">Phường Xã</option>
                                                     </select>
                                                 </div>
+
+                                                <!-- Input ẩn để lưu tên đầy đủ -->
+                                                <input type="hidden" name="TenTinh" />
+                                                <input type="hidden" name="TenQuan" />
+                                                <input type="hidden" name="TenPhuong" />
 
                                                 <!-- Cập nhật trường nhập địa chỉ -->
                                                 <div class="form-item">
@@ -157,69 +162,106 @@
 
     <script>
         $(document).ready(function () {
-            $(document).ready(function () {
-                //Lấy tỉnh thành
-                $.getJSON('https://esgoo.net/api-tinhthanh/1/0.htm', function (data_tinh) {
-                    if (data_tinh.error == 0) {
-                        $.each(data_tinh.data, function (key_tinh, val_tinh) {
-                            $("#tinh").append('<option value="' + val_tinh.id + '">' + val_tinh.full_name + '</option>');
-                        });
-                        $("#tinh").change(function (e) {
-                            var idtinh = $(this).val();
-                            //Lấy quận huyện
-                            $.getJSON('https://esgoo.net/api-tinhthanh/2/' + idtinh + '.htm', function (data_quan) {
-                                if (data_quan.error == 0) {
-                                    $("#quan").html('<option value="0">Quận Huyện</option>');
-                                    $("#phuong").html('<option value="0">Phường Xã</option>');
-                                    $.each(data_quan.data, function (key_quan, val_quan) {
-                                        $("#quan").append('<option value="' + val_quan.id + '">' + val_quan.full_name + '</option>');
-                                    });
-                                    //Lấy phường xã
-                                    $("#quan").change(function (e) {
-                                        var idquan = $(this).val();
-                                        $.getJSON('https://esgoo.net/api-tinhthanh/3/' + idquan + '.htm', function (data_phuong) {
-                                            if (data_phuong.error == 0) {
-                                                $("#phuong").html('<option value="0">Phường Xã</option>');
-                                                $.each(data_phuong.data, function (key_phuong, val_phuong) {
-                                                    $("#phuong").append('<option value="' + val_phuong.id + '">' + val_phuong.full_name + '</option>');
-                                                });
-                                            }
-                                        });
-                                    });
+            // Lấy danh sách Tỉnh Thành từ API
+            $.getJSON('https://esgoo.net/api-tinhthanh/1/0.htm', function (data_tinh) {
+                if (data_tinh.error === 0) {
+                    // Đổ dữ liệu Tỉnh Thành vào dropdown
+                    data_tinh.data.forEach(val_tinh => {
+                        $("#tinh").append(`<option value="${val_tinh.id}">${val_tinh.full_name}</option>`);
+                    });
 
+                    // Khi chọn Tỉnh Thành, lấy danh sách Quận Huyện
+                    $("#tinh").change(function () {
+                        var tinhId = $(this).val();
+                        var tenTinh = $("#tinh option:selected").text();
+
+                        // Cập nhật input ẩn cho Tỉnh Thành
+                        $("input[name='TinhId']").val(tinhId);
+                        $("input[name='TenTinh']").val(tenTinh);
+
+                        if (tinhId > 0) {
+                            // Reset các dropdown Quận và Phường
+                            $("#quan").html('<option value="0">Quận Huyện</option>');
+                            $("#phuong").html('<option value="0">Phường Xã</option>');
+
+                            // Gọi API để lấy Quận Huyện
+                            $.getJSON(`https://esgoo.net/api-tinhthanh/2/${tinhId}.htm`, function (data_quan) {
+                                if (data_quan.error === 0) {
+                                    data_quan.data.forEach(val_quan => {
+                                        $("#quan").append(`<option value="${val_quan.id}">${val_quan.full_name}</option>`);
+                                    });
                                 }
                             });
-                        });
+                        }
+                    });
 
-                    }
-                });
+                    // Khi chọn Quận Huyện, lấy danh sách Phường Xã
+                    $("#quan").change(function () {
+                        var quanId = $(this).val();
+                        var tenQuan = $("#quan option:selected").text();
+
+                        // Cập nhật input ẩn cho Quận Huyện
+                        $("input[name='QuanId']").val(quanId);
+                        $("input[name='TenQuan']").val(tenQuan);
+
+                        if (quanId > 0) {
+                            // Reset dropdown Phường
+                            $("#phuong").html('<option value="0">Phường Xã</option>');
+
+                            // Gọi API để lấy Phường Xã
+                            $.getJSON(`https://esgoo.net/api-tinhthanh/3/${quanId}.htm`, function (data_phuong) {
+                                if (data_phuong.error === 0) {
+                                    data_phuong.data.forEach(val_phuong => {
+                                        $("#phuong").append(`<option value="${val_phuong.id}">${val_phuong.full_name}</option>`);
+                                    });
+                                }
+                            });
+                        }
+                    });
+
+                    // Khi chọn Phường Xã
+                    $("#phuong").change(function () {
+                        var phuongId = $(this).val();
+                        var tenPhuong = $("#phuong option:selected").text();
+
+                        // Cập nhật input ẩn cho Phường Xã
+                        $("input[name='PhuongId']").val(phuongId);
+                        $("input[name='TenPhuong']").val(tenPhuong);
+                    });
+                }
             });
 
             // Hàm tìm kiếm địa chỉ
             function searchAddress() {
                 var query = $("#addressSearch").val();
                 if (query.length > 2) {
-                    $.getJSON('https://esgoo.net/api-timkiemdiachi/1/' + query + '.htm', function (data) {
-                        if (data.error == 0) {
+                    $.getJSON(`https://esgoo.net/api-timkiemdiachi/1/${query}.htm`, function (data) {
+                        if (data.error === 0) {
                             var suggestions = data.data;
                             var suggestionList = $("#addressSuggestions");
                             suggestionList.empty().show();
-                            suggestions.forEach(function (item) {
-                                suggestionList.append('<li class="list-group-item" onclick="selectAddress(\'' + item.full_name + '\')">' + item.full_name + '</li>');
+
+                            // Hiển thị danh sách gợi ý
+                            suggestions.forEach(item => {
+                                suggestionList.append(
+                                    `<li class="list-group-item" onclick="selectAddress('${item.full_name}')">${item.full_name}</li>`
+                                );
                             });
                         }
                     });
-                }
-                else {
+                } else {
                     $("#addressSuggestions").hide();
                 }
             }
 
-            // Hàm chọn địa chỉ
+            // Hàm chọn địa chỉ từ gợi ý
             function selectAddress(address) {
                 $("#addressSearch").val(address);
                 $("#addressSuggestions").hide();
             }
+
+            // Gắn sự kiện tìm kiếm địa chỉ vào input
+            $("#addressSearch").on("input", searchAddress);
         });
     </script>
 </body>
