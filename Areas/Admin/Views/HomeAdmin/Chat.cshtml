@@ -1,4 +1,5 @@
-﻿@model IEnumerable<BTLW_BDT.Models.KhachHang>
+﻿@using System.Web
+@model IEnumerable<BTLW_BDT.Models.KhachHang>
 @{
     ViewData["Title"] = "Chat Support";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
@@ -14,16 +15,26 @@
                 <div class="card-body customer-list" style="height: 600px; overflow-y: auto;">
                     @foreach (var customer in Model)
                     {
+                        var customerName = HttpUtility.JavaScriptStringEncode(customer.TenKhachHang ?? "");
+                        var username = HttpUtility.JavaScriptStringEncode(customer.TenDangNhapNavigation?.TenDangNhap ?? "");
+                        
+                        <script>
+                            console.log("Customer data:", {
+                                username: '@username',
+                                customerName: '@customerName'
+                            });
+                        </script>
+                        
                         <div class="customer-item" 
-                             onclick="selectCustomer('@customer.TenDangNhapNavigation?.TenDangNhap', '@customer.TenKhachHang')"
-                             data-username="@customer.TenDangNhapNavigation?.TenDangNhap">
+                             onclick="selectCustomer('@username', '@customerName')"
+                             data-username="@username">
                             <div class="d-flex align-items-center p-3 border-bottom">
                                 <div class="avatar me-3">
                                     <img src="~/Images/Customer/default-avatar.jpg" alt="Avatar" class="rounded-circle" width="40">
                                 </div>
                                 <div>
-                                    <h6 class="mb-0">@customer.TenKhachHang</h6>
-                                    <small class="text-muted last-message">@customer.LastMessage?.NoiDung</small>
+                                    <h6 class="mb-0">@Html.Raw(customerName)</h6>
+                                    <small class="text-muted last-message">@(customer.LastMessage?.NoiDung ?? "")</small>
                                 </div>
                             </div>
                         </div>

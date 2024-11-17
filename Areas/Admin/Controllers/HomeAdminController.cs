@@ -294,12 +294,14 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         public async Task<IActionResult> Chat()
         {
             var customers = await db.KhachHangs
-                .Include(k => k.TinNhans) // Include để lấy tin nhắn cuối cùng
+                .Include(k => k.TenDangNhapNavigation) // Include thông tin TaiKhoan
+                .Include(k => k.TinNhans) // Include tin nhắn
                 .Select(k => new KhachHang
                 {
                     MaKhachHang = k.MaKhachHang,
                     TenKhachHang = k.TenKhachHang,
                     AnhDaiDien = k.AnhDaiDien,
+                    TenDangNhapNavigation = k.TenDangNhapNavigation, // Map thông tin TaiKhoan
                     LastMessage = k.TinNhans
                         .OrderByDescending(t => t.ThoiGian)
                         .FirstOrDefault()
