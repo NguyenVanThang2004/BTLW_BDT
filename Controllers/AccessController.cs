@@ -124,18 +124,19 @@ namespace BTLW_BDT.Controllers
             return View();
         }
 
+        [HttpGet]
         public IActionResult Logout()
         {
+            // Xóa session
             HttpContext.Session.Clear();
-            HttpContext.Session.Remove("Username");
-            HttpContext.Session.Remove("MaKhachHang");
-            HttpContext.Session.Remove("HoTen");
-            HttpContext.Session.Remove("NgaySinh");
-            HttpContext.Session.Remove("SoDienThoai");
-            HttpContext.Session.Remove("DiaChi");
-            HttpContext.Session.Remove("Email");
-            HttpContext.Session.Remove("GhiChu");
-            HttpContext.Session.Remove("Avatar");
+            
+            // Xóa cookies nếu có
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
+            
+            // Redirect về trang login
             return RedirectToAction("Login", "Access");
         }
 
