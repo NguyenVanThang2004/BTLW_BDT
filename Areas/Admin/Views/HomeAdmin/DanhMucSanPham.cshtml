@@ -130,7 +130,30 @@
             <label class="control-label">Ram</label>
             <input id="RAM" type="text" class="form-control" />
         </div>
+        <div class="form-group">
+            <label class="control-label">RAM</label>
+            <input id="RAM" type="text" class="form-control" />
+        </div>
 
+        <!-- Add new Rom section -->
+        <div id="romContainer">
+            <div class="rom-entry">
+                <h4>ROM #1</h4>
+                <div class="form-group">
+                    <label class="control-label">Mã ROM</label>
+                    <input type="text" class="form-control rom-ma" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Thông số</label>
+                    <input type="text" class="form-control rom-thongso" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Giá</label>
+                    <input type="number" class="form-control rom-gia" />
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-secondary" onclick="addRomEntry()">Thêm ROM</button>
         <div class="form-group">
             <input onclick="addANewProduct('https://localhost:7040/api/product/'); return false;" value="Create" class="btn btn-primary" />
         </div>
@@ -252,9 +275,59 @@
 </div>
 
 <script type="text/javascript">
+    let romCount = 1;
+
+    function showHideDiveInsertData(activeDiv) {
+        if ($(document.getElementById(activeDiv)).is(":visible")) {
+            $(document.getElementById(activeDiv)).hide('slow');
+        }
+        else {
+            $(document.getElementById(activeDiv)).show('slow');
+        }
+    }
+
+    function addRomEntry() {
+        romCount++;
+        const newRomHtml = `
+                <div class="rom-entry">
+                    <h4>ROM #${romCount}</h4>
+                    <div class="form-group">
+                        <label class="control-label">Mã ROM</label>
+                        <input type="text" class="form-control rom-ma" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Thông số</label>
+                        <input type="text" class="form-control rom-thongso" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Giá</label>
+                        <input type="number" class="form-control rom-gia" />
+                    </div>
+                    <button type="button" class="btn btn-danger" onclick="removeRomEntry(this)">Xóa ROM</button>
+                </div>
+            `;
+        $('#romContainer').append(newRomHtml);
+    }
+
+    function removeRomEntry(button) {
+        $(button).closest('.rom-entry').remove();
+    }
+
     function addANewProduct(apiUrl) {
-        // Thu thập dữ liệu từ form
-        console.log('AAAA:', apiUrl);
+        // Thu thập dữ liệu ROM
+        const roms = [];
+        $('.rom-entry').each(function () {
+            const rom = {
+                MaRom: $(this).find('.rom-ma').val(),
+                ThongSo: $(this).find('.rom-thongso').val(),
+                Gia: parseFloat($(this).find('.rom-gia').val())
+            };
+            if (rom.MaRom && rom.ThongSo && !isNaN(rom.Gia)) { // Kiểm tra dữ liệu hợp lệ
+                roms.push(rom);
+            }
+        });
+
+        // Thu thập dữ liệu sản phẩm
         var duLieuSanPham = {
             MaSanPham: $('#MaSanPham').val(),
             TenSanPham: $('#TenSanPham').val(),
@@ -280,11 +353,16 @@
             Camera: $('#Camera').val(),
             KichThuoc: $('#KichThuoc').val(),
             Chip: $('#Chip').val(),
-            RAM: $('#RAM').val()
-
+            Ram: $('#RAM').val(),
+            Roms: roms
         };
-        console.log('jQuery version:', $.fn.jquery); // Kiểm tra version jQuery
-        console.log('Data being sent:', duLieuSanPham); // Kiểm tra dữ liệu gửi đi
+
+        // Kiểm tra dữ liệu trước khi gửi
+        if (!duLieuSanPham.MaSanPham || !duLieuSanPham.TenSanPham) {
+            alert('Vui lòng nhập đầy đủ thông tin bắt buộc');
+            return;
+        }
+
         // Gửi yêu cầu AJAX
         $.ajax({
             type: 'POST',
@@ -292,50 +370,27 @@
             data: JSON.stringify(duLieuSanPham),
             contentType: 'application/json',
             dataType: 'json',
-            timeout: 30000,
-            success: function (phanHoi) {
+            success: function (response) {
                 alert('Thêm sản phẩm thành công!');
-                window.location.href = 'https://localhost:7244/admin/DanhMucSanPham'; // Chuyển hướng sau khi thêm thành công
+                window.location.reload();
             },
             error: function (xhr, status, error) {
-                // Log chi tiết thông tin lỗi
-                console.log('XHR:', xhr);
-                console.log('Status:', status);
-                console.log('Error:', error);
-                console.log('Response Text:', xhr.responseText);
+                console.error('XHR:', xhr);
+                console.error('Status:', status);
+                console.error('Error:', error);
 
-                // Log dữ liệu gửi đi
-                console.log('Dữ liệu gửi đi:', duLieuSanPham);
-
-                // Hiển thị thông báo lỗi chi tiết
-                let errorMessage = 'Lỗi khi gọi API:\n';
-                errorMessage += 'Status: ' + status + '\n';
-                errorMessage += 'Error: ' + error + '\n';
-
-                if (xhr.responseText) {
-                    try {
-                        // Thử parse responseText nếu là JSON
-                        const responseObj = JSON.parse(xhr.responseText);
-                        errorMessage += 'Response: ' + JSON.stringify(responseObj, null, 2);
-                    } catch (e) {
-                        // Nếu không phải JSON thì hiện text gốc
-                        errorMessage += 'Response: ' + xhr.responseText;
-                    }
+                let errorMessage = 'Lỗi khi thêm sản phẩm: ';
+                if (xhr.responseJSON) {
+                    errorMessage += xhr.responseJSON.message || xhr.responseJSON;
+                } else {
+                    errorMessage += error;
                 }
                 alert(errorMessage);
             }
         });
     }
-    function showHideDiveInsertData(activeDiv) {
-        if ($(document.getElementById(activeDiv)).is(":visible")) {
-            $(document.getElementById(activeDiv)).hide('slow');
-        }
-        else {
-            $(document.getElementById(activeDiv)).show('slow');
-        }
-    }
-    
 </script>
+
 <script>
     function submitEditProduct() {
         var sanPham = {
