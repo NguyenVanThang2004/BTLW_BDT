@@ -260,5 +260,59 @@
             display: flex;
             flex-direction: column;
         }
+
+        .chat-input {
+            position: sticky;
+            bottom: 0;
+            background-color: white;
+            padding: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            border-radius: 20px;
+            padding: 10px 20px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        #sendButton {
+            border-radius: 20px;
+            padding: 8px 25px;
+            background-color: #0d6efd;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        #sendButton:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-1px);
+        }
+
+        #sendButton:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Điều chỉnh khoảng cách giữa các tin nhắn */
+        #messagesList {
+            padding-bottom: 70px; /* Tạo khoảng cách để không bị che bởi thanh input */
+        }
+
+        /* Làm mượt hiệu ứng cuộn */
+        #messagesList {
+            scroll-behavior: smooth;
+        }
     </style>
 }
