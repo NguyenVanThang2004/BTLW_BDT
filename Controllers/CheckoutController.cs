@@ -86,7 +86,8 @@ namespace BTLW_BDT.Controllers
                     PhuongThucThanhToan = paymentMethod,
                     TongTien = cartItems.Sum(item => item.DonGia * item.SoLuong),
                     ThoiGianLap = DateTime.Now,
-                    
+                    MaKhachHang = HttpContext.Session.GetString("MaKhachHang")
+
 
                 };
 
@@ -197,7 +198,8 @@ namespace BTLW_BDT.Controllers
                 MaHoaDon = newMaHoaDon,
                 PhuongThucThanhToan = "QR",
                 TongTien = cartItems.Sum(item => item.DonGia * item.SoLuong),
-                ThoiGianLap = DateTime.Now
+                ThoiGianLap = DateTime.Now,
+                MaKhachHang = HttpContext.Session.GetString("MaKhachHang")
             };
 
             _context.HoaDonBans.Add(order);
