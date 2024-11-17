@@ -127,8 +127,35 @@
                             </div>
                             <div class="form-group mt-3">
                                 <label class="form-control-label">Địa chỉ</label>
-                                <input type="text" class="form-control" name="DiaChi" value="@Model.DiaChi" required>
-                                <div class="invalid-feedback">Vui lòng nhập địa chỉ</div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Tỉnh Thành</label><sup>*</sup>
+                                        <select class="form-control css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
+                                            <option value="0">Tỉnh Thành</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Quận Huyện</label><sup>*</sup>
+                                        <select class="form-control css_select" id="quan" name="quan" title="Chọn Quận Huyện">
+                                            <option value="0">Quận Huyện</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Phường Xã</label><sup>*</sup>
+                                        <select class="form-control css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
+                                            <option value="0">Phường Xã</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="position-relative">
+                                    <input type="text" id="addressSearch" name="DiaChi" class="form-control" 
+                                           placeholder="Nhập địa chỉ..." oninput="searchAddress()" 
+                                           value="@Model.DiaChi" required>
+                                    <ul id="addressSuggestions" class="list-group" 
+                                        style="display:none; position: absolute; width: 100%; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                    </ul>
+                                    <div class="invalid-feedback">Vui lòng nhập địa chỉ</div>
+                                </div>
                             </div>
                             <div class="form-group mt-3">
                                 <label class="form-control-label">Ghi chú</label>
@@ -143,6 +170,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         // Preview image before upload
         function previewImage(input) {
@@ -170,5 +198,75 @@
                     }, false)
                 })
         })()
+
+        $(document).ready(function () {
+            // Lấy tỉnh thành
+            $.getJSON('https://esgoo.net/api-tinhthanh/1/0.htm', function (data_tinh) {
+                if (data_tinh.error == 0) {
+                    $.each(data_tinh.data, function (key_tinh, val_tinh) {
+                        $("#tinh").append('<option value="' + val_tinh.id + '">' + val_tinh.full_name + '</option>');
+                    });
+                }
+            });
+
+            // Sự kiện thay đổi tỉnh
+            $("#tinh").change(function () {
+                var idtinh = $(this).val();
+                $.getJSON('https://esgoo.net/api-tinhthanh/2/' + idtinh + '.htm', function (data_quan) {
+                    if (data_quan.error == 0) {
+                        $("#quan").html('<option value="0">Quận Huyện</option>');
+                        $("#phuong").html('<option value="0">Phường Xã</option>');
+                        $.each(data_quan.data, function (key_quan, val_quan) {
+                            $("#quan").append('<option value="' + val_quan.id + '">' + val_quan.full_name + '</option>');
+                        });
+                    }
+                });
+            });
+
+            // Sự kiện thay đổi quận
+            $("#quan").change(function () {
+                var idquan = $(this).val();
+                $.getJSON('https://esgoo.net/api-tinhthanh/3/' + idquan + '.htm', function (data_phuong) {
+                    if (data_phuong.error == 0) {
+                        $("#phuong").html('<option value="0">Phường Xã</option>');
+                        $.each(data_phuong.data, function (key_phuong, val_phuong) {
+                            $("#phuong").append('<option value="' + val_phuong.id + '">' + val_phuong.full_name + '</option>');
+                        });
+                    }
+                });
+            });
+        });
+
+        // Hàm tìm kiếm địa chỉ
+        function searchAddress() {
+            var query = $("#addressSearch").val();
+            if (query.length > 2) {
+                $.getJSON('https://esgoo.net/api-timkiemdiachi/1/' + query + '.htm', function (data) {
+                    if (data.error == 0) {
+                        var suggestions = data.data;
+                        var suggestionList = $("#addressSuggestions");
+                        suggestionList.empty().show();
+                        suggestions.forEach(function (item) {
+                            suggestionList.append('<li class="list-group-item" onclick="selectAddress(\'' + item.full_name + '\')">' + item.full_name + '</li>');
+                        });
+                    }
+                });
+            } else {
+                $("#addressSuggestions").hide();
+            }
+        }
+
+        // Hàm chọn địa chỉ
+        function selectAddress(address) {
+            $("#addressSearch").val(address);
+            $("#addressSuggestions").hide();
+        }
+
+        // Đóng danh sách gợi ý khi click ra ngoài
+        $(document).click(function (e) {
+            if (!$(e.target).closest('#addressSearch, #addressSuggestions').length) {
+                $("#addressSuggestions").hide();
+            }
+        });
     </script>
 } 
