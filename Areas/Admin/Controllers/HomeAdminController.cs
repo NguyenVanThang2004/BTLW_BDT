@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System.Threading.Tasks.Dataflow;
 using X.PagedList;
 using X.PagedList.Extensions;
+using System.Text.RegularExpressions;
 
 namespace BTLW_BDT.Areas.Admin.Controllers
 {
@@ -312,6 +313,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         }
 
         [Route("Profile")]
+        [HttpGet]
         public async Task<IActionResult> Profile()
         {
             var username = HttpContext.Session.GetString("Username");
@@ -325,6 +327,100 @@ namespace BTLW_BDT.Areas.Admin.Controllers
                 .FirstOrDefaultAsync(nv => nv.TenDangNhap == username);
 
             return View(nhanVien);
+        }
+
+        [Route("UpdateProfile")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(NhanVien model, IFormFile? imageFile)
+        {
+            // Lấy nhân viên hiện tại từ database
+            var nhanVien = await db.NhanViens.FindAsync(model.MaNhanVien);
+            if (nhanVien == null)
+            {
+                return NotFound();
+            }
+
+            // Chỉ cập nhật các trường được phép thay đổi
+            // Giữ nguyên các giá trị khác từ database
+            if (!string.IsNullOrEmpty(model.TenNhanVien))
+                nhanVien.TenNhanVien = model.TenNhanVien.Trim();
+            
+            if (model.NgaySinh.HasValue)
+            {
+                // Validate ngày sinh
+                var minDate = DateOnly.FromDateTime(DateTime.Now.AddYears(-70));
+                var maxDate = DateOnly.FromDateTime(DateTime.Now.AddYears(-18));
+                if (model.NgaySinh < minDate || model.NgaySinh > maxDate)
+                {
+                    TempData["ErrorMessage"] = "Ngày sinh không hợp lệ (tuổi phải từ 18-70)!";
+                    return RedirectToAction("Profile");
+                }
+                nhanVien.NgaySinh = model.NgaySinh;
+            }
+
+            if (!string.IsNullOrEmpty(model.SoDienThoai))
+            {
+                // Validate số điện thoại
+                var phoneRegex = new Regex(@"^(0)[0-9]{9}$");
+                if (!phoneRegex.IsMatch(model.SoDienThoai))
+                {
+                    TempData["ErrorMessage"] = "Số điện thoại không hợp lệ!";
+                    return RedirectToAction("Profile");
+                }
+                nhanVien.SoDienThoai = model.SoDienThoai.Trim();
+            }
+
+            if (!string.IsNullOrEmpty(model.DiaChi))
+                nhanVien.DiaChi = model.DiaChi.Trim();
+
+            if (!string.IsNullOrEmpty(model.GhiChu))
+                nhanVien.GhiChu = model.GhiChu.Trim();
+
+            // Xử lý upload ảnh nếu có
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+                
+                if (!allowedExtensions.Contains(extension))
+                {
+                    TempData["ErrorMessage"] = "Chỉ chấp nhận file ảnh .jpg, .jpeg hoặc .png!";
+                    return RedirectToAction("Profile");
+                }
+
+                if (imageFile.Length > 5 * 1024 * 1024)
+                {
+                    TempData["ErrorMessage"] = "Kích thước ảnh không được vượt quá 5MB!";
+                    return RedirectToAction("Profile");
+                }
+
+                // Xóa ảnh cũ
+                if (!string.IsNullOrEmpty(nhanVien.AnhDaiDien))
+                {
+                    var oldImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", "Admin", nhanVien.AnhDaiDien);
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
+
+                // Upload ảnh mới
+                var fileName = Path.GetFileName(imageFile.FileName);
+                var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", "Admin", uniqueFileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                nhanVien.AnhDaiDien = uniqueFileName;
+                HttpContext.Session.SetString("Avatar", $"/Images/Admin/{uniqueFileName}");
+            }
+
+            await db.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
+            return RedirectToAction("Profile");
         }
 
     }
