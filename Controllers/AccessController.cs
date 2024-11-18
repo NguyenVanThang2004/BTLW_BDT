@@ -163,11 +163,18 @@ namespace BTLW_BDT.Controllers
                     {
                         khachHang.AnhDaiDien = MyUtil.UploadHinh(Hinh, "Customer");
                     }
-                    //else
-                    //{
-                    //    khachHang.AnhDaiDien = "default-avatar.jpg"; // Set default avatar if no image uploaded
-                    //}
-                    db.KhachHangs.Add(khachHang);
+                //else
+                //{
+                //    khachHang.AnhDaiDien = "default-avatar.jpg"; // Set default avatar if no image uploaded
+                //}
+                var gioHang = new GioHang
+                {
+                    MaGioHang = $"GH{MyUtil.GenerateRamdomKey()}",
+                    TenDangNhap = model.TaiKhoan,
+                    TongTien = 0
+                };
+                db.GioHangs.Add(gioHang);
+                db.KhachHangs.Add(khachHang);
                     db.TaiKhoans.Add(taiKhoan);
                     db.SaveChanges();
 

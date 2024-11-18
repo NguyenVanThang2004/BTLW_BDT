@@ -11,6 +11,10 @@ public partial class ChiTietGioHang
 
     public string MaSanPham { get; set; } = null!;
 
+    public string ThongSoMau { get; set; } = null!;
+
+    public string ThongSoRom { get; set; } = null!;
+
     public virtual GioHang MaGioHangNavigation { get; set; } = null!;
 
     public virtual SanPham MaSanPhamNavigation { get; set; } = null!;

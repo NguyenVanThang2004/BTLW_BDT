@@ -1,16 +1,12 @@
-﻿@{
+﻿@inject BTLW_BDT.Models.BtlLtwQlbdtContext _context
+@{
     ViewData["Title"] = "Checkout";
     Layout = "~/Views/Shared/_LayoutCart.cshtml";
-}
-@{
-    // Lấy giá trị ngày sinh từ Session
+
     var ngaySinh = Context.Session.GetString("NgaySinh");
     var ngaySinhFormatted = "";
-
-    // Kiểm tra và chuyển đổi ngày sinh về định dạng yyyy-MM-dd
     if (!string.IsNullOrEmpty(ngaySinh))
     {
-        // Giả sử ngày sinh trong session là dạng MM/dd/yyyy hoặc yyyy/MM/dd
         DateTime date;
         if (DateTime.TryParse(ngaySinh, out date))
         {
@@ -19,15 +15,12 @@
     }
 }
 
-@model List<BTLW_BDT.Models.Cart.CartItem>
+@model List<BTLW_BDT.Models.ChiTietGioHang>
 
 <div class="row px-xl-5">
     <div class="col-lg-8">
         <div class="mb-4">
             <h4 class="font-weight-semi-bold mb-4">Billing Address</h4>
-
-
-
             <div class="row">
                 <div class="col-md-6 form-group">
                     <label>Tên Khách Hàng</label>
@@ -56,18 +49,9 @@
                     <textarea class="form-control" rows="4" cols="50">@Context.Session.GetString("GhiChu")</textarea>
                 </div>
             </div>
-
-
-                
-                
-            
-
-            
         </div>
-       
     </div>
     <div class="col-lg-4">
-        
         <div class="card border-secondary mb-5">
             <div class="card-header bg-secondary border-0">
                 <h4 class="font-weight-semi-bold m-0">Order Total</h4>
@@ -77,9 +61,20 @@
 
                 @foreach (var item in Model)
                 {
+                    var sanPham = _context.SanPhams.FirstOrDefault(s => s.MaSanPham == item.MaSanPham);
+                    var mauSac = _context.MauSacs.FirstOrDefault(m => m.MaMau == item.ThongSoMau);
+                    var rom = _context.Roms.FirstOrDefault(r => r.MaRom == item.ThongSoRom);
+                    var danhSachRom = _context.Roms.Where(r => r.MaSanPham == item.MaSanPham).ToList();
+                    var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
+
+                    decimal baseRomGia = baseRom?.Gia.GetValueOrDefault() ?? 0;
+                    decimal selectedRomGia = rom?.Gia.GetValueOrDefault() ?? 0;
+                    decimal donGia = (selectedRomGia - baseRomGia) + sanPham.DonGiaBanRa.GetValueOrDefault();
+                    var tongTien = donGia * (item.SoLuong ?? 0);
+
                     <div class="d-flex justify-content-between">
-                        <p>@item.TenSanPham</p>
-                        <p>@Convert.ToDouble(item.TongTien).ToString("N0") VNĐ</p> <!-- Hiển thị tổng tiền của mỗi sản phẩm -->
+                        <p>@sanPham?.TenSanPham (@mauSac?.TenMau - @rom?.ThongSo)</p>
+                        <p>@Convert.ToDouble(tongTien).ToString("N0") VNĐ</p>
                     </div>
                 }
 
@@ -87,25 +82,38 @@
                 <div class="d-flex justify-content-between mb-3 pt-1">
                     <h6 class="font-weight-medium">Subtotal</h6>
                     <h6 class="font-weight-medium">
-                 
-                        @Convert.ToDouble(Model.Sum(item=>item.TongTien)).ToString("N0") VNĐ<!-- Tính tổng tiền từ giỏ hàng -->
+                        @{
+                            var totalAmount = Model.Sum(item =>
+                            {
+                                var sp = _context.SanPhams.FirstOrDefault(s => s.MaSanPham == item.MaSanPham);
+                                var danhSachRom = _context.Roms.Where(r => r.MaSanPham == item.MaSanPham).ToList();
+                                var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
+                                var selectedRom = _context.Roms.FirstOrDefault(r => r.MaRom == item.ThongSoRom);
+
+                                decimal baseRomGia = baseRom?.Gia.GetValueOrDefault() ?? 0;
+                                decimal selectedRomGia = selectedRom?.Gia.GetValueOrDefault() ?? 0;
+                                decimal donGia = (selectedRomGia - baseRomGia) + sp.DonGiaBanRa.GetValueOrDefault();
+
+                                return donGia * (item.SoLuong ?? 0);
+                            });
+                        }
+                        @Convert.ToDouble(totalAmount).ToString("N0") VNĐ
                     </h6>
                 </div>
                 <div class="d-flex justify-content-between">
                     <h6 class="font-weight-medium">Shipping</h6>
-                    <h6 class="font-weight-medium">25,000 VNĐ</h6> <!-- Phí vận chuyển cố định -->
+                    <h6 class="font-weight-medium">25,000 VNĐ</h6>
                 </div>
             </div>
             <div class="card-footer border-secondary bg-transparent">
                 <div class="d-flex justify-content-between mt-2">
                     <h5 class="font-weight-bold">Total</h5>
                     <h5 class="font-weight-bold">
-                        @((Model.Sum(item => item.DonGia * item.SoLuong) + 25000).ToString("N0")) VNĐ <!-- Tính tổng tiền cộng phí vận chuyển -->
+                        @Convert.ToDouble(totalAmount + 25000).ToString("N0") VNĐ
                     </h5>
                 </div>
             </div>
         </div>
-
 
         <form asp-controller="Checkout" asp-action="PlaceOrder" method="post">
             <input type="hidden" id="paymentMethod" name="paymentMethod" value="Pay at store" />
@@ -133,195 +141,177 @@
                             <img src="../assets/img/qr-icon.png" alt="QR Code" class="option-icon">
                             <span>Bank transfer via QR code</span>
                         </div>
- 
                     </div>
-                    <button class="confirm-btn" type="button" onclick="confirmSelection()">Confirm</button>
+                    <button class="confirm-btn" onclick="confirmSelection()">Confirm</button>
                 </div>
             </div>
-
-            <div class="card-footer border-secondary bg-transparent">
-                <button type="submit" class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3">
-                    Place Order
-                </button>
-            </div>
         </form>
+    </div>
+</div>
 
+<style>
+    /* Payment info section */
+    .payment-info {
+        padding: 20px;
+    }
 
-    <style>
-        /* Payment info section */
-        .payment-info {
-            padding: 20px;
+    .payment-selection {
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.1s;
+    }
+
+        .payment-selection:hover {
+            background-color: #f5f5f5;
+            transform: scale(1.02);
         }
 
-        .payment-selection {
+    /* Icon next to payment method */
+    .icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 15px;
+    }
+
+    /* Payment text styling */
+    .payment-text p {
+        margin: 0;
+        font-weight: bold;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .change-text {
+        margin-left: auto;
+        color: #007bff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+        .change-text:hover {
+            color: #0056b3;
+        }
+
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 25px;
+        width: 90%;
+        max-width: 400px;
+        border-radius: 12px;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        text-align: center;
+    }
+
+    .close {
+        position: absolute;
+        right: 15px;
+        top: 10px;
+        font-size: 28px;
+        cursor: pointer;
+    }
+
+    .payment-options {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+        .payment-options .option {
             display: flex;
             align-items: center;
-            background-color: #fff;
-            padding: 15px;
+            padding: 12px;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: background-color 0.3s, transform 0.1s;
         }
 
-            .payment-selection:hover {
-                background-color: #f5f5f5;
-                transform: scale(1.02);
+            .payment-options .option:hover {
+                background-color: #e9ecef;
+                transform: scale(1.03);
             }
 
-        /* Icon next to payment method */
-        .icon {
-            width: 40px;
-            height: 40px;
-            margin-right: 15px;
+    .option-icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 15px;
+    }
+
+    .payment-options .option.selected {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        font-weight: bold;
+    }
+
+    .confirm-btn {
+        margin-top: 20px;
+        width: 100%;
+        padding: 12px 0;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .confirm-btn:hover {
+            background-color: #45a049;
+        }
+</style>
+
+<script>
+    let selectedMethodText = 'Pay at store';
+    let selectedIconSrc = '../assets/img/how-pay-icon.png';
+    let currentSelectedElement = null;
+
+    function openModal() {
+        document.getElementById('paymentModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('paymentModal').style.display = 'none';
+    }
+
+    function selectMethod(method, icon) {
+        selectedMethodText = method;
+        selectedIconSrc = icon;
+
+        if (currentSelectedElement) {
+            currentSelectedElement.classList.remove('selected');
         }
 
-        /* Payment text styling */
-        .payment-text p {
-            margin: 0;
-            font-weight: bold;
-            font-size: 18px;
-            color: #333;
-        }
+        event.target.classList.add('selected');
+        currentSelectedElement = event.target;
 
-        .change-text {
-            margin-left: auto;
-            color: #007bff;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
+        document.getElementById('paymentMethod').value = method;
+    }
 
-            .change-text:hover {
-                color: #0056b3;
-            }
-
-        /* Modal styles */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        /* Modal content box */
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 25px;
-            width: 90%;
-            max-width: 400px;
-            border-radius: 12px;
-            position: relative;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
-
-        /* Close button */
-        .close {
-            position: absolute;
-            right: 15px;
-            top: 10px;
-            font-size: 28px;
-            cursor: pointer;
-        }
-
-        /* Payment options styling */
-        .payment-options {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-            /* Styling each payment option */
-            .payment-options .option {
-                display: flex;
-                align-items: center;
-                padding: 12px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: background-color 0.3s, transform 0.1s;
-            }
-
-                .payment-options .option:hover {
-                    background-color: #e9ecef;
-                    transform: scale(1.03);
-                }
-
-        /* Icon for each option */
-        .option-icon {
-            width: 40px;
-            height: 40px;
-            margin-right: 15px;
-        }
-
-        /* Highlight selected option */
-        .payment-options .option.selected {
-            background-color: #d1e7dd;
-            color: #0f5132;
-            font-weight: bold;
-        }
-
-        /* Confirm button */
-        .confirm-btn {
-            margin-top: 20px;
-            width: 100%;
-            padding: 12px 0;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-            .confirm-btn:hover {
-                background-color: #
-    </style>
-    <script>
-
-            let selectedMethodText = 'Pay at store';
-            let selectedIconSrc = '../assets/img/how-pay-icon.png';
-            let currentSelectedElement = null;
-
-            function openModal() {
-                document.getElementById('paymentModal').style.display = 'block';
-            }
-
-            function closeModal() {
-                document.getElementById('paymentModal').style.display = 'none';
-            }
-
-            function selectMethod(method, icon) {
-                selectedMethodText = method;
-                selectedIconSrc = icon;
-
-                // Xóa màu của phần tử trước đó
-                if (currentSelectedElement) {
-                    currentSelectedElement.classList.remove('selected');
-                }
-
-                // Gán phần tử được chọn và thêm lớp 'selected'
-                event.target.classList.add('selected');
-                currentSelectedElement = event.target;
-
-                // Cập nhật giá trị trong input hidden
-                document.getElementById('paymentMethod').value = method;
-            }
-
-            function confirmSelection() {
-                // Cập nhật giao diện chính
-                document.getElementById('selectedMethod').textContent = selectedMethodText;
-                document.getElementById('selectedIcon').src = selectedIconSrc;
-
-                // Đóng modal
-                closeModal();
-            }
-    </script>
+    function confirmSelection() {
+        document.getElementById('selectedMethod').textContent = selectedMethodText;
+        document.getElementById('selectedIcon').src = selectedIconSrc;
+        closeModal();
+    }
+</script>

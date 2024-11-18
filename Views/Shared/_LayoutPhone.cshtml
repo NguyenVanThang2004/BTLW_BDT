@@ -88,7 +88,7 @@
                 </a>
                 <a asp-controller="Cart" asp-action="DetailCart" class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">@ViewBag.CartCount</span>
+                    <span class="badge">@(ViewBag.CartCount ?? 0)</span>
                 </a>
             </div>
         </div>
