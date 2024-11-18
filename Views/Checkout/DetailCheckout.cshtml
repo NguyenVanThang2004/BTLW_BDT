@@ -143,8 +143,13 @@
                             <span>Bank transfer via QR code</span>
                         </div>
                     </div>
-                    <button class="confirm-btn" onclick="confirmSelection()">Confirm</button>
+                    <button class="confirm-btn" type="button" onclick="confirmSelection()">Confirm</button>
                 </div>
+            </div>
+              <div class="card-footer border-secondary bg-transparent">
+                <button type="submit" class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3">
+                    Place Order
+                </button>
             </div>
         </form>
     </div>
@@ -325,4 +330,5 @@
         document.getElementById('selectedIcon').src = selectedIconSrc;
         closeModal();
     }
+
 </script>
