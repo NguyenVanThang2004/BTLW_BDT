@@ -1,4 +1,5 @@
 ﻿using BTLW_BDT.Models;
+using BTLW_BDT.Responsitory;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,13 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;              // Cookie là cần thiết
 });
 
+var conectionString = builder.Configuration.GetConnectionString("QlbanVaLiContext");
+builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(conectionString));
+builder.Services.AddScoped<IHangSpResponsitory, HangSpResponsitory>();
+
+
 var app = builder.Build();
+
 
 
 if (!app.Environment.IsDevelopment())
@@ -43,6 +50,6 @@ app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Shop}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

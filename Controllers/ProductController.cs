@@ -9,10 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BTLW_BDT.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    //[Route("Phone")]
-    public class PhoneController : Controller
+
+    [Route("Product")]
+    public class ProductController : Controller
     {
         BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
         [HttpGet("GetPhoneByRam")]
@@ -20,19 +19,19 @@ namespace BTLW_BDT.Controllers
         {
             var ramList = rams.Split(',').Select(r => r.Trim()).ToList();
             var query = db.SanPhams.Where(p => ramList.Contains(p.Ram));
-            
+
             var totalItems = query.Count();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-            
+
             var phones = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            
+
             var viewModel = new
             {
                 Products = phones,
                 TotalPages = totalPages,
                 CurrentPage = page
             };
-            
+
             return Json(viewModel);
         }
         [HttpGet("GetRamOptions")]
@@ -45,19 +44,19 @@ namespace BTLW_BDT.Controllers
         public IActionResult GetAllPhones(int page = 1, int pageSize = 12)
         {
             var query = db.SanPhams;
-            
+
             var totalItems = query.Count();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-            
+
             var phones = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            
+
             var viewModel = new
             {
                 Products = phones,
                 TotalPages = totalPages,
                 CurrentPage = page
             };
-            
+
             return Json(viewModel);
         }
         [HttpGet("GetFilteredPhones")]
