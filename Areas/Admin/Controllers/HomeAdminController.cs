@@ -150,7 +150,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
 
         }
         [HttpPost]
-        [Route("GetChartDataBySelect")]
+       
         public async Task<IActionResult> GetChartDataBySelect(DateTime startDate, DateTime endDate)
         {
             var data = (from hdb in db.HoaDonBans
@@ -165,6 +165,41 @@ namespace BTLW_BDT.Areas.Admin.Controllers
                             TongTien = hdb.TongTien,
                             LoiNhuan = cthdb.DonGiaCuoi
                         }).Where(x => x.NgayBan >= startDate && x.NgayBan <= endDate).
+                        Select(x => new
+                        {
+                            date = x.NgayBan.ToString("yyyy-MM-dd"),
+                            sold = x.SoLuongBan,
+                            quantity = x.TongTien,
+                            profit = x.LoiNhuan
+                        }).ToList();
+            Console.WriteLine(JsonConvert.SerializeObject(data));
+            return Json(data);
+
+        }
+        [HttpPost]
+        [Route("FilterData")]
+        public async Task<IActionResult> FilterData(DateTime fromDate, DateTime toDate)
+        {
+            var data = (from hdb in db.HoaDonBans
+                        join cthdb in db.ChiTietHoaDonBans on hdb.MaHoaDon equals cthdb.MaHoaDon
+                        join sp in db.SanPhams on cthdb.MaSanPham equals sp.MaSanPham
+                        join ctgh in db.ChiTietGioHangs on sp.MaSanPham equals ctgh.MaSanPham
+                        join gh in db.GioHangs on ctgh.MaGioHang equals gh.MaGioHang
+
+                        select new BieuDo
+                        {
+                            NgayBan = hdb.ThoiGianLap,
+                            SoLuongBan = (from cth in db.ChiTietHoaDonBans
+                                          select cth.SoLuongBan).Sum(),
+                            TongTien = (from hdbSub in db.HoaDonBans
+                                        select hdbSub.TongTien).Sum(),
+                            LoiNhuan = (from hdbSub in db.HoaDonBans
+                                        select hdbSub.TongTien).Sum()
+                            - (from cth in db.ChiTietHoaDonBans
+                               join sp in db.SanPhams on cth.MaSanPham equals sp.MaSanPham
+                               where (cth.MaHoaDon == hdb.MaHoaDon)
+                               select (cth.DonGiaCuoi ?? sp.DonGiaBanGoc) * cth.SoLuongBan).Sum()
+                        }).Where(x => x.NgayBan >= fromDate && x.NgayBan <= toDate).
                         Select(x => new
                         {
                             date = x.NgayBan.ToString("yyyy-MM-dd"),

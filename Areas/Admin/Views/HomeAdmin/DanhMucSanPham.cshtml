@@ -126,10 +126,7 @@
             <label class="control-label">Chip</label>
             <input id="Chip" type="text" class="form-control" />
         </div>
-        <div class="form-group">
-            <label class="control-label">Ram</label>
-            <input id="RAM" type="text" class="form-control" />
-        </div>
+       
         <div class="form-group">
             <label class="control-label">RAM</label>
             <input id="RAM" type="text" class="form-control" />
@@ -144,16 +141,59 @@
                     <input type="text" class="form-control rom-ma" />
                 </div>
                 <div class="form-group">
-                    <label class="control-label">Thông số</label>
-                    <input type="text" class="form-control rom-thongso" />
+                    <label class="control-label">Thông số ROM</label>
+                    <select class="form-control rom-thongso">
+                        <option value="-1" data-price="0">Chọn ROM</option>
+                        <option value="64GB" data-price="200000">64GB</option>
+                        <option value="128GB" data-price="400000">128GB</option>
+                        <option value="256GB" data-price="600000">256GB</option>
+                        <option value="512GB" data-price="800000">512GB</option>
+                        <option va lue="1TB" data-price="1200000">1TB</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="control-label">Giá</label>
-                    <input type="number" class="form-control rom-gia" />
+                    <input type="number" class="form-control rom-gia" readonly />
                 </div>
             </div>
+            
+            
         </div>
-        <button type="button" class="btn btn-secondary" onclick="addRomEntry()">Thêm ROM</button>
+        <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addRomEntry()">Thêm ROM</button>
+        <div id="mauSacContainer">
+            <div class="mau-entry">
+                <h4>Màu sắc #1</h4>
+                <div class="form-group">
+                    <label class="control-label">Mã Màu</label>
+                    <input type="text" class="form-control mau-ma" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Tên màu</label>
+                    <select class="form-control mau-ten   ">
+                        <option value="-1">Chọn Màu</option>
+                        <option value="001">Xanh</option>
+                        <option value="002">Tím</option>
+                        <option value="003">Đen</option>
+                        <option value="004">Trắng</option>
+                        <option value="005">Vàng</option>
+                    </select>
+                </div>
+                
+            </div>
+            <div class="anhSpContainer">
+                <div class="anh-entry">
+                    <h6 style ="margin-top:10px;">Ảnh </h6>
+                    <div class="form-group">
+                        <label class="control-label">Chọn ảnh</label>
+                        <input type="text" class="form-control anh-ten" />
+                    </div>
+                </div>
+                
+            </div>
+            <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addAnhEntry()">Thêm Ảnh</button>
+            
+        </div>
+        <button  type="button" class="btn btn-secondary" onclick="addMauEntry()">Thêm Màu</button>
         <div class="form-group">
             <input onclick="addANewProduct('https://localhost:7040/api/product/'); return false;" value="Create" class="btn btn-primary" />
         </div>
@@ -268,15 +308,77 @@
             <label class="control-label">RAM</label>
             <input type="text" class="form-control" id="editRAM" />
         </div>
+        
+        <div id="editromContainer">
+            <div class="editrom-entry">
+                <h4>ROM #1</h4>
+                <div class="form-group">
+                    <label class="control-label">Mã ROM</label>
+                    <input type="text" class="form-control editrom-ma" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Thông số ROM</label>
+                    <select class="form-control editrom-thongso">
+                        <option value="-1" data-price="0">Chọn ROM</option>
+                        <option value="64GB" data-price="200000">64GB</option>
+                        <option value="128GB" data-price="400000">128GB</option>
+                        <option value="256GB" data-price="600000">256GB</option>
+                        <option value="512GB" data-price="800000">512GB</option>
+                        <option va lue="1TB" data-price="1200000">1TB</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Giá</label>
+                    <input type="number" class="form-control editrom-gia" readonly />
+                </div>
+            </div>
+
+        </div>
+
+        <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addEditRomEntry()">Thêm ROM</button>
+        <div id="editmauSacContainer">
+            <div class="editmau-entry">
+                <h4>Màu sắc #1</h4>
+                <div class="form-group">
+                    <label class="control-label">Mã Màu</label>
+                    <input type="text" class="form-control editmau-ma" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Tên màu</label>
+                    <select class="form-control editmau-ten   ">
+                        <option value="-1">Chọn Màu</option>
+                        <option value="Xanh">Xanh</option>
+                        <option value="Tím">Tím</option>
+                        <option value="Đen">Đen</option>
+                        <option value="Trắng">Trắng</option>
+                        <option value="Vàng">Vàng</option>
+                    </select>
+                </div>
+            </div>
+            <div class="editanhSpContainer">
+                <div class="editanh-entry">
+                    <h6 style="margin-top:10px;">Ảnh </h6>
+                    <div class="form-group">
+                        <label class="control-label">Chọn ảnh</label>
+                        <input type="text" class="form-control editanh-ten" />
+                    </div>
+                </div>
+
+            </div>
+            <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addEditAnhEntry()">Thêm Ảnh</button>
+
+        </div>
+        <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addEditMauEntry()">Thêm Màu</button>
         <div class="form-group">
-            <button type="button" onclick="submitEditProduct()" class="btn btn-danger delete-btn">Lưu</button>
+            <button style="margin-top:10px;" type="button" onclick="submitEditProduct()" class="btn btn-danger delete-btn">Lưu</button>
         </div>
     </form>
 </div>
 
 <script type="text/javascript">
     let romCount = 1;
-
+    let mauCount = 1;
+    
     function showHideDiveInsertData(activeDiv) {
         if ($(document.getElementById(activeDiv)).is(":visible")) {
             $(document.getElementById(activeDiv)).hide('slow');
@@ -285,7 +387,65 @@
             $(document.getElementById(activeDiv)).show('slow');
         }
     }
+    function addAnhEntry(){
+        console.log("đã bấm thêm");
+        
+        const newAnhHtml = `
+             <div class="anh-entry">
+                     <h6 style="margin-top:10px;">Ảnh</h6>
+                        <div class="form-group">
+                            <label class="control-label">Chọn ảnh</label>
+                            <input type="text" class="form-control anh-ten" />
+                        </div>
+                        <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeAnhEntry(this)">Xóa Ảnh</button>
+             </div>
+                    
+        `;
+        console.log("doan tml", newAnhHtml);
+        $('.anhSpContainer').append(newAnhHtml);
+    }
+    function removeAnhEntry(button) {
+        console.log("bãmoa", $(button).closest('.anh-entry'));
+        $(button).closest('.anh-entry').remove();    
+    }
+    function addMauEntry(){
+        mauCount++;
+        const newMauHtml = `
+            <div class="mau-entry">
+                        <h4>Màu sắc #${mauCount}</h4>
+                        <div class="form-group">
+                            <label class="control-label">Mã Màu</label>
+                                <input type="text" class="form-control mau-ma" />
+                        </div>
+                           <div class="form-group">
+                                <label class="control-label">Tên màu</label>
+                                <select class="form-control mau-ten">
+                                       <option value="-1">Chọn Màu</option>
+                            <option value="Xanh">Xanh</option>
+                            <option value="Tím">Tím</option>
+                            <option value="Đen">Đen</option>
+                            <option value="Trắng">Trắng</option>
+                            <option value="Vàng">Vàng</option>
+                                </select>
+                        </div>
+                        <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeMauEntry(this)">Xóa màu</button>
+                <div class="anhSpContainer">
+                    <div class="anh-entry">
+                            <h6 style="margin-top:10px;">Ảnh </h6>
+                        <div class="form-group">
+                            <label class="control-label">Chọn ảnh</label>
+                            <input type="text" class="form-control anh-ten" />
+                        </div>
+                    </div>
 
+                </div>
+                <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addAnhEntry()">Thêm Ảnh</button>
+                 </div>
+
+             </div>
+        `;
+        $('#mauSacContainer').append(newMauHtml);
+    }
     function addRomEntry() {
         romCount++;
         const newRomHtml = `
@@ -293,24 +453,44 @@
                     <h4>ROM #${romCount}</h4>
                     <div class="form-group">
                         <label class="control-label">Mã ROM</label>
-                        <input type="text" class="form-control rom-ma" />
+                            <input type="text" class="form-control rom-ma" />
                     </div>
-                    <div class="form-group">
-                        <label class="control-label">Thông số</label>
-                        <input type="text" class="form-control rom-thongso" />
-                    </div>
+                       <div class="form-group">
+                        <label class="control-label">Thông số ROM</label>
+                        <select class="form-control rom-thongso">
+                                <option value="-1" data-price="0">Chọn ROM</option>
+                              <option value="64GB" data-price="200000">64GB</option>
+                                <option value="128GB" data-price="400000">128GB</option>
+                                <option value="256GB" data-price="600000">256GB</option>
+                                <option value="512GB" data-price="800000">512GB</option>
+                                <option value="1TB" data-price="1200000">1TB</option>   
+                        </select>
+                    </div>  
                     <div class="form-group">
                         <label class="control-label">Giá</label>
-                        <input type="number" class="form-control rom-gia" />
+                        <input type="number" class="form-control rom-gia" readonly />
                     </div>
-                    <button type="button" class="btn btn-danger" onclick="removeRomEntry(this)">Xóa ROM</button>
+                    <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeRomEntry(this)">Xóa ROM</button>
                 </div>
             `;
         $('#romContainer').append(newRomHtml);
     }
+    $(document).on('change', '.rom-thongso', function () {
+        let selectedThongSo = $(this).val();
+        let selectedOption = $(this).find('option:selected');
+        let selectedPrice = selectedOption.data('price');
+        $(this).closest('.form-group').next().find('.rom-gia').val(selectedPrice || 0);
 
+        console.log('Thông số chọn:', selectedOption); // Kiểm tra giá trị ThongSo
+    })
+    
     function removeRomEntry(button) {
         $(button).closest('.rom-entry').remove();
+        romCount= romCount -1;
+    }
+    function removeMauEntry(button) {
+        $(button).closest('.mau-entry').remove();
+        mauCount = mauCount -1;
     }
 
     function addANewProduct(apiUrl) {
@@ -319,15 +499,41 @@
         $('.rom-entry').each(function () {
             const rom = {
                 MaRom: $(this).find('.rom-ma').val(),
-                ThongSo: $(this).find('.rom-thongso').val(),
-                Gia: parseFloat($(this).find('.rom-gia').val())
+                ThongSo: $(this).find('.rom-thongso').val(), // Lấy giá trị của option đã chọn
+                Gia: parseFloat($(this).find('.rom-gia').val()), // Lấy giá trị price từ thuộc tính data-price
+                MaSanPham: $('#MaSanPham').val()
             };
+            console.log(rom)
             if (rom.MaRom && rom.ThongSo && !isNaN(rom.Gia)) { // Kiểm tra dữ liệu hợp lệ
                 roms.push(rom);
             }
-        });
-
-        // Thu thập dữ liệu sản phẩm
+        })
+        const mausacs = [];
+        const anhsanphams = [];
+        $('.mau-entry').each(function () {
+            const mausac = {
+                MaMau: $(this).find('.mau-ma').val(),
+                TenMau: $(this).find('.mau-ten').val(),
+                MaSanPham: $('#MaSanPham').val()
+            };
+            $('.anhSpContainer .anh-entry').each(function () {
+                console.log("Đã vào đây");
+                const anhsanpham = {
+                    TenFile: $(this).find('.anh-ten').val(),
+                    MaMau: mausac.MaMau, // Lấy MaMau hiện tại từ mausac
+                    MaSanPham: mausac.MaSanPham
+                };
+                if (anhsanpham.TenFile) { // Kiểm tra nếu ảnh hợp lệ
+                    anhsanphams.push(anhsanpham);
+                }
+            });
+            console.log(mausac)
+            if (mausac.MaMau && mausac.TenMau ) { // Kiểm tra dữ liệu hợp lệ
+                mausacs.push(mausac);            
+            }
+        })
+        console.log("Danh sách màu sắc:", mausacs);
+        console.log("Danh sách ảnh sản phẩm:", anhsanphams);
         var duLieuSanPham = {
             MaSanPham: $('#MaSanPham').val(),
             TenSanPham: $('#TenSanPham').val(),
@@ -354,16 +560,15 @@
             KichThuoc: $('#KichThuoc').val(),
             Chip: $('#Chip').val(),
             Ram: $('#RAM').val(),
-            Roms: roms
+            Roms: roms,
+            Mausacs:mausacs,
+            AnhSanPhams: anhsanphams
         };
 
-        // Kiểm tra dữ liệu trước khi gửi
         if (!duLieuSanPham.MaSanPham || !duLieuSanPham.TenSanPham) {
             alert('Vui lòng nhập đầy đủ thông tin bắt buộc');
             return;
         }
-
-        // Gửi yêu cầu AJAX
         $.ajax({
             type: 'POST',
             url: apiUrl,
@@ -372,13 +577,9 @@
             dataType: 'json',
             success: function (response) {
                 alert('Thêm sản phẩm thành công!');
-                window.location.reload();
+                
             },
             error: function (xhr, status, error) {
-                console.error('XHR:', xhr);
-                console.error('Status:', status);
-                console.error('Error:', error);
-
                 let errorMessage = 'Lỗi khi thêm sản phẩm: ';
                 if (xhr.responseJSON) {
                     errorMessage += xhr.responseJSON.message || xhr.responseJSON;
@@ -392,7 +593,52 @@
 </script>
 
 <script>
+    $(document).on('change', '.editrom-thongso', function () {
+        let selectedThongSo = $(this).val();
+        let selectedOption = $(this).find('option:selected');
+        let selectedPrice = selectedOption.data('price');
+        $(this).closest('.form-group').next().find('.editrom-gia').val(selectedPrice || 0);
+
+        console.log('Thông số chọn:', selectedOption); // Kiểm tra giá trị ThongSo
+    })
     function submitEditProduct() {
+        const roms = [];
+        $('.editrom-entry').each(function () {
+            const rom = {
+                MaRom: $(this).find('.editrom-ma').val(),
+                ThongSo: $(this).find('.editrom-thongso').val(), // Lấy giá trị của option đã chọn
+                Gia: parseFloat($(this).find('.editrom-gia').val()), // Lấy giá trị price từ thuộc tính data-price
+                MaSanPham: $('#editMaSanPham').val()
+            };
+            console.log(rom)
+            if (rom.MaRom && rom.ThongSo && !isNaN(rom.Gia)) { // Kiểm tra dữ liệu hợp lệ
+                roms.push(rom);
+            }
+        })
+        const mausacs = [];
+        const anhsanphams = [];
+        $('.editmau-entry').each(function () {
+            const mausac = {
+                MaMau: $(this).find('.editmau-ma').val(),
+                TenMau: $(this).find('.editmau-ten').val(),
+                MaSanPham: $('#editMaSanPham').val()
+            };
+            console.log(mausac)
+            $('.editanhSpContainer .editanh-entry').each(function () {
+                console.log("Đã vào đây");
+                const anhsanpham = {
+                    TenFile: $(this).find('.editanh-ten').val(),
+                    MaMau: mausac.MaMau, // Lấy MaMau hiện tại từ mausac
+                    MaSanPham: mausac.MaSanPham
+                };
+                if (anhsanpham.TenFile) { // Kiểm tra nếu ảnh hợp lệ
+                    anhsanphams.push(anhsanpham);
+                }
+            });          
+            if (mausac.MaMau && mausac.TenMau) { // Kiểm tra dữ liệu hợp lệ
+                mausacs.push(mausac);
+            }
+        })
         var sanPham = {
             maSanPham: $('#editMaSanPham').val(),
             tenSanPham: $('#editTenSanPham').val(),
@@ -418,7 +664,10 @@
             camera: $('#editCamera').val(),
             kichThuoc: $('#editKichThuoc').val(),
             chip: $('#editChip').val(),
-            ram: $('#editRAM').val()
+            ram: $('#editRAM').val(),
+            roms:roms,
+            mauSacs:mausacs,
+            anhSanPhams:anhsanphams
 
         };
         $.ajax({
@@ -428,7 +677,7 @@
             data: JSON.stringify(sanPham),
             success: function () {
                 alert("Sửa sản phẩm thành công!");
-                $('edit#MaSanPham').hide();
+                $('#editMaSanPham').hide();
                 location.reload(); // Tải lại danh sách sản phẩm (nếu cần)
             },
             error: function (xhr, status, error) {
@@ -466,16 +715,107 @@
     }
 </script>
 <script>
+    let editromCount = 1;
+    let editmauCount = 1;
+
+
+    function removeEditRomEntry(button) {
+        $(button).closest('.editrom-entry').remove();
+    }
+    function removeEditMauEntry(button) {
+        $(button).closest('.editmau-entry').remove();
+    }
+    function removeEditAnhEntry(button) {
+        console.log("bãmoa", $(button).closest('.anh-entry'));
+
+        $(button).closest('.editanh-entry').remove();
+
+    }
+    function addEditAnhEntry() {
+        console.log("đã bấm sửa");
+
+        const newEditAnhHtml = `
+                 <div class="editanh-entry">
+                         <h6 style="margin-top:10px;">Ảnh</h6>
+                            <div class="form-group">
+                                <label class="control-label">Chọn ảnh</label>
+                                <input type="text" class="form-control editanh-ten" />
+                            </div>
+                            <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeEditAnhEntry(this)">Xóa Ảnh</button>
+                 </div>
+            `;
+        console.log("doan tml", newEditAnhHtml);
+        $('.editanhSpContainer').append(newEditAnhHtml);
+    }
+    
+    function addEditMauEntry() {
+        editmauCount++;
+        const neweditMauHtml = `
+                <div class="editmau-entry">
+                            <h4>Màu sắc #${editmauCount}</h4>
+                            <div class="form-group">
+                                <label class="control-label">Mã Màu</label>
+                                    <input type="text" class="form-control editmau-ma" />
+                            </div>
+                               <div class="form-group">
+                                    <label class="control-label">Tên màu</label>
+                                    <select class="form-control editmau-ten">
+                                           <option value="-1">Chọn Màu</option>
+                                <option value="Xanh">Xanh</option>
+                                <option value="Tím">Tím</option>
+                                <option value="Đen">Đen</option>
+                                <option value="Trắng">Trắng</option>
+                                <option value="Vàng">Vàng</option>
+                                    </select>
+                            </div>
+                            <button type="button" class="btn btn-danger" onclick="removeEditMauEntry(this)">Xóa màu</button>
+                        </div>
+            `;
+        $('#editmauSacContainer').append(neweditMauHtml);
+    }
+    function addEditRomEntry() {
+        editromCount++;
+        const neweditRomHtml = `
+                    <div class="editrom-entry">
+                        <h4>ROM #${editromCount}</h4>
+                        <div class="form-group">
+                            <label class="control-label">Mã ROM</label>
+                                <input type="text" class="form-control editrom-ma" />
+                        </div>
+                           <div class="form-group">
+                            <label class="control-label">Thông số ROM</label>
+                            <select class="form-control editrom-thongso">
+                                    <option value="-1" data-price="0">Chọn ROM</option>
+                                  <option value="64GB" data-price="200000">64GB</option>
+                                    <option value="128GB" data-price="400000">128GB</option>
+                                    <option value="256GB" data-price="600000">256GB</option>
+                                    <option value="512GB" data-price="800000">512GB</option>
+                                    <option value="1TB" data-price="1200000">1TB</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Giá</label>
+                            <input type="number" class="form-control editrom-gia" readonly />
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="removeEditRomEntry(this)">Xóa ROM</button>
+                    </div>
+                `;
+        $('#editromContainer').append(neweditRomHtml);
+    }
     function editProduct(maSanPham) {
         $.ajax({
             url: `https://localhost:7040/api/Product/GetProductsById/${maSanPham}`, // Đảm bảo URL chính xác
             type: 'GET',
-            timeout:10000,
+            timeout: 10000,
             success: function (data) {
                 console.log('Dữ liệu nhận được từ API:', data);
-                console.log('masp',(data.maSanPham))
-                console.log('ténp',(data.tenSanPham))
-                console.log('ténp',(data.thoiGianBaoHanh))
+                console.log('masp', (data.maSanPham))
+                console.log('ROMs:', data.roms); // Kiểm tra xem "roms" có tồn tại không
+                console.log('Màu sắc:', data.mauSacs); // Kiểm tra "mauSacs"
+                let roms = data.roms && data.roms.$values ? data.roms.$values : [];
+                console.log('Danh sách ROMs:', roms);
+
+                
                 // Điền dữ liệu vào form
                 $('#editMaSanPham').val(data.maSanPham).prop('disabled', true);
                 $('#editTenSanPham').val(data.tenSanPham);
@@ -503,6 +843,99 @@
                 $('#editChip').val(data.chip);
                 $('#editRAM').val(data.ram);
 
+
+                if (roms.length > 0) {
+                    let romContainer = $('#editromContainer');
+                    romContainer.empty(); // Xóa toàn bộ nội dung cũ để thêm mới
+                    roms.forEach(rom => {
+                        let romHtml = `
+                        <div class="editrom-entry">
+                            <h4>ROM</h4>
+                            <div class="form-group">
+                                <label class="control-label">Mã ROM</label>
+                                <input type="text" class="form-control editrom-ma" value="${rom.maRom}" />
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Thông số ROM</label>
+                                <select class="form-control editrom-thongso">
+                                    <option value="64GB" ${rom.thongSo === '64GB' ? 'selected' : ''}>64GB</option>
+                                    <option value="128GB" ${rom.thongSo === '128GB' ? 'selected' : ''}>128GB</option>
+                                    <option value="256GB" ${rom.thongSo === '256GB' ? 'selected' : ''}>256GB</option>
+                                    <option value="512GB" ${rom.thongSo === '512GB' ? 'selected' : ''}>512GB</option>
+                                    <option value="1TB" ${rom.thongSo === '1TB' ? 'selected' : ''}>1TB</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Giá</label>
+                                <input type="number" class="form-control editrom-gia" value="${rom.gia}" />
+                            </div>
+                                 <button type="button" class="btn btn-danger" onclick="removeEditRomEntry(this)">Xóa ROM</button>
+                        </div>`;
+                        romContainer.append(romHtml);
+                    });
+                } else {
+                    console.warn('Dữ liệu ROMs không hợp lệ hoặc trống.');
+                }
+
+                // Tương tự, xử lý phần màu sắc (nếu có)
+                let mauSacs = data.mauSacs && data.mauSacs.$values ? data.mauSacs.$values : [];
+                console.log('Danh sách màu sắc:', mauSacs);
+
+                if (mauSacs.length > 0) {
+                    let mauSacContainer = $('#editmauSacContainer');
+                    mauSacContainer.empty();
+                    mauSacs.forEach(mauSac => {
+                        let anhHtml = '';
+                        let anhSanPhams = data.anhSanPhams && data.anhSanPhams.$values ? data.anhSanPhams.$values : [];
+                        let filteredAnhs = anhSanPhams.filter(anh => anh.maSanPham === mauSac.maSanPham && anh.maMau === mauSac.maMau);
+                        console.log(`Ảnh của Màu ${mauSac.maMau}:`, filteredAnhs);
+                        // Lặp qua danh sách ảnh của từng màu
+                        if (filteredAnhs.length > 0) {
+                            let anhSpContainer = $('#editanhSpContainer');
+                            anhSpContainer.empty();
+                            filteredAnhs.forEach(anh => {
+                                console.log("anhne", anh);
+                                anhHtml += `
+                                <div class="editanh-entry">
+                                    <h6 style="margin-top:10px;">Ảnh</h6>
+                                    <div class="form-group">
+                                        <label class="control-label">Chọn ảnh</label>
+                                        <input type="text" class="form-control editanh-ten" value="${anh.tenFile}" />
+                                    </div>
+                                    <button type="button" class="btn btn-danger" onclick="removeEditAnhEntry(this)">Xóa ảnh</button>
+                                </div>`;
+                            });
+                        }
+                        let mauSacHtml = `
+                        <div class="editmau-entry">
+                            <h4>Màu Sắc</h4>
+                            <div class="form-group">
+                                <label class="control-label">Mã Màu</label>
+                                <input type="text" class="form-control editmau-ma" value="${mauSac.maMau}" />
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Tên màu</label>
+                                <select class="form-control editmau-ten">
+                                            <option value="-1">Chọn Màu</option>
+                        <option value="Xanh" ${mauSac.tenMau === 'xanh' ? 'selected' : ''}>Xanh</option>
+                        <option value="Tím" ${mauSac.tenMau === 'tím' ? 'selected' : ''}>Tím</option>
+                        <option value="Đen" ${mauSac.tenMau === 'đen' ? 'selected' : ''}>Đen</option>
+                        <option value="Trắng" ${mauSac.tenMau === 'trắng' ? 'selected' : ''}>Trắng</option>
+                        <option value="Vàng" ${mauSac.tenMau === 'vàng' ? 'selected' : ''}>Vàng</option>
+                                </select>
+                            </div>
+                                 <button type="button" class="btn btn-danger" onclick="removeEditMauEntry(this)">Xóa màu</button>
+                        <div class="editanhSpContainer">
+                                ${anhHtml}
+                       </div>
+                        <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addEditAnhEntry()">Thêm Ảnh</button>
+
+                        </div>`;
+                        mauSacContainer.append(mauSacHtml);
+                    });
+                } else {
+                    console.warn('Dữ liệu Màu sắc không hợp lệ hoặc trống.');
+                }
                 // Hiển thị form sửa
                 $('#editForm').show();
             },
@@ -527,12 +960,9 @@
             <th  style="text-align:center">
                 Tên sản phẩm
             </th>
-            <th  style="text-align:center">
+           @*  <th  style="text-align:center">
                 Ảnh đại diện
-            </th>
-            <th  style="text-align:center">
-                Thời gian BH
-            </th>
+            </th> *@
             <th  style="text-align:center">
                 SL Tồn kho
             </th>
@@ -544,29 +974,7 @@
             </th>
             <th  style="text-align:center">
                 Khuyến mại
-            <th  style="text-align:center">
-                Mã Hãng
             </th>
-
-            <th  style="text-align:center">
-                Màn hình
-            </th>
-            <th  style="text-align:center">
-                Pin
-            </th>
-            <th  style="text-align:center">
-                Camera
-            </th>
-            <th  style="text-align:center">
-                Kích thước
-            </th>
-            <th  style="text-align:center">
-                Chip
-            </th>
-            <th  style="text-align:center">
-                Ram
-            </th>
-
             <th>
 
             </th>
@@ -595,13 +1003,10 @@
                 <td style="text-align:center">
                     @Html.DisplayFor(modelItem => item.TenSanPham)
                 </td>
-               <td class="d-flex justify-content-center align-items-center" >
+               @* <td class="d-flex justify-content-center align-items-center" >
                     <img class="img-fluid" style="width:35px;height:50px;" src="@Url.Content("~/PhoneImages/anh/" + item.AnhDaiDien)" alt="Product Image">
                 </td>
-
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.ThoiGianBaoHanh)
-                </td>
+ *@
                 <td  style="text-align:center">
                     @Html.DisplayFor(modelItem => item.SoLuongTonKho)
                 </td>
@@ -611,40 +1016,14 @@
                 <td  style="text-align:center">
                     @Html.DisplayFor(modelItem => item.DonGiaBanRa)
                 </td>
-                <td  style="text-align:center">
+                <td style="text-align:center">
                     @Html.DisplayFor(modelItem => item.KhuyenMai)
                 </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.MaHang)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.ManHinh)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.Pin)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.Camera)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.KichThuoc)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.Chip)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.Ram)
-                </td>
-
-
                 <td>
                     <a href="#" onclick="editProduct('@item.MaSanPham'); return false;" class="btn btn-danger delete-btn">Sửa</a>
                     <a onclick="deleteProduct('https://localhost:7040/api/product','@item.MaSanPham'); return false;" value="Delete" class="btn btn-danger delete-btn" >Xóa</a>
                 </td>
 
-               <td>
-
-               </td>
             </tr>
         }
     </tbody>
@@ -656,11 +1035,11 @@
         PageClasses = new List<String> { "page-link" }
     })
 
-
-
-
     <style>
         /* Styling the Edit link */
+        th{
+            width:10%;
+        }
 .edit-link {
     color: #007bff; /* Bootstrap primary color */
     text-decoration: none; /* Remove underline */
