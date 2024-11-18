@@ -67,10 +67,11 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<ChiTietGioHang>(entity =>
         {
-            entity.HasKey(e => new { e.MaGioHang, e.MaSanPham });
+            entity.HasKey(e => e.Id).HasName("PK__ChiTietG__3214EC27361B8C4C");
 
-            entity.ToTable("ChiTietGioHang", tb => tb.HasTrigger("theoDoiCustomerGioHang"));
+            entity.ToTable("ChiTietGioHang");
 
+            entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.MaGioHang).HasMaxLength(50);
             entity.Property(e => e.MaSanPham).HasMaxLength(50);
             entity.Property(e => e.ThongSoMau).HasMaxLength(50);
@@ -78,29 +79,34 @@ public partial class BtlLtwQlbdtContext : DbContext
 
             entity.HasOne(d => d.MaGioHangNavigation).WithMany(p => p.ChiTietGioHangs)
                 .HasForeignKey(d => d.MaGioHang)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChiTietGioHang_GioHang");
 
             entity.HasOne(d => d.MaSanPhamNavigation).WithMany(p => p.ChiTietGioHangs)
                 .HasForeignKey(d => d.MaSanPham)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChiTietGioHang_SanPham");
         });
 
         modelBuilder.Entity<ChiTietHoaDonBan>(entity =>
         {
-            entity.HasKey(e => new { e.MaHoaDon, e.MaSanPham });
+            entity.HasKey(e => e.Id).HasName("PK__ChiTietH__3214EC277B3C1A25");
 
             entity.ToTable("ChiTietHoaDonBan", tb => tb.HasTrigger("TinhTienHDB"));
 
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.DonGiaCuoi).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.MaHoaDon).HasMaxLength(50);
             entity.Property(e => e.MaSanPham).HasMaxLength(50);
-            entity.Property(e => e.DonGiaCuoi).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.MaHoaDonNavigation).WithMany(p => p.ChiTietHoaDonBans)
                 .HasForeignKey(d => d.MaHoaDon)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChiTietHoaDonBan_HoaDonBan");
 
             entity.HasOne(d => d.MaSanPhamNavigation).WithMany(p => p.ChiTietHoaDonBans)
                 .HasForeignKey(d => d.MaSanPham)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChiTietHoaDonBan_SanPham");
         });
 

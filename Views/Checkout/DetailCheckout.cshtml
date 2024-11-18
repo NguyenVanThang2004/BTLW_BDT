@@ -117,6 +117,7 @@
 
         <form asp-controller="Checkout" asp-action="PlaceOrder" method="post">
             <input type="hidden" id="paymentMethod" name="paymentMethod" value="Pay at store" />
+            <input type="hidden" id="ghiChu" name="ghiChu" />
 
             <div class="payment-info">
                 <div class="payment-selection" onclick="openModal()">
@@ -310,6 +311,16 @@
     }
 
     function confirmSelection() {
+        document.getElementById('selectedMethod').textContent = selectedMethodText;
+        document.getElementById('selectedIcon').src = selectedIconSrc;
+        closeModal();
+    }
+
+    function confirmSelection() {
+        // Lấy giá trị ghi chú từ textarea
+        var ghiChu = document.querySelector('textarea').value;
+        document.getElementById('ghiChu').value = ghiChu;
+
         document.getElementById('selectedMethod').textContent = selectedMethodText;
         document.getElementById('selectedIcon').src = selectedIconSrc;
         closeModal();

@@ -46,12 +46,18 @@ namespace BTLW_BDT.Controllers
         }
 
         [HttpPost]
-        public IActionResult PlaceOrder(string paymentMethod)
+        public IActionResult PlaceOrder(string paymentMethod , string ghiChu)
         {
             string userId = HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(userId))
             {
                 return RedirectToAction("Login", "Access");
+            }
+
+            // Lưu ghi chú vào session để sử dụng sau này
+            if (!string.IsNullOrEmpty(ghiChu))
+            {
+                HttpContext.Session.SetString("GhiChu", ghiChu);
             }
 
             var gioHang = _context.GioHangs.FirstOrDefault(g => g.TenDangNhap == userId);
@@ -85,6 +91,13 @@ namespace BTLW_BDT.Controllers
                     TempData["Error"] = "Không tìm thấy thông tin khách hàng";
                     return RedirectToAction("DetailCart", "Cart");
                 }
+                // Cập nhật ghi chú từ session
+                var ghiChu = HttpContext.Session.GetString("GhiChu");
+                if (!string.IsNullOrEmpty(ghiChu))
+                {
+                    khachHang.GhiChu = ghiChu;
+                    _context.KhachHangs.Update(khachHang);
+                }
 
                 var newMaHoaDon = GenerateNewOrderId();
                 var totalAmount = CalculateTotal(chiTietGioHang);
@@ -98,8 +111,26 @@ namespace BTLW_BDT.Controllers
                     MaKhachHang = khachHang.MaKhachHang
                 };
 
+
+
                 _context.HoaDonBans.Add(order);
                 _context.SaveChanges();
+
+                // Lưu thông tin chi tiết giỏ hàng vào session trước khi xử lý đơn hàng
+                var cartDetails = new List<CartDetailTemp>();
+                foreach (var item in chiTietGioHang)
+                {
+                    cartDetails.Add(new CartDetailTemp
+                    {
+                        MaSanPham = item.MaSanPham,
+                        ThongSoMau = item.ThongSoMau,
+                        ThongSoRom = item.ThongSoRom,
+                        SoLuong = int.Parse(item.SoLuong.ToString())
+
+
+                    });
+                }
+                HttpContext.Session.SetString("TempCartDetails", JsonSerializer.Serialize(cartDetails));
 
                 foreach (var item in chiTietGioHang)
                 {
@@ -119,6 +150,8 @@ namespace BTLW_BDT.Controllers
                         SoLuongBan = item.SoLuong ?? 0,
                         DonGiaCuoi = donGia
                     };
+
+                    
                     _context.ChiTietHoaDonBans.Add(orderDetail);
                 }
 
@@ -168,7 +201,9 @@ namespace BTLW_BDT.Controllers
 
         private string GenerateNewOrderId()
         {
-            return "HD" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            Random random = new Random();
+            string randomNumbers = random.Next(1000, 9999).ToString(); // Tạo số ngẫu nhiên 4 chữ số
+            return "HD" + randomNumbers;
         }
 
         private decimal CalculateTotal(List<ChiTietGioHang> items)
@@ -213,6 +248,8 @@ namespace BTLW_BDT.Controllers
                 gioHang.TongTien = 0;
                 _context.SaveChanges();
             }
+
+           
         }
 
         public IActionResult PaymentCallback()
@@ -255,6 +292,8 @@ namespace BTLW_BDT.Controllers
                 _context.HoaDonBans.Add(order);
                 _context.SaveChanges();
 
+
+
                 var gioHang = _context.GioHangs.FirstOrDefault(g => g.TenDangNhap == userId);
                 if (gioHang != null)
                 {
@@ -262,6 +301,22 @@ namespace BTLW_BDT.Controllers
                         .Include(c => c.MaSanPhamNavigation)
                         .Where(c => c.MaGioHang == gioHang.MaGioHang)
                         .ToList();
+
+                    // Lưu thông tin chi tiết giỏ hàng vào session trước khi xử lý đơn hàng
+                    var cartDetails = new List<CartDetailTemp>();
+                    foreach (var item in chiTietGioHang)
+                    {
+                        cartDetails.Add(new CartDetailTemp
+                        {
+                            MaSanPham = item.MaSanPham,
+                            ThongSoMau = item.ThongSoMau,
+                            ThongSoRom = item.ThongSoRom,
+                            SoLuong = int.Parse(item.SoLuong.ToString())
+
+                        });
+                    }
+                    HttpContext.Session.SetString("TempCartDetails", JsonSerializer.Serialize(cartDetails));
+
 
                     foreach (var item in chiTietGioHang)
                     {
@@ -304,9 +359,24 @@ namespace BTLW_BDT.Controllers
 
         public IActionResult OrderSuccess()
         {
+            // Debug: Kiểm tra tất cả các session
+            var allSessionKeys = HttpContext.Session.Keys;
+            var sessionDebugInfo = new Dictionary<string, string>();
+
+            foreach (var key in allSessionKeys)
+            {
+                sessionDebugInfo[key] = HttpContext.Session.GetString(key);
+            }
+
+            // Debug: Kiểm tra session TempCartDetails
+            var tempCartDetailsJson = HttpContext.Session.GetString("TempCartDetails");
+            TempData["SessionDebug"] = $"TempCartDetails Content: {tempCartDetailsJson ?? "null"}";
+            TempData["AllSessions"] = JsonSerializer.Serialize(sessionDebugInfo);
+
             string userId = HttpContext.Session.GetString("MaKhachHang");
             if (string.IsNullOrEmpty(userId))
             {
+                TempData["Error"] = "UserId is null or empty";
                 return RedirectToAction("Login", "Access");
             }
 
@@ -321,6 +391,24 @@ namespace BTLW_BDT.Controllers
             {
                 TempData["Error"] = "Không tìm thấy đơn hàng";
                 return RedirectToAction("Index", "Home");
+            }
+
+            if (!string.IsNullOrEmpty(tempCartDetailsJson))
+            {
+                try
+                {
+                    var cartDetails = JsonSerializer.Deserialize<List<CartDetailTemp>>(tempCartDetailsJson);
+                    ViewBag.CartDetails = cartDetails;
+                    TempData["CartDetailsCount"] = cartDetails?.Count ?? 0;
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = $"Error deserializing cart details: {ex.Message}";
+                }
+            }
+            else
+            {
+                TempData["Warning"] = "TempCartDetails is empty";
             }
 
             return View(lastOrder);
