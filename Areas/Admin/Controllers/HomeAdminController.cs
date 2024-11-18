@@ -9,6 +9,9 @@ using System.Threading.Tasks.Dataflow;
 using X.PagedList;
 using X.PagedList.Extensions;
 using System.Text.RegularExpressions;
+using BTLW_BDT.Helpers;
+using BTLW_BDT.ViewModels;
+using System.Linq;
 
 namespace BTLW_BDT.Areas.Admin.Controllers
 {
@@ -421,6 +424,115 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             await db.SaveChangesAsync();
             TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
             return RedirectToAction("Profile");
+        }
+
+        [Route("CreateAdmin")]
+        [HttpGet]
+        public IActionResult CreateAdmin()
+        {
+            return View();
+        }
+
+        [Route("CreateAdmin")]
+        [HttpPost]
+        public async Task<IActionResult> CreateAdmin(CreateAdminViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Kiểm tra trùng tên đăng nhập
+                    var existingAccount = await db.TaiKhoans.FirstOrDefaultAsync(x => x.TenDangNhap == model.TenDangNhap);
+                    if (existingAccount != null)
+                    {
+                        ModelState.AddModelError("TenDangNhap", "Tên đăng nhập đã tồn tại!");
+                        return View(model);
+                    }
+
+                    // Validate tuổi
+                    var minDate = DateOnly.FromDateTime(DateTime.Now.AddYears(-70));
+                    var maxDate = DateOnly.FromDateTime(DateTime.Now.AddYears(-18));
+                    if (model.NgaySinh < minDate || model.NgaySinh > maxDate)
+                    {
+                        ModelState.AddModelError("NgaySinh", "Tuổi phải từ 18-70!");
+                        return View(model);
+                    }
+
+                    // Xử lý upload ảnh
+                    string? anhDaiDien = null;
+                    if (model.ImageFile != null)
+                    {
+                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                        var extension = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
+                        
+                        if (!allowedExtensions.Contains(extension))
+                        {
+                            ModelState.AddModelError("ImageFile", "Chỉ chấp nhận file ảnh .jpg, .jpeg hoặc .png!");
+                            return View(model);
+                        }
+
+                        if (model.ImageFile.Length > 5 * 1024 * 1024)
+                        {
+                            ModelState.AddModelError("ImageFile", "Kích thước ảnh không được vượt quá 5MB!");
+                            return View(model);
+                        }
+
+                        var uniqueFileName = $"{Guid.NewGuid()}_{model.ImageFile.FileName}";
+                        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", "Admin", uniqueFileName);
+
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            await model.ImageFile.CopyToAsync(stream);
+                        }
+
+                        anhDaiDien = uniqueFileName;
+                    }
+
+                    // Tạo mã nhân viên mới
+                    string maNhanVien;
+                    do
+                    {
+                        maNhanVien = "NV" + MyUtil.GenerateRamdomKey();
+                    } while (await db.NhanViens.AnyAsync(x => x.MaNhanVien == maNhanVien));
+
+                    // Tạo tài khoản mới
+                    var taiKhoan = new TaiKhoan
+                    {
+                        TenDangNhap = model.TenDangNhap,
+                        MatKhau = "123456".ToSHA256Hash("MySaltKey"),
+                        LoaiTaiKhoan = "admin"
+                    };
+
+                    // Tạo nhân viên mới
+                    var nhanVien = new NhanVien
+                    {
+                        MaNhanVien = maNhanVien,
+                        TenNhanVien = model.TenNhanVien,
+                        NgaySinh = model.NgaySinh,
+                        SoDienThoai = model.SoDienThoai,
+                        DiaChi = model.DiaChi,
+                        ChucVu = model.ChucVu,
+                        GhiChu = model.GhiChu,
+                        AnhDaiDien = anhDaiDien,
+                        TenDangNhap = model.TenDangNhap
+                    };
+
+                    // Lưu vào database
+                    db.TaiKhoans.Add(taiKhoan);
+                    db.NhanViens.Add(nhanVien);
+                    await db.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Tạo tài khoản admin mới thành công!";
+                    return RedirectToAction("DashBoard");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Có lỗi xảy ra khi tạo tài khoản: " + ex.Message);
+                    return View(model);
+                }
+            }
+
+            return View(model);
         }
 
     }
