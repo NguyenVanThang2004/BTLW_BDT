@@ -21,20 +21,28 @@ using X.PagedList;
            
             }
 
-            public int CartCount()
+        private int GetCartCount(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return 0;
 
-            {
-                var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
-                return cart.Count;
-            }
-            public IActionResult Index()
-            {
-                ViewBag.CartCount = CartCount();  // Truyền số lượng sản phẩm vào ViewBag
-                var lstSanPham = db.SanPhams.ToList();
-       
-                return View(lstSanPham);
-            }
-            public IActionResult Shop(int? page)
+            var gioHang = db.GioHangs.FirstOrDefault(g => g.TenDangNhap == userId);
+            if (gioHang == null) return 0;
+
+            return db.ChiTietGioHangs
+                .Where(c => c.MaGioHang == gioHang.MaGioHang)
+                .Sum(c => c.SoLuong) ?? 0; // Thêm ?? 0 để xử lý trường hợp null
+        }
+
+        public IActionResult Index()
+        {
+            string userId = HttpContext.Session.GetString("Username");
+            ViewBag.CartCount = GetCartCount(userId);
+            var lstSanPham = db.SanPhams.ToList();
+            return View(lstSanPham);
+        }
+
+
+        public IActionResult Shop(int? page)
             {
                 int pageSize = 9;
                 int pageNumber = page == null || page < 0 ? 1 : page.Value;
@@ -43,39 +51,87 @@ using X.PagedList;
                     (lstsanpham, pageNumber, pageSize);
                 return View(lst);
             }
-            public IActionResult ProductDetail(string maSp)
-            {
-                var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp) ?? new SanPham();
-                var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp).ToList();
-                var mauSanPham = db.MauSacs.Where(x => x.MaSanPham == maSp).ToList();
-                var romSanPham = db.Roms.Where(x => x.MaSanPham == maSp)
-                            .OrderBy(x => x.Gia)  // Sắp xếp theo giá tăng dần
-                            .ToList();
-            
-                // Lấy màu đầu tiên
-                var firstColor = mauSanPham.FirstOrDefault()?.MaMau;
-                var firstColorImages = anhSanPham.Where(x => x.MaMau == firstColor).ToList();
-            
-                // Lấy ROM nhỏ nhất (rẻ nhất)
-                var smallestRom = romSanPham.FirstOrDefault();
-            
-                // Lấy danh sách đánh giá
-                var reviews = db.DanhGia.Where(r => r.MaHoaDon == maSp).ToList();
+        //public IActionResult ProductDetail(string maSp, string? maMau = null, string? maRom = null)
+        //{
+        //    var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp) ?? new SanPham();
+        //    var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp).ToList();
+        //    var mauSanPham = db.MauSacs.Where(x => x.MaSanPham == maSp).ToList();
+        //    var romSanPham = db.Roms.Where(x => x.MaSanPham == maSp)
+        //                .OrderBy(x => x.Gia)  // Sắp xếp theo giá tăng dần
+        //                .ToList();
 
-                var detailView = new ProductDetailViewModel
-                {
-                    dmSp = sanPham,
-                    dmAnhSp = firstColorImages,
-                    dmMauSp = mauSanPham,
-                    dmRomSp = romSanPham,
-                    SelectedColor = firstColor,
-                    SelectedRom = smallestRom?.MaRom,
-                    CurrentPrice = sanPham.DonGiaBanRa, // Giá ban đầu với ROM nhỏ nhất
-                    Reviews = reviews
-                };
-                return View(detailView);
+        //    // Lấy màu đầu tiên
+        //    var firstColor = mauSanPham.FirstOrDefault()?.MaMau;
+        //    var firstColorImages = anhSanPham.Where(x => x.MaMau == firstColor).ToList();
+
+        //    // Lấy ROM nhỏ nhất (rẻ nhất)
+        //    var smallestRom = romSanPham.FirstOrDefault();
+
+        //    // Lấy danh sách đánh giá
+        //    var reviews = db.DanhGia.Where(r => r.MaHoaDon == maSp).ToList();
+
+        //    var detailView = new ProductDetailViewModel
+        //    {
+        //        dmSp = sanPham,
+        //        dmAnhSp = firstColorImages,
+        //        dmMauSp = mauSanPham,
+        //        dmRomSp = romSanPham,
+        //        SelectedColor = firstColor,
+        //        SelectedRom = smallestRom?.MaRom,
+        //        CurrentPrice = sanPham.DonGiaBanRa, // Giá ban đầu với ROM nhỏ nhất
+        //        Reviews = reviews
+        //    };
+        //    return View(detailView);
+        //}
+        public IActionResult ProductDetail(string maSp, string? maMau = null, string? maRom = null)
+        {
+            var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp) ?? new SanPham();
+            var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp).ToList();
+            var mauSanPham = db.MauSacs.Where(x => x.MaSanPham == maSp).ToList();
+            var romSanPham = db.Roms.Where(x => x.MaSanPham == maSp)
+                        .OrderBy(x => x.Gia)
+                        .ToList();
+
+            // Sử dụng màu được chọn từ giỏ hàng nếu có, nếu không thì lấy màu đầu tiên
+            var selectedColor = !string.IsNullOrEmpty(maMau)
+                ? maMau
+                : mauSanPham.FirstOrDefault()?.MaMau;
+
+            // Lấy ảnh theo màu được chọn
+            var selectedColorImages = anhSanPham.Where(x => x.MaMau == selectedColor).ToList();
+
+            // Sử dụng ROM được chọn từ giỏ hàng nếu có, nếu không thì lấy ROM đầu tiên
+            var selectedRom = !string.IsNullOrEmpty(maRom)
+                ? romSanPham.FirstOrDefault(r => r.MaRom == maRom)
+                : romSanPham.FirstOrDefault();
+
+            // Tính giá dựa trên ROM được chọn
+            var baseRom = romSanPham.FirstOrDefault();
+            decimal? currentPrice = null;
+            if (selectedRom != null && baseRom != null)
+            {
+                currentPrice = sanPham.DonGiaBanRa + (selectedRom.Gia - baseRom.Gia);
             }
-            public IActionResult GetColorImages(string maSp, string maMau)
+
+            var reviews = db.DanhGia.Where(r => r.MaSanPham == maSp).ToList();
+
+            var detailView = new ProductDetailViewModel
+            {
+                dmSp = sanPham,
+                dmAnhSp = selectedColorImages,  // Sử dụng ảnh của màu được chọn
+                dmMauSp = mauSanPham,
+                dmRomSp = romSanPham,
+                SelectedColor = selectedColor,  // Đặt màu được chọn
+                SelectedRom = selectedRom?.MaRom,  // Đặt ROM được chọn
+                CurrentPrice = currentPrice ?? sanPham.DonGiaBanRa,
+                Reviews = reviews
+            };
+
+            return View(detailView);
+        }
+
+
+        public IActionResult GetColorImages(string maSp, string maMau)
             {
                 var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp && x.MaMau == maMau).ToList();
                 return PartialView("_ColorImagesPartial", anhSanPham);

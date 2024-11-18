@@ -67,7 +67,7 @@ namespace BTLW_BDT.Controllers
                 NoiDung = content,
                 Rate = rate,
                 TenDangNhap = userId,
-                MaHoaDon = order
+                MaSanPham = order
             };
 
             db.DanhGia.Add(review);
@@ -85,7 +85,7 @@ namespace BTLW_BDT.Controllers
                 review.NoiDung = newContent;
                 review.Rate = newRate;
                 db.SaveChanges();
-                return RedirectToAction("ProductDetail", "Product", new { id = review.MaHoaDon });
+                return RedirectToAction("ProductDetail", "Product", new { id = review.MaSanPham });
             }
             
             TempData["Message"] = "Không tìm thấy đánh giá.";
@@ -98,7 +98,7 @@ namespace BTLW_BDT.Controllers
             var review = db.DanhGia.Find(reviewId);
             if (review != null)
             {
-                var productId = review.MaHoaDon;
+                var productId = review.MaSanPham;
                 if (productId != null)
                 {
                     db.DanhGia.Remove(review);
@@ -114,7 +114,7 @@ namespace BTLW_BDT.Controllers
         public IActionResult ProductReview(string productId)
         {
             var reviews = (from dg in db.DanhGia
-                           join cthdb in db.ChiTietHoaDonBans on dg.MaHoaDon equals cthdb.MaHoaDon
+                           join cthdb in db.ChiTietHoaDonBans on dg.MaSanPham equals cthdb.MaSanPham
                            where cthdb.MaSanPham == productId
                            select dg).ToList();
 

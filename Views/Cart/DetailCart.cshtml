@@ -1,18 +1,23 @@
-﻿@{
-
+﻿@inject BTLW_BDT.Models.BtlLtwQlbdtContext _context
+@{
     ViewData["Title"] = "DetailCart";
     Layout = "~/Views/Shared/_LayoutCart.cshtml";
 }
-@model List<BTLW_BDT.Models.Cart.CartItem>
-
-
-
+@model List<BTLW_BDT.Models.ChiTietGioHang>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
 <div class="row px-xl-5">
     <div class="col-lg-8 table-responsive mb-5">
         <table class="table table-bordered text-center mb-0">
             <thead class="bg-secondary text-dark">
                 <tr>
                     <th>Products</th>
+                    <th>Color</th>
+                    <th>ROM</th>
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>Total</th>
@@ -20,55 +25,82 @@
                 </tr>
             </thead>
             <tbody class="align-middle">
-
-
                 @foreach (var item in Model)
                 {
+                    var sanPham = _context.SanPhams.FirstOrDefault(s => s.MaSanPham == item.MaSanPham);
+                    var mauSac = _context.MauSacs.FirstOrDefault(m => m.MaMau == item.ThongSoMau);
+                    var rom = _context.Roms.FirstOrDefault(r => r.MaRom == item.ThongSoRom);
+                    var danhSachRom = _context.Roms.Where(r => r.MaSanPham == item.MaSanPham).ToList();
+                    var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
+
+                    decimal baseRomGia = baseRom?.Gia.GetValueOrDefault() ?? 0;
+                    decimal selectedRomGia = rom?.Gia.GetValueOrDefault() ?? 0;
+                    decimal donGia = (selectedRomGia - baseRomGia) + sanPham.DonGiaBanRa.GetValueOrDefault();
+                    var tongTien = donGia * item.SoLuong;
+
                     <tr>
                         <td class="align-middle">
-                            <img src="@Url.Content("../PhoneImages/Images/"+item.Anh)" alt="@item.TenSanPham" style="width: 50px;">
-                            @item.TenSanPham
+                            <a asp-controller="Home"
+                               asp-action="ProductDetail"
+                               asp-route-maSp="@item.MaSanPham"
+                               asp-route-maMau="@item.ThongSoMau"
+                               asp-route-maRom="@item.ThongSoRom"
+                               class="text-dark">
+                                <img src="~/PhoneImages/Images/@sanPham.AnhDaiDien" alt="@sanPham.TenSanPham" style="width: 50px;">
+                                @sanPham.TenSanPham
+                            </a>
                         </td>
                         <td class="align-middle">
-                            
-                            @Convert.ToDouble(item.DonGia).ToString("N0") VNĐ
-                          
+                            @(mauSac?.TenMau ?? "N/A")
                         </td>
                         <td class="align-middle">
-                            <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display:inline;">
-                                <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
-                                <input type="hidden" name="quantity" value="@item.SoLuong" />
-                                <div class="input-group quantity mx-auto" style="width: 100px;">
-                                    <div class="input-group-btn">
-                                        <button type="submit" name="action" value="decrease" class="btn btn-sm btn-primary btn-minus">
+                            @(rom?.ThongSo ?? "N/A")
+                        </td>
+                        <td class="align-middle">
+                            @Convert.ToDouble(donGia).ToString("N0") VNĐ
+                        </td>
+                        <td class="align-middle">
+                            <div class="input-group quantity mx-auto" style="width: 100px;">
+                                <div class="input-group-btn">
+                                    <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display: inline;">
+                                        <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
+                                        <input type="hidden" name="maMau" value="@item.ThongSoMau" />
+                                        <input type="hidden" name="maRom" value="@item.ThongSoRom" />
+                                        <input type="hidden" name="action" value="decrease" />
+                                        <button type="submit" class="btn btn-sm btn-primary">
                                             <i class="fa fa-minus"></i>
                                         </button>
-                                    </div>
-                                    <input type="text" class="form-control form-control-sm bg-secondary text-center" value="@item.SoLuong" readonly>
-                                    <div class="input-group-btn">
-                                        <button type="submit" name="action" value="increase" class="btn btn-sm btn-primary btn-plus">
+                                    </form>
+                                </div>
+                                <input type="text" class="form-control form-control-sm bg-secondary text-center" value="@item.SoLuong" readonly>
+                                <div class="input-group-btn">
+                                    <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display: inline;">
+                                        <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
+                                        <input type="hidden" name="maMau" value="@item.ThongSoMau" />
+                                        <input type="hidden" name="maRom" value="@item.ThongSoRom" />
+                                        <input type="hidden" name="action" value="increase" />
+                                        <button type="submit" class="btn btn-sm btn-primary">
                                             <i class="fa fa-plus"></i>
                                         </button>
-                                    </div>
+                                    </form>
                                 </div>
-                            </form>
+                            </div>
                         </td>
                         <td class="align-middle">
-                            @Convert.ToDouble(item.TongTien).ToString("N0") VNĐ
+                            @Convert.ToDouble(tongTien).ToString("N0") VNĐ
                         </td>
                         <td class="align-middle">
                             <form asp-controller="Cart" asp-action="RemoveFromCart" method="post">
                                 <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
+                                <input type="hidden" name="maMau" value="@item.ThongSoMau" />
+                                <input type="hidden" name="maRom" value="@item.ThongSoRom" />
                                 <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="fa fa-times"></i>
                                 </button>
                             </form>
                         </td>
-
                     </tr>
                 }
-
-
             </tbody>
         </table>
     </div>
@@ -86,12 +118,25 @@
                 <h4 class="font-weight-semi-bold m-0">Cart Summary</h4>
             </div>
             <div class="card-body">
+                @{
+                    var totalAmount = Model.Sum(item =>
+                    {
+                        var sp = _context.SanPhams.FirstOrDefault(s => s.MaSanPham == item.MaSanPham);
+                        var danhSachRom = _context.Roms.Where(r => r.MaSanPham == item.MaSanPham).ToList();
+                        var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
+                        var selectedRom = _context.Roms.FirstOrDefault(r => r.MaRom == item.ThongSoRom);
+
+                        decimal baseRomGia = baseRom?.Gia.GetValueOrDefault() ?? 0;
+                        decimal selectedRomGia = selectedRom?.Gia.GetValueOrDefault() ?? 0;
+                        decimal donGia = (selectedRomGia - baseRomGia) + sp.DonGiaBanRa.GetValueOrDefault();
+
+                        return donGia * item.SoLuong;
+                    });
+                }
                 <div class="d-flex justify-content-between mb-3 pt-1">
                     <h6 class="font-weight-medium">Subtotal</h6>
                     <h6 class="font-weight-medium">
-
-                        @Convert.ToDouble(@Model.Sum(item => item.DonGia * item.SoLuong)).ToString("N0") VNĐ
-                        
+                        @Convert.ToDouble(totalAmount).ToString("N0") VNĐ
                     </h6>
                 </div>
                 <div class="d-flex justify-content-between">
@@ -103,10 +148,7 @@
                 <div class="d-flex justify-content-between mt-2">
                     <h5 class="font-weight-bold">Total</h5>
                     <h5 class="font-weight-bold">
-
-                        @((Model.Sum(item => item.DonGia * item.SoLuong) + 25000).ToString("N0")) VNĐ
-
-                       
+                        @Convert.ToDouble(totalAmount + 25000).ToString("N0") VNĐ
                     </h5>
                 </div>
                 <a asp-controller="Checkout" asp-action="DetailCheckout" class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</a>
@@ -115,6 +157,52 @@
     </div>
 </div>
 
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Xử lý nút giảm số lượng
+        $('.btn-minus').click(function (e) {
+            e.preventDefault();
+            var form = $(this).closest('form');
+            var quantityInput = form.find('input[name="quantity"]');
+            var currentQuantity = parseInt(quantityInput.val());
 
+            if (currentQuantity > 1) {
+                quantityInput.val(currentQuantity - 1);
+                form.submit();
+            }
+        });
 
+        // Xử lý nút tăng số lượng
+        $('.btn-plus').click(function (e) {
+            e.preventDefault();
+            var form = $(this).closest('form');
+            var quantityInput = form.find('input[name="quantity"]');
+            var currentQuantity = parseInt(quantityInput.val());
 
+            quantityInput.val(currentQuantity + 1);
+            form.submit();
+        });
+
+        // Cập nhật tổng tiền khi số lượng thay đổi
+        function updateTotalPrice() {
+            var total = 0;
+            $('.align-middle').each(function () {
+                var price = parseFloat($(this).find('.item-price').text().replace(/[^0-9.-]+/g, ""));
+                var quantity = parseInt($(this).find('input[type="text"]').val());
+                if (!isNaN(price) && !isNaN(quantity)) {
+                    total += price * quantity;
+                }
+            });
+
+            // Cộng thêm phí ship
+            total += 25000;
+
+            // Cập nhật hiển thị tổng tiền
+            $('.total-price').text(total.toLocaleString('vi-VN') + ' VNĐ');
+        }
+
+        // Gọi hàm cập nhật tổng tiền khi trang load và khi có thay đổi số lượng
+        updateTotalPrice();
+        $('.quantity input').on('change', updateTotalPrice);
+    });
+</script>

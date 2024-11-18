@@ -169,11 +169,18 @@ namespace BTLW_BDT.Controllers
                     {
                         khachHang.AnhDaiDien = MyUtil.UploadHinh(Hinh, "Customer");
                     }
-                    //else
-                    //{
-                    //    khachHang.AnhDaiDien = "default-avatar.jpg"; // Set default avatar if no image uploaded
-                    //}
-                    db.KhachHangs.Add(khachHang);
+                //else
+                //{
+                //    khachHang.AnhDaiDien = "default-avatar.jpg"; // Set default avatar if no image uploaded
+                //}
+                var gioHang = new GioHang
+                {
+                    MaGioHang = $"GH{MyUtil.GenerateRamdomKey()}",
+                    TenDangNhap = model.TaiKhoan,
+                    TongTien = 0
+                };
+                db.GioHangs.Add(gioHang);
+                db.KhachHangs.Add(khachHang);
                     db.TaiKhoans.Add(taiKhoan);
                     db.SaveChanges();
 
@@ -225,52 +232,123 @@ namespace BTLW_BDT.Controllers
                 // Tạo mã xác thực
                 var code = GenerateResetCode();
 
-                // Lưu mã xác thực và thời gian hết hạn vào bảng KhachHang
+               
+               
+
+                // Lưu mã xác thực vào cơ sở dữ liệu
                 user.ResetCode = code;
-               // user.ResetCodeExpiry = DateTime.Now.AddMinutes(30); // Mã sẽ hết hạn sau 30 phút
+                user.ResetCodeExpiry = DateTime.Now.AddMinutes(5);
+
                 db.SaveChanges();
 
-                // Gửi mã qua email
+                // Gửi mã qua email 
                 SendResetCodeEmail(model.Email, code);
 
-                // Thông báo thành công
-                TempData["SuccessMessage"] = "Mã đặt lại mật khẩu đã được gửi đến email của bạn.";
-            }
-            else
-            {
-                // Nếu không tìm thấy email, thông báo lỗi
-                ModelState.AddModelError(string.Empty, "Email không tồn tại.");
+                // Chuyển email vào TempData để dùng ở bước kiểm tra mã
+                TempData["Email"] = model.Email;
+
+                return RedirectToAction("CheckCode");
             }
 
+            ModelState.AddModelError(string.Empty, "Email không tồn tại.");
             return View(model);
         }
 
-        [HttpPost]
-        public IActionResult ResetPassword(string email, int code, string newPassword)
+        [HttpGet]
+        public IActionResult CheckCode()
         {
-            var user = db.KhachHangs.SingleOrDefault(x => x.Email == email && x.ResetCode == code);
+            var email = TempData["Email"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            TempData.Keep("Email"); // Giữ lại giá trị cho POST request
+            return View(new CheckCodeVM { Email = email });
+        }
+
+        [HttpPost]
+        public IActionResult CheckCode(CheckCodeVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = db.KhachHangs.SingleOrDefault(x =>
+                x.Email == model.Email &&
+                x.ResetCode.ToString() == model.Code);
+
             if (user != null)
             {
+                // Kiểm tra thời gian hết hạn
+                if (user.ResetCodeExpiry.Value > DateTime.Now)
+                {
+                    TempData["Email"] = model.Email;
+                    return RedirectToAction("NewPassword");
+                }
+                else
+                {
+                    // Mã đã hết hạn
+                    user.ResetCode = null;
+                    user.ResetCodeExpiry = null;
+                    db.SaveChanges();
 
-                var account = db.TaiKhoans.SingleOrDefault(x=>x.TenDangNhap.Equals(user.TenDangNhap));
-               
-                db.SaveChanges();
-
-                TempData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
-                return RedirectToAction("Login");
+                    ModelState.AddModelError(string.Empty, "Mã xác thực đã hết hạn. Vui lòng yêu cầu mã mới.");
+                    return View(model);
+                }
             }
-            else
+
+            ModelState.AddModelError(string.Empty, "Mã xác thực không hợp lệ");
+            return View(model);
+        }
+
+
+        [HttpGet]
+        public IActionResult NewPassword()
+        {
+            var email = TempData["Email"]?.ToString();
+            if (string.IsNullOrEmpty(email))
             {
-                TempData["ErrorMessage"] = "Mã xác thực không hợp lệ hoặc đã hết hạn.";
-                return View();
+                return RedirectToAction("ForgotPassword");
             }
+
+            TempData.Keep("Email");
+            return View(new NewPasswordVM { Email = email });
+        }
+
+        [HttpPost]
+        public IActionResult NewPassword(NewPasswordVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = db.KhachHangs.SingleOrDefault(x => x.Email == model.Email);
+            if (user != null)
+            {
+                var account = db.TaiKhoans.SingleOrDefault(x => x.TenDangNhap == user.TenDangNhap);
+                if (account != null)
+                {
+                    account.MatKhau = model.NewPassword.ToSHA256Hash("MySaltKey");
+                    user.ResetCode = null; // Xóa mã sau khi dùng
+                    db.SaveChanges();
+
+                    TempData["SuccessMessage"] = "Đặt lại mật khẩu thành công!";
+                    return RedirectToAction("Login");
+                }
+            }
+
+            TempData["ErrorMessage"] = "Đã xảy ra lỗi. Vui lòng thử lại.";
+            return RedirectToAction("ForgotPassword");
         }
 
         private void SendResetCodeEmail(string email, int code)
         {
-            var fromAddress = new MailAddress("thangdepzai38@gmail.com", "Your App Name");
+            var fromAddress = new MailAddress("thangdepzai38@gmail.com", "Admin");
             var toAddress = new MailAddress(email);
-            const string fromPassword = "your-email-password";
+            const string fromPassword = "iflx rhxm wyjf hlbw";
             const string subject = "Reset mật khẩu - Mã xác thực";
             string body = $"Mã xác thực của bạn là: {code}";
 
@@ -283,6 +361,7 @@ namespace BTLW_BDT.Controllers
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
             };
+
             using (var message = new MailMessage(fromAddress, toAddress)
             {
                 Subject = subject,
@@ -292,14 +371,14 @@ namespace BTLW_BDT.Controllers
                 smtp.Send(message);
             }
         }
+
         private int GenerateResetCode()
         {
             var rng = new Random();
-            var code = rng.Next(100000, 999999); // Tạo mã ngẫu nhiên 6 chữ số
-            return code;
+            return rng.Next(100000, 999999); // Tạo mã ngẫu nhiên 6 chữ số
         }
 
-        
+
 
 
 
