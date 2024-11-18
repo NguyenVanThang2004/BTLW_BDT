@@ -108,7 +108,10 @@ namespace BTLW_BDT.Controllers
                     PhuongThucThanhToan = "Pay at store",
                     TongTien = totalAmount,
                     ThoiGianLap = DateTime.Now,
-                    MaKhachHang = khachHang.MaKhachHang
+                    MaKhachHang = khachHang.MaKhachHang ,
+                    TrangThai   = "chưa thanh toán"
+                    // ma nhan vien 
+                   
                 };
 
 
@@ -145,6 +148,7 @@ namespace BTLW_BDT.Controllers
 
                     var orderDetail = new ChiTietHoaDonBan
                     {
+                        MaChiTietHoaDonBan = Guid.NewGuid().ToString(),
                         MaHoaDon = order.MaHoaDon,
                         MaSanPham = item.MaSanPham,
                         SoLuongBan = item.SoLuong ?? 0,
@@ -286,7 +290,9 @@ namespace BTLW_BDT.Controllers
                     PhuongThucThanhToan = "Bank transfer via QR code",
                     TongTien = totalAmount,
                     ThoiGianLap = DateTime.Now,
-                    MaKhachHang = khachHang.MaKhachHang
+                    MaKhachHang = khachHang.MaKhachHang,
+                    TrangThai = "đã thanh toán"
+
                 };
 
                 _context.HoaDonBans.Add(order);
@@ -331,6 +337,7 @@ namespace BTLW_BDT.Controllers
 
                         var orderDetail = new ChiTietHoaDonBan
                         {
+                            MaChiTietHoaDonBan = Guid.NewGuid().ToString(),
                             MaHoaDon = order.MaHoaDon,
                             MaSanPham = item.MaSanPham,
                             SoLuongBan = item.SoLuong ?? 0,

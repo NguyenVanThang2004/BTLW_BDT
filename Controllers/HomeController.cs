@@ -113,7 +113,7 @@ using X.PagedList;
                 currentPrice = sanPham.DonGiaBanRa + (selectedRom.Gia - baseRom.Gia);
             }
 
-            var reviews = db.DanhGia.Where(r => r.MaHoaDon == maSp).ToList();
+            var reviews = db.DanhGia.Where(r => r.MaSanPham == maSp).ToList();
 
             var detailView = new ProductDetailViewModel
             {

@@ -125,7 +125,7 @@ public class CartController : Controller
                 // Nếu chưa có, tạo mới chi tiết giỏ hàng
                 chiTietGioHang = new ChiTietGioHang
                 {
-                    //MaChiTietGioHang = Guid.NewGuid().ToString(),
+                    MaChiTietGioHang = Guid.NewGuid().ToString(),
                     MaGioHang = gioHang.MaGioHang,
                     MaSanPham = id,
                     ThongSoMau = selectedMau.MaMau,

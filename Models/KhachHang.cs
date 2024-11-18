@@ -32,4 +32,6 @@ public partial class KhachHang
     public virtual ICollection<HoaDonBan> HoaDonBans { get; set; } = new List<HoaDonBan>();
 
     public virtual TaiKhoan? TenDangNhapNavigation { get; set; }
+
+    public virtual ICollection<TinNhan> TinNhans { get; set; } = new List<TinNhan>();
 }
