@@ -8,16 +8,14 @@
             </a>
         </div>
         <div class="col-lg-6 col-6 text-left">
-            <form asp-controller="Phone" asp-action="Search" method="post">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="searchInputIndex" placeholder="Search for products" name="searchTerm">
-                    <div class="input-group-append">
-                        <button class="input-group-text bg-transparent text-primary" id="searchButtonIndex">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
+            <div class="input-group">
+                <input type="text" class="form-control" id="searchInputHeader" placeholder="Search for products">
+                <div class="input-group-append">
+                    <button type="button" class="input-group-text bg-transparent text-primary" id="searchButtonHeader">
+                        <i class="fa fa-search"></i>
+                    </button>
                 </div>
-            </form>
+            </div>
         </div>
         <div class="col-lg-2 col-3 text-right">
             <div class="d-flex align-items-center justify-content-end">
@@ -146,6 +144,52 @@ function loadBrands() {
 document.addEventListener('DOMContentLoaded', function() {
     loadBrands();
     updateDistanceDisplay();
+});
+
+$(document).ready(function() {
+    // Xóa script cũ nếu có
+    $('#searchButtonHeader').off('click');
+    $('#searchInputHeader').off('keypress');
+
+    function handleSearch() {
+        const searchQuery = $('#searchInputHeader').val();
+        const currentPath = window.location.pathname.toLowerCase();
+        
+        console.log('Search triggered');
+        console.log('Current path:', currentPath);
+        console.log('Search query:', searchQuery);
+
+        if (currentPath.includes('/home/shop')) {
+            // Nếu đang ở trang Shop, thực hiện tìm kiếm tại chỗ
+            console.log('On Shop page, performing local search');
+            if (typeof loadProducts === 'function') {
+                currentPage = 1;
+                loadProducts();
+            }
+        } else {
+            // Nếu đang ở trang khác, chuyển hướng đến trang Shop với tham số tìm kiếm
+            console.log('Not on Shop page, redirecting to Shop');
+            const redirectUrl = `/Home/Shop?searchQuery=${encodeURIComponent(searchQuery)}`;
+            console.log('Redirecting to:', redirectUrl);
+            window.location.href = redirectUrl;
+        }
+    }
+
+    // Xử lý sự kiện click nút tìm kiếm
+    $('#searchButtonHeader').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleSearch();
+    });
+
+    // Xử lý sự kiện nhấn Enter trong ô tìm kiếm
+    $('#searchInputHeader').on('keypress', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSearch();
+        }
+    });
 });
 </script>
 
