@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Security.Claims;
-using BTLW_BDT.Models;
+﻿using BTLW_BDT.Models;
 using BTLW_BDT.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
 
 namespace BTLW_BDT.Controllers
 {
@@ -11,140 +10,209 @@ namespace BTLW_BDT.Controllers
     [ApiController]
     public class ReviewController : Controller
     {
-        BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
+        private readonly BtlLtwQlbdtContext _context;
 
-        [HttpGet("CreateReview")]
-        public IActionResult CreateReview(string productId)
+        public ReviewController(BtlLtwQlbdtContext context)
         {
-            if (!User.Identity?.IsAuthenticated ?? false)
-            {
-                TempData["Message"] = "Bạn cần đăng nhập để đánh giá sản phẩm.";
-                return RedirectToAction("Login", "Account");
-            }
-
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
-            {
-                TempData["Message"] = "Không thể xác định người dùng.";
-                return RedirectToAction("Login", "Account");
-            }
-
-            var hasPurchased = db.HoaDonBans.Any(h => h.MaKhachHang == userId && h.ChiTietHoaDonBans.Any(c => c.MaSanPham == productId));
-
-            if (!hasPurchased)
-            {
-                TempData["Message"] = "Bạn chưa mua sản phẩm này.";
-                return RedirectToAction("ProductDetail", "Product", new { id = productId });
-            }
-
-            return View();
+            _context = context;
         }
 
-        [HttpPost("SaveReview")]
-        public IActionResult SaveReview(string productId, string content, int rate)
+        private bool HasPurchasedProduct(string username, string productId)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
-            {
-                TempData["Message"] = "Không thể xác định người dùng.";
-                return RedirectToAction("Login", "Account");
-            }
+            var customer = _context.KhachHangs.FirstOrDefault(k => k.TenDangNhap == username);
+            if (customer == null) return false;
 
-            var order = (from cthdb in db.ChiTietHoaDonBans
-                         join hdb in db.HoaDonBans on cthdb.MaHoaDon equals hdb.MaHoaDon
-                         where cthdb.MaSanPham == productId && hdb.MaKhachHang == userId
-                         select cthdb.MaHoaDon)
-                        .FirstOrDefault();
 
-            if (order == null)
-            {
-                TempData["Message"] = "Không tìm thấy hóa đơn cho sản phẩm này.";
-                return RedirectToAction("ProductDetail", "Product", new { id = productId });
-            }
+            var hasPurchased = (from hd in _context.HoaDonBans
+                               join ct in _context.ChiTietHoaDonBans on hd.MaHoaDon equals ct.MaHoaDon
+                               where hd.MaKhachHang == customer.MaKhachHang
+                               && ct.MaSanPham == productId
+                               select ct).Any();
 
-            var review = new DanhGium
-            {
-                NoiDung = content,
-                Rate = rate,
-                TenDangNhap = userId,
-                MaSanPham = order
-            };
-
-            db.DanhGia.Add(review);
-            db.SaveChanges();
-
-            return RedirectToAction("ProductDetail", "Product", new { id = productId });
-        }
-
-        [HttpPost("EditReview")]
-        public IActionResult EditReview(int reviewId, string newContent, int newRate)
-        {
-            var review = db.DanhGia.Find(reviewId);
-            if (review != null)
-            {
-                review.NoiDung = newContent;
-                review.Rate = newRate;
-                db.SaveChanges();
-                return RedirectToAction("ProductDetail", "Product", new { id = review.MaSanPham });
-            }
             
-            TempData["Message"] = "Không tìm thấy đánh giá.";
-            return RedirectToAction("ProductDetail", "Product");
+            return hasPurchased;
         }
 
-        [HttpPost("DeleteReview")]
-        public IActionResult DeleteReview(int reviewId)
-        {
-            var review = db.DanhGia.Find(reviewId);
-            if (review != null)
-            {
-                var productId = review.MaSanPham;
-                if (productId != null)
-                {
-                    db.DanhGia.Remove(review);
-                    db.SaveChanges();
-                    return RedirectToAction("ProductDetail", "Product", new { id = productId });
-                }
-            }
-            TempData["Message"] = "Không tìm thấy đánh giá hoặc sản phẩm.";
-            return RedirectToAction("ProductDetail", "Product");
-        }
 
-        [HttpGet("ProductReview")]
+        [HttpGet("productreview/{productId}")]
         public IActionResult ProductReview(string productId)
         {
-            var reviews = (from dg in db.DanhGia
-                           join cthdb in db.ChiTietHoaDonBans on dg.MaSanPham equals cthdb.MaSanPham
-                           where cthdb.MaSanPham == productId
-                           select dg).ToList();
+            try 
 
-            var products = db.SanPhams.Where(p => p.MaSanPham == productId).ToList();
-
-            if (!products.Any())
             {
-                return NotFound(new { message = "Sản phẩm không tồn tại." });
+                var username = HttpContext.Session.GetString("Username");
+                var canReview = false;
+                var hasPurchased = false;
+
+                if (!string.IsNullOrEmpty(username))
+                {
+                    hasPurchased = HasPurchasedProduct(username, productId);
+                    canReview = hasPurchased;
+                }
+
+                var reviews = from r in _context.DanhGia
+                             where r.MaSanPham == productId
+                             orderby r.ThoiGianDanhGia descending
+                             select new ViewModels.ReviewViewModel
+                             {
+                                 TenDangNhap = r.TenDangNhap,
+                                 MaSanPham = r.MaSanPham,
+                                 Rate = (int)r.Rate,
+                                 NoiDung = r.NoiDung,
+                                 ThoiGianDanhGia = r.ThoiGianDanhGia,
+                                 IsCurrentUser = r.TenDangNhap == username
+                             };
+
+                var product = _context.SanPhams.FirstOrDefault(p => p.MaSanPham == productId);
+
+                return Json(new { 
+                    reviews = reviews.ToList(), 
+                    dmSp = new { 
+                        tenSanPham = product.TenSanPham 
+                    },
+                    canReview = canReview,
+                    hasPurchased = hasPurchased,
+                    isLoggedIn = !string.IsNullOrEmpty(username)
+                });
             }
-
-            var viewModel = new ProductDetailViewModel
+            catch (Exception ex)
             {
-                dmSp = products.FirstOrDefault() ?? new SanPham(),
-                Reviews = reviews
-            };
-
-            return Ok(viewModel); // Trả về JSON
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
-        [HttpGet("AllReviews")]
-        public IActionResult AllReviews()
+        [HttpGet("CreateReview/{productId}")]
+        public IActionResult CreateReview(string productId)
         {
-            var reviews = db.DanhGia.ToList();
+            var username = HttpContext.Session.GetString("Username");
+            var existingReview = _context.DanhGia
+                .FirstOrDefault(r => r.TenDangNhap == username && r.MaSanPham == productId);
 
-            if (!reviews.Any())
+            return PartialView("_ReviewForm", new ViewModels.ReviewFormViewModel 
+            { 
+                MaSanPham = productId,
+                ExistingReview = existingReview
+            });
+        }
+
+        [HttpPost("submitreview")]
+        public IActionResult SubmitReview([FromBody] ViewModels.ReviewCreateModel model)
+        {
+            try
             {
-                return NotFound(new { message = "Không có đánh giá nào." });
-            }
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ" });
 
-            return Ok(reviews); // Trả về JSON
+                var username = HttpContext.Session.GetString("Username");
+                if (string.IsNullOrEmpty(username))
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để đánh giá" });
+
+                if (!HasPurchasedProduct(username, model.MaSanPham))
+                    return Json(new { success = false, message = "Bạn cần mua sản phẩm để đánh giá" });
+
+                var existingReview = _context.DanhGia
+                    .FirstOrDefault(r => r.TenDangNhap == username && r.MaSanPham == model.MaSanPham);
+
+                if (existingReview != null)
+                    return Json(new { success = false, message = "Bạn đã đánh giá sản phẩm này" });
+
+                var review = new DanhGium
+                {
+                    TenDangNhap = username,
+                    MaSanPham = model.MaSanPham,
+                    Rate = model.Rate,
+                    NoiDung = model.NoiDung,
+                    ThoiGianDanhGia = DateTime.Now
+                };
+
+                _context.DanhGia.Add(review);
+                _context.SaveChanges();
+
+                return Json(new { success = true, message = "Đánh giá đã được gửi thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [HttpPost("updatereview")]
+        public IActionResult UpdateReview([FromBody] ViewModels.ReviewUpdateModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ" });
+
+                var username = HttpContext.Session.GetString("Username");
+                if (string.IsNullOrEmpty(username))
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để sửa đánh giá" });
+
+                var existingReview = _context.DanhGia
+                    .FirstOrDefault(r => r.TenDangNhap == username && r.MaSanPham == model.MaSanPham);
+
+                if (existingReview == null)
+                    return Json(new { success = false, message = "Không tìm thấy đánh giá" });
+
+                existingReview.Rate = model.Rate;
+                existingReview.NoiDung = model.NoiDung;
+                existingReview.ThoiGianDanhGia = DateTime.Now;
+
+                _context.SaveChanges();
+                return Json(new { success = true, message = "Cập nhật đánh giá thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [HttpPost("deletereview/{productId}")]
+        public IActionResult DeleteReview(string productId)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+                return Json(new { success = false, message = "Vui lòng đăng nhập để xóa đánh giá" });
+
+            var review = _context.DanhGia
+                .FirstOrDefault(r => r.TenDangNhap == username && r.MaSanPham == productId);
+
+            if (review == null)
+                return Json(new { success = false, message = "Không tìm thấy đánh giá" });
+
+            _context.DanhGia.Remove(review);
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
+
+        [HttpGet("GetReviewForEdit/{productId}")]
+        public IActionResult GetReviewForEdit(string productId)
+        {
+            try
+            {
+                var username = HttpContext.Session.GetString("Username");
+                if (string.IsNullOrEmpty(username))
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để sửa đánh giá" });
+
+                var review = _context.DanhGia
+                    .FirstOrDefault(r => r.TenDangNhap == username && r.MaSanPham == productId);
+
+                if (review == null)
+                    return Json(new { success = false, message = "Không tìm thấy đánh giá" });
+
+                return Json(new { 
+                    success = true, 
+                    review = new { 
+                        maSanPham = review.MaSanPham,
+                        rate = review.Rate,
+                        noiDung = review.NoiDung
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
         }
     }
 }

@@ -4,12 +4,15 @@ using BTLW_BDT.Repository;
 using BTLW_BDT.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
+using BTLW_BDT.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Đăng ký các dịch vụ cần thiết
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
+builder.Services.AddSignalR();
 
 // Đăng ký DbContext trong DI container
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(options =>
@@ -35,8 +38,19 @@ builder.Services.AddSession(options =>
 // Đăng ký IHttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.SetIsOriginAllowed(origin => true) // Cho phép tất cả origin trong development
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
+
 
 
 builder.Services.AddAuthorization();
@@ -46,6 +60,7 @@ app.MapControllerRoute(
     pattern: "san-pham/{id}",
     defaults: new { controller = "Home", action = "ProductDetail" }
 );
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -55,15 +70,21 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseSession();
+
 app.UseRouting();
 
-// Kích hoạt middleware cho session, authentication và authorization
-app.UseSession();
+app.UseCors();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=access}/{action=login}/{id?}");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=access}/{action=login}/{id?}");
+    endpoints.MapHub<ChatHub>("/chatHub");
+});
 
 app.Run();

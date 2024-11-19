@@ -73,7 +73,7 @@
                     var tongTien = donGia * (item.SoLuong ?? 0);
 
                     <div class="d-flex justify-content-between">
-                        <p>@sanPham?.TenSanPham (@mauSac?.TenMau - @rom?.ThongSo)</p>
+                        <p>@sanPham?.TenSanPham (@mauSac?.TenMau - @rom?.ThongSo) x @item.SoLuong </p>
                         <p>@Convert.ToDouble(tongTien).ToString("N0") VNĐ</p>
                     </div>
                 }

@@ -71,7 +71,8 @@ namespace BTLW_BDT.ViewModels
         [DataType(DataType.Upload)]
         public string? Hinh { get; set; }
 
-       
+        public decimal? DiaChiLatitude { get; set; }
+        public decimal? DiaChiLongitude { get; set; }
 
 
         // Phương thức kiểm tra email hợp lệ

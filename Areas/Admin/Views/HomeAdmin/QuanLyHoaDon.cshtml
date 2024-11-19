@@ -64,7 +64,7 @@
 </table>
 
 @Html.PagedListPager(Model, page => Url.Action("QuanLyHoaDon", new { page = page }),
-        new X.PagedList.Web.Common.PagedListRenderOptions
+        new PagedListRenderOptions
     {
         LiElementClasses = new List<String> { "page-item" },
         PageClasses = new List<String> { "page-link" }

@@ -51,38 +51,7 @@ using X.PagedList;
                     (lstsanpham, pageNumber, pageSize);
                 return View(lst);
             }
-        //public IActionResult ProductDetail(string maSp, string? maMau = null, string? maRom = null)
-        //{
-        //    var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp) ?? new SanPham();
-        //    var anhSanPham = db.AnhSanPhams.Where(x => x.MaSanPham == maSp).ToList();
-        //    var mauSanPham = db.MauSacs.Where(x => x.MaSanPham == maSp).ToList();
-        //    var romSanPham = db.Roms.Where(x => x.MaSanPham == maSp)
-        //                .OrderBy(x => x.Gia)  // Sắp xếp theo giá tăng dần
-        //                .ToList();
 
-        //    // Lấy màu đầu tiên
-        //    var firstColor = mauSanPham.FirstOrDefault()?.MaMau;
-        //    var firstColorImages = anhSanPham.Where(x => x.MaMau == firstColor).ToList();
-
-        //    // Lấy ROM nhỏ nhất (rẻ nhất)
-        //    var smallestRom = romSanPham.FirstOrDefault();
-
-        //    // Lấy danh sách đánh giá
-        //    var reviews = db.DanhGia.Where(r => r.MaHoaDon == maSp).ToList();
-
-        //    var detailView = new ProductDetailViewModel
-        //    {
-        //        dmSp = sanPham,
-        //        dmAnhSp = firstColorImages,
-        //        dmMauSp = mauSanPham,
-        //        dmRomSp = romSanPham,
-        //        SelectedColor = firstColor,
-        //        SelectedRom = smallestRom?.MaRom,
-        //        CurrentPrice = sanPham.DonGiaBanRa, // Giá ban đầu với ROM nhỏ nhất
-        //        Reviews = reviews
-        //    };
-        //    return View(detailView);
-        //}
         public IActionResult ProductDetail(string maSp, string? maMau = null, string? maRom = null)
         {
             var sanPham = db.SanPhams.SingleOrDefault(x => x.MaSanPham == maSp) ?? new SanPham();
@@ -181,6 +150,17 @@ using X.PagedList;
                     price = newPrice,
                     formattedPrice = formattedPrice
                 });
+            }
+            public IActionResult Contact()
+            {
+                // Kiểm tra xem người dùng đã đăng nhập chưa
+                var username = HttpContext.Session.GetString("Username");
+                if (string.IsNullOrEmpty(username))
+                {
+                    return RedirectToAction("Login", "Access");
+                }
+                
+                return View();
             }
         }
     }

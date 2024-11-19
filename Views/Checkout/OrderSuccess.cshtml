@@ -10,6 +10,8 @@
 
 
 
+
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -41,19 +43,19 @@
 
             @{
                 var mergedDetails = Model.ChiTietHoaDonBans
-                .SelectMany(item => tempCartDetails
-                .Where(x => x.MaSanPham == item.MaSanPham)
-                .GroupBy(x => new { x.ThongSoMau, x.ThongSoRom }) // Nhóm theo ThongSoMau và ThongSoRom
-                .Select(g => new
+                .Join(tempCartDetails,
+                hd => hd.MaSanPham,
+                cart => cart.MaSanPham,
+                (hd, cart) => new
                 {
-                    SanPham = item.MaSanPhamNavigation,
-                    DonGiaCuoi = item.DonGiaCuoi,
-                    SoLuongBan = g.Sum(c => c.SoLuong), // Tổng số lượng từ các mục trong nhóm
-                    ThongSoMau = g.Key.ThongSoMau,
-                    ThongSoRom = g.Key.ThongSoRom
+                    SanPham = hd.MaSanPhamNavigation,
+                    DonGiaCuoi = hd.DonGiaCuoi,
+                    ThongSoMau = cart.ThongSoMau,
+                    ThongSoRom = cart.ThongSoRom,
+                    SoLuongBan = cart.SoLuong
                 })
-                )
-                .Distinct() // Loại bỏ các mục trùng lặp
+                .GroupBy(x => new { x.SanPham.MaSanPham, x.ThongSoMau, x.ThongSoRom })
+                .Select(g => g.First())
                 .ToList();
             }
 
@@ -221,4 +223,3 @@
             border-color: #23272b;
         }
 </style>
-

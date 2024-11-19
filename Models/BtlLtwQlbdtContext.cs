@@ -46,8 +46,10 @@ public partial class BtlLtwQlbdtContext : DbContext
     public virtual DbSet<TinNhan> TinNhans { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=DESKTOP-MO49P9T;Initial Catalog=BTL_LTW_QLBDT;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -142,7 +144,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<Hang>(entity =>
         {
-            entity.HasKey(e => e.MaHang).HasName("PK__Hang__19C0DB1DB37DA7EB");
+
+            entity.HasKey(e => e.MaHang).HasName("PK__Hang__19C0DB1DFDA88AC5");
+
 
             entity.ToTable("Hang");
 
@@ -152,7 +156,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<HoaDonBan>(entity =>
         {
+
             entity.HasKey(e => e.MaHoaDon).HasName("PK__HoaDonBa__835ED13B415054B7");
+
 
             entity.ToTable("HoaDonBan", tb => tb.HasTrigger("theoDoiCustomerMuaSanPham"));
 
@@ -176,7 +182,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<KhachHang>(entity =>
         {
-            entity.HasKey(e => e.MaKhachHang).HasName("PK__KhachHan__88D2F0E5CD2D27FF");
+
+            entity.HasKey(e => e.MaKhachHang).HasName("PK__KhachHan__88D2F0E52D4778C6");
+
 
             entity.ToTable("KhachHang");
 
@@ -189,7 +197,9 @@ public partial class BtlLtwQlbdtContext : DbContext
             entity.Property(e => e.DiaChiLongitude)
                 .HasColumnType("decimal(11, 8)")
                 .HasColumnName("DiaChi_Longitude");
-            entity.Property(e => e.Email).HasMaxLength(100);
+
+            entity.Property(e => e.Email).HasMaxLength(20);
+
             entity.Property(e => e.GhiChu).HasMaxLength(255);
             entity.Property(e => e.LoaiKhachHang).HasMaxLength(100);
             entity.Property(e => e.ResetCodeExpiry).HasColumnType("datetime");
@@ -204,7 +214,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<LichSuHoatDong>(entity =>
         {
-            entity.HasKey(e => e.MaHoatDong).HasName("PK__LichSuHo__BD808BE7DC936883");
+
+            entity.HasKey(e => e.MaHoatDong).HasName("PK__LichSuHo__BD808BE7D3D87F1A");
+
 
             entity.ToTable("LichSuHoatDong");
 
@@ -237,7 +249,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<NhanVien>(entity =>
         {
-            entity.HasKey(e => e.MaNhanVien).HasName("PK__NhanVien__77B2CA471AF2B8DC");
+
+            entity.HasKey(e => e.MaNhanVien).HasName("PK__NhanVien__77B2CA47FBF83422");
+
 
             entity.ToTable("NhanVien");
 
@@ -312,7 +326,9 @@ public partial class BtlLtwQlbdtContext : DbContext
 
         modelBuilder.Entity<TaiKhoan>(entity =>
         {
-            entity.HasKey(e => e.TenDangNhap).HasName("PK__TaiKhoan__55F68FC1B5176A6B");
+
+            entity.HasKey(e => e.TenDangNhap).HasName("PK__TaiKhoan__55F68FC185494EAC");
+
 
             entity.ToTable("TaiKhoan");
 
