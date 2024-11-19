@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using BTLW_BDT.Hubs;
+using BTLW_BDT.Responsitory;
 
 var builder = WebApplication.CreateBuilder(args);
 

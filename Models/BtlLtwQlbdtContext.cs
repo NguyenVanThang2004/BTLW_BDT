@@ -88,11 +88,7 @@ public partial class BtlLtwQlbdtContext : DbContext
         {
             entity.HasKey(e => new { e.MaHoaDon, e.MaSanPham });
 
-            entity.ToTable("ChiTietHoaDonBan", tb =>
-                {
-                    tb.HasTrigger("TinhTienHDB");
-                    tb.HasTrigger("trg_SanPhamBanChay");
-                });
+            entity.ToTable("ChiTietHoaDonBan", tb => tb.HasTrigger("trg_SanPhamBanChay"));
 
             entity.Property(e => e.MaHoaDon).HasMaxLength(50);
             entity.Property(e => e.MaSanPham).HasMaxLength(50);
@@ -279,7 +275,6 @@ public partial class BtlLtwQlbdtContext : DbContext
 
             entity.Property(e => e.MaSanPham).HasMaxLength(50);
             entity.Property(e => e.AnhDaiDien).HasMaxLength(255);
-            entity.Property(e => e.BanChay).HasDefaultValue(false);
             entity.Property(e => e.BaoMatNangCao).HasMaxLength(255);
             entity.Property(e => e.Camera).HasMaxLength(50);
             entity.Property(e => e.Chip).HasMaxLength(50);
