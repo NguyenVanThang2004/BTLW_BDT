@@ -21,6 +21,9 @@
         var selectedBrand = '';
 
         $(document).ready(function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            selectedBrand = urlParams.get('brand') || '';
+
             // Reset các ô input về giá trị mặc định khi trang được tải
             $(window).on('pageshow', function () {
                 $('#minPrice').val('');
