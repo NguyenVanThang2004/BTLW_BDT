@@ -43,7 +43,8 @@
             </a>
             <nav class="collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 border border-top-0 border-bottom-0 bg-light" id="navbar-vertical" style="width: calc(100% - 30px); z-index: 1;">
                 <div class="navbar-nav w-100 overflow-hidden" id="brandNav">
-                    <!-- Các hãng sẽ được thêm vào đây bằng JavaScript -->
+                    <a href="#" class="nav-item nav-link brand-filter" data-brand="">All Brands</a>
+                    <!-- Các hãng khác sẽ được thêm vào đây bằng JavaScript -->
                 </div>
             </nav>
         </div>
@@ -118,7 +119,9 @@ function loadBrands() {
         method: 'GET',
         success: function (data) {
             var brandNav = $('#brandNav');
-            brandNav.empty();
+            // Giữ lại "All Brands" và xóa các mục khác
+            brandNav.find('a:not(:first-child)').remove();
+            
             data.forEach(function (brand) {
                 var brandLink = `
                     <a href="/Home/Shop?brand=${brand.maHang}" class="nav-item nav-link">
@@ -128,9 +131,9 @@ function loadBrands() {
                 brandNav.append(brandLink);
             });
 
-            // Tính toán chiều cao dựa trên số lượng hãng
+            // Tính toán chiều cao dựa trên số lượng hãng (bao gồm cả All Brands)
             var itemHeight = 40;
-            var totalHeight = data.length * itemHeight;
+            var totalHeight = (data.length + 1) * itemHeight;
             $('#navbar-vertical').css('height', totalHeight + 'px');
         },
         error: function (error) {
