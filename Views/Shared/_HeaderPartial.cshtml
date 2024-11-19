@@ -1,0 +1,80 @@
+<div class="container-fluid">
+    <div class="row align-items-center py-3 px-xl-5">
+        <div class="col-lg-3 d-none d-lg-block">
+            <a href="" class="text-decoration-none">
+                <h1 style="font-size: 30px;" class="m-0 display-5 font-weight-semi-bold">
+                    <span style="font-size: 45px;" class="text-primary font-weight-bold border px-3 mr-1">IT 1</span>Mobile Shop
+                </h1>
+            </a>
+        </div>
+        <div class="col-lg-5 col-6 text-left">
+            <form asp-controller="Phone" asp-action="Search" method="post">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInputIndex" placeholder="Search for products" name="searchTerm">
+                    <div class="input-group-append">
+                        <button class="input-group-text bg-transparent text-primary" id="searchButtonIndex">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-2 col-3 text-right">
+            <div class="d-flex align-items-center justify-content-end">
+                <i class="fas fa-map-marker-alt text-primary mr-2"></i>
+                <span id="distanceToShop">-- km</span>
+            </div>
+        </div>
+        <div class="col-lg-2 col-3 text-right">
+            <a asp-controller="Cart" asp-action="DetailCart" class="btn border">
+                <i class="fas fa-shopping-cart text-primary"></i>
+                <span class="badge">@ViewBag.CartCount</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateDistanceDisplay() {
+    const customerLat = @(Context.Session.GetString("CustomerLat") ?? "null");
+    const customerLng = @(Context.Session.GetString("CustomerLng") ?? "null");
+    const shopLocation = { lat: 21.028511, lng: 105.804817 };
+
+    if (customerLat && customerLng) {
+        const distance = google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng(customerLat, customerLng),
+            new google.maps.LatLng(shopLocation.lat, shopLocation.lng)
+        );
+        
+        document.getElementById('distanceToShop').textContent = 
+            `${(distance/1000).toFixed(1)} km từ shop`;
+    } else {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                    new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+                    new google.maps.LatLng(shopLocation.lat, shopLocation.lng)
+                );
+                
+                document.getElementById('distanceToShop').textContent = 
+                    `${(distance/1000).toFixed(1)} km từ shop`;
+            });
+        }
+    }
+}
+
+// Gọi hàm khi trang được tải
+document.addEventListener('DOMContentLoaded', updateDistanceDisplay);
+</script>
+
+<style>
+#distanceToShop {
+    font-size: 0.9rem;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.fa-map-marker-alt {
+    font-size: 1.2rem;
+}
+</style> 
