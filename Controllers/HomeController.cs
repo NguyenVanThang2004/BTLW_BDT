@@ -27,13 +27,27 @@ using X.PagedList;
                 var cart = HttpContext.Session.Get<List<CartItem>>("GioHang") ?? new List<CartItem>();
                 return cart.Count;
             }
-            public IActionResult Index()
+            public IActionResult Index(int ? page)
             {
+                int pageSize = 8;
+                int pageNumber = page == null || page < 0 ? 1 : page.Value;
                 ViewBag.CartCount = CartCount();  // Truyền số lượng sản phẩm vào ViewBag
-                var lstSanPham = db.SanPhams.ToList();
-       
-                return View(lstSanPham);
+                var lstSanPham = db.SanPhams.AsNoTracking().OrderBy(x => x.TenSanPham);
+                PagedList<SanPham> lst = new PagedList<SanPham>(lstSanPham, pageNumber, pageSize);
+                return View(lst);
             }
+
+            public IActionResult SanPhamTheoHang(string mahang, int ? page)
+            {
+                int pageSize = 8;
+                int pageNumber = page == null || page < 0 ? 1 : page.Value;
+                var lstsanpham = db.SanPhams.AsNoTracking().Where(x => x.MaHang == mahang).OrderBy(x => x.TenSanPham).ToList();
+
+                PagedList<SanPham> lst = new PagedList<SanPham>(lstsanpham, pageNumber, pageSize);
+                ViewBag.mahang = mahang;
+                return View(lst);
+            }
+
             public IActionResult Shop(int? page)
             {
                 int pageSize = 9;

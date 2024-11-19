@@ -47,6 +47,11 @@ builder.Services.AddCors(options =>
     });
 });
 
+var conectionString = builder.Configuration.GetConnectionString("QlbanVaLiContext");
+builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(conectionString));
+builder.Services.AddScoped<IHangSpResponsitory, HangSpResponsitory>();
+
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
