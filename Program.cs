@@ -48,6 +48,7 @@ builder.Services.AddCors(options =>
 var conectionString = builder.Configuration.GetConnectionString("QlbanVaLiContext");
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(conectionString));
 
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

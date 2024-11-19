@@ -4,7 +4,6 @@ using BTLW_BDT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using BTLW_BDT.ViewModels;
 using System.Text.RegularExpressions;
 
 namespace BTLW_BDT.Controllers
