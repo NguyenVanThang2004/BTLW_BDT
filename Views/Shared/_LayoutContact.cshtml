@@ -19,7 +19,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
 
     <!-- Libraries Stylesheet -->
-    <link href="../lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="../assets/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="../assets/css/style.css" rel="stylesheet">
@@ -30,11 +30,15 @@
 
     <!-- Google Maps API -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBqIm1BH4Z2iXUobBw9w98dpCIIyRLP-QE&libraries=places,geometry"></script>
+
+    <!-- Đặt các script này trong thẻ head hoặc cuối body -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
     <!-- Header Start -->
-    @await Html.PartialAsync("_HeaderPartial")
+    <partial name="_HeaderPartial" />
     <!-- Header End -->
 
     <!-- Page Header Start -->
@@ -81,7 +85,7 @@
     <!-- Contact End -->
 
     <!-- Footer Start -->
-    @await Html.PartialAsync("_FooterPartial")
+    <partial name="_FooterPartial" />
     <!-- Footer End -->
 
     <!-- JavaScript Libraries -->
