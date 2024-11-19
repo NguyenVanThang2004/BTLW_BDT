@@ -69,7 +69,36 @@ namespace BTLW_BDT.Areas.Admin.Controllers
 
             return View(lst);
         }
+        //[HttpPost("upload")]
+        //public IActionResult UploadFile([FromForm] IFormFile file)
+        //{
+        //    try
+        //    {
+        //        if (file == null || file.Length == 0)
+        //        {
+        //            return BadRequest("No file selected");
+        //        }
 
+        //        // Lưu file vào wwwroot/Images
+        //        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+        //        if (!Directory.Exists(uploadPath))
+        //        {
+        //            Directory.CreateDirectory(uploadPath);
+        //        }
+
+        //        var filePath = Path.Combine(uploadPath, file.FileName);
+        //        using (var stream = new FileStream(filePath, FileMode.Create))
+        //        {
+        //            file.CopyTo(stream);
+        //        }
+
+        //        return Ok(new { filePath = $"/Images/{file.FileName}" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Lỗi khi lưu file: {ex.Message}");
+        //    }
+        //}
         //[Route("ThemSanPhamMoi")]
         //[HttpGet]
         //public IActionResult ThemSanPhamMoi()
