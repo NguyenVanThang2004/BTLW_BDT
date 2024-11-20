@@ -50,8 +50,26 @@ builder.Services.AddCors(options =>
 var conectionString = builder.Configuration.GetConnectionString("QlbanVaLiContext");
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(conectionString));
 
-builder.Services.AddMemoryCache();
+builder.Services.AddDbContext<BtlLtwQlbdtContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("BtlLtwQlbdtContext")));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+builder.Services.AddMemoryCache();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
 var app = builder.Build();
 
 

@@ -2,6 +2,7 @@
 using BTLW_BDT.Models.PhoneModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace BTLW_BDT.Controllers
 {
@@ -23,7 +24,7 @@ namespace BTLW_BDT.Controllers
                                KhuyenMai = p.KhuyenMai,
                                Ram = p.Ram,
                                Pin = p.Pin,
-                               AnhDaiDien = p.AnhDaiDien
+                               AnhDaiDien = string.IsNullOrEmpty(p.AnhDaiDien) ? "" : p.AnhDaiDien.Trim()
                            }).ToList();
             return sanPham;
         }
@@ -43,9 +44,43 @@ namespace BTLW_BDT.Controllers
                                KhuyenMai = p.KhuyenMai,
                                Ram = p.Ram,
                                Pin = p.Pin,
-                               AnhDaiDien = p.AnhDaiDien
+                               AnhDaiDien = p.AnhDaiDien ?? ""
                            }).ToList();
             return sanPham;
+        }
+
+        [HttpPost("UploadImage")]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest("No file uploaded");
+
+                // Tạo đường dẫn đến thư mục lưu file
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PhoneImages", "Images");
+                
+                // Tạo thư mục nếu chưa tồn tại
+                if (!Directory.Exists(uploadPath))
+                    Directory.CreateDirectory(uploadPath);
+
+                // Tạo tên file độc nhất để tránh trùng lặp
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                // Lưu file
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Trả về tên file để lưu vào database
+                return Ok(new { fileName = fileName });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }
