@@ -15,7 +15,8 @@ builder.Services.AddSignalR();
 
 // Đăng ký DbContext trong DI container
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("BtlLtwQlbdtContext"))
+    .EnableDetailedErrors());
 
 // Đăng ký Repository và Service trong DI container
 builder.Services.AddScoped<IVnPayService, VnPayService>();
@@ -38,22 +39,6 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.SetIsOriginAllowed(origin => true) // Cho phép tất cả origin trong development
-               .AllowAnyHeader()
-               .AllowAnyMethod()
-               .AllowCredentials();
-    });
-});
-
-var conectionString = builder.Configuration.GetConnectionString("QlbanVaLiContext");
-builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(conectionString));
-
-builder.Services.AddDbContext<BtlLtwQlbdtContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("BtlLtwQlbdtContext")));
-
-builder.Services.AddCors(options =>
-{
     options.AddPolicy("AllowAll",
         builder =>
         {
@@ -63,6 +48,7 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader();
         });
 });
+
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers()
    .AddJsonOptions(options =>
@@ -91,12 +77,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseSession();
-
 app.UseRouting();
-
-app.UseCors();
-
+app.UseCors("AllowAll");
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -104,8 +87,15 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
+        name: "productDetail",
+        pattern: "san-pham/{id}",
+        defaults: new { controller = "Home", action = "ProductDetail" }
+    );
+
+    endpoints.MapControllerRoute(
         name: "default",
         pattern: "{controller=access}/{action=login}/{id?}");
+        
     endpoints.MapHub<ChatHub>("/chatHub");
 });
 
