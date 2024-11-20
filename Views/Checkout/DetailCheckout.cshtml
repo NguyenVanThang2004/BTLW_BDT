@@ -41,6 +41,10 @@
                                readonly>
                     </div>
                     <div class="col-md-6 form-group">
+                        <label>Ghi Chú</label>
+                        <textarea class="form-control" name="ghiChu" id="ghiChu" rows="4" cols="50"></textarea>
+                    </div>
+                    <div class="col-md-6 form-group">
                         <label>Địa chỉ giao hàng</label>
                         <input type="text" id="searchInput" class="form-control" 
                                placeholder="Tìm kiếm địa chỉ..." 
@@ -53,10 +57,6 @@
                         <input type="hidden" name="DiaChiLongitude" id="longitude">
                         <input type="hidden" name="PhiGiaoHang" id="shippingFeeInput">
                         <div id="distanceInfo" class="text-muted small mt-2"></div>
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Ghi Chú</label>
-                        <textarea class="form-control" name="ghiChu" id="ghiChu" rows="4" cols="50"></textarea>
                     </div>
                 </div>
             </div>
@@ -125,13 +125,13 @@
                 </div>
             </div>
 
-            <input type="hidden" id="paymentMethod" name="paymentMethod" value="Pay at store" />
+            <input type="hidden" id="paymentMethod" name="paymentMethod" value="Bank transfer via QR code" />
             
             <div class="payment-info">
                 <div class="payment-selection" onclick="openModal()">
-                    <img src="../assets/img/how-pay-icon.png" alt="Icon" class="icon" id="selectedIcon">
+                    <img src="../assets/img/qr-icon.png" alt="Icon" class="icon" id="selectedIcon">
                     <div class="payment-text">
-                        <p id="selectedMethod">Pay at store</p>
+                        <p id="selectedMethod">Bank transfer via QR code</p>
                     </div>
                     <span class="change-text">change &gt;</span>
                 </div>
@@ -149,13 +149,9 @@
 <div class="modal" id="paymentModal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
-        <h2>Select Payment Method</h2>
+        <h2>Payment Method</h2>
         <div class="payment-options">
-            <div class="option" onclick="selectMethod('Pay at store', '../assets/img/store-icon.png')">
-                <img src="../assets/img/store-icon.png" alt="Store" class="option-icon">
-                <span>Pay at store</span>
-            </div>
-            <div class="option" onclick="selectMethod('Bank transfer via QR code', '../assets/img/qr-icon.png')">
+            <div class="option selected" onclick="selectMethod('Bank transfer via QR code', '../assets/img/qr-icon.png')">
                 <img src="../assets/img/qr-icon.png" alt="QR Code" class="option-icon">
                 <span>Bank transfer via QR code</span>
             </div>
@@ -318,8 +314,8 @@
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBqIm1BH4Z2iXUobBw9w98dpCIIyRLP-QE&libraries=places,geometry"></script>
 <script>
-    let selectedMethodText = 'Pay at store';
-    let selectedIconSrc = '../assets/img/how-pay-icon.png';
+    let selectedMethodText = 'Bank transfer via QR code';
+    let selectedIconSrc = '../assets/img/qr-icon.png';
     let currentSelectedElement = null;
     let map, marker, searchBox;
     const shopLocation = { lat: 21.028511, lng: 105.804817 }; // Tọa độ shop
