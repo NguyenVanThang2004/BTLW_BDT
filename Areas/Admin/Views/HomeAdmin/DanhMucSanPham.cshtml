@@ -20,7 +20,7 @@
 <a onclick="showHideDiveInsertData('displayForm'); return false;" class="btn btn-primary">Thêm sản phẩm bằng API</a>
 
 <div id="displayForm" style="display: none;">
-    <form id="formAddProduct" method="post">
+    <form id="formAddProduct" method="post" enctype="multipart/form-data">
         <div class="form-group">
             <label class="control-label">Mã sản phẩm</label>
             <input type="text" class="form-control" id="MaSanPham" />
@@ -32,7 +32,7 @@
         <div class="form-group">
             <label class="control-label">Ảnh đại diện</label>
             <input type="file" class="form-control" id="AnhDaiDien" accept="image/*" onchange="previewAnhDaiDien(this)" />
-            <img id="anhDaiDienPreview" src="" alt="Ảnh đại diện" style="max-width: 200px; max-height: 200px; display: none;" />
+            <img id="anhDaiDienPreview" src="" alt="Preview" style="max-width: 200px; max-height: 200px; display: none;" />
         </div>
         <div class="form-group">
             <label class="control-label">Thời gian bảo hành</label>
@@ -163,7 +163,7 @@
         </div>
         <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addRomEntry()">Thêm ROM</button>
         <div id="mauSacContainer">
-            <div class="mau-entry">
+            <div class="mau-entry" data-mamau="">
                 <h4>Màu sắc #1</h4>
                 <div class="form-group">
                     <label class="control-label">Mã Màu</label>
@@ -171,7 +171,7 @@
                 </div>
                 <div class="form-group">
                     <label class="control-label">Tên màu</label>
-                    <select class="form-control mau-ten   ">
+                    <select class="form-control mau-ten">
                         <option value="-1">Chọn Màu</option>
                         <option value="Xanh">Xanh</option>
                         <option value="Tím">Tím</option>
@@ -180,23 +180,18 @@
                         <option value="Vàng">Vàng</option>
                     </select>
                 </div>
-
-            </div>
-            <div class="anhSpContainer">
-                <div class="anh-entry">
-                    <h6 style="margin-top:10px;">Ảnh </h6>
-                    <div class="form-group">
-                        <label class="control-label">Chọn ảnh</label>
-                        <input type="file" class="form-control anh-ten" onchange="previewImage(this)" />
-
-                        <!-- Hình ảnh sẽ hiển thị nếu có -->
-                        <img id="productImage" src="" alt="Product Image" style="max-width: 200px; max-height: 200px;" />
+                <div class="anhSpContainer">
+                    <div class="anh-entry">
+                        <h6 style="margin-top:10px;">Ảnh</h6>
+                        <div class="form-group">
+                            <label class="control-label">Chọn ảnh</label>
+                            <input type="file" class="form-control anh-ten" onchange="previewImage(this)" />
+                            <img class="preview-image" src="" alt="Preview" style="max-width: 200px; max-height: 200px; display: none;" />
+                        </div>
                     </div>
                 </div>
-
+                <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addAnhEntry(this)">Thêm Ảnh</button>
             </div>
-            <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addAnhEntry()">Thêm Ảnh</button>
-
         </div>
         <button type="button" class="btn btn-secondary" onclick="addMauEntry()">Thêm Màu</button>
         <div class="form-group">
@@ -366,7 +361,7 @@
                     <h6 style="margin-top:10px;">Ảnh </h6>
                     <div class="form-group">
                         <label class="control-label">Chọn ảnh</label>
-                        <input type="file" class="form-control editanh-ten" onchange="previewImage(this)" />
+                        <input type="file" class="form-control editanh-ten" onchange="editpreviewImage(this)" />
                         <!-- Thẻ img để hiển thị hình ảnh -->
                         <img src="" alt="Preview" class="editimg-preview mt-2" style="max-width: 200px; max-height: 200px; display: none;" />
                     </div>
@@ -423,17 +418,49 @@
     });
     function previewImage(input) {
         var file = input.files[0];
-        var reader = new FileReader();
-
-        // Khi đọc file thành công, hiển thị ảnh lên form
-        reader.onload = function (e) {
-            // Cập nhật lại ảnh trong form
-            document.getElementById("productImage").src = e.target.result;
-        };
-
-        // Đọc file ảnh
         if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var imgElement = $(input).closest('.anh-entry').find('img');
+                imgElement.attr('src', e.target.result);
+                imgElement.show();
+            };
             reader.readAsDataURL(file);
+        }
+    }
+    async function uploadProductImages(maSanPham, maMau) {
+        try {
+            const imagePromises = [];
+            // Tìm tất cả ảnh trong container của màu hiện tại
+            const anhEntries = $(`.mau-entry[data-mamau="${maMau}"] .anh-entry`);
+            
+            for (let i = 0; i < anhEntries.length; i++) {
+                const fileInput = $(anhEntries[i]).find('.anh-ten')[0];
+                if (fileInput && fileInput.files && fileInput.files[0]) {
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('maSanPham', maSanPham);
+                    formData.append('maMau', maMau);
+
+                    const promise = fetch('https://localhost:7244/api/ProductAPI/UploadImage', {
+                        method: 'POST',
+                        body: formData
+                    }).then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    });
+                    
+                    imagePromises.push(promise);
+                }
+            }
+
+            const results = await Promise.all(imagePromises);
+            return results;
+        } catch (error) {
+            console.error('Error uploading images:', error);
+            throw error;
         }
     }
     function showHideDiveInsertData(activeDiv) {
@@ -444,25 +471,23 @@
             $(document.getElementById(activeDiv)).show('slow');
         }
     }
-    function addAnhEntry(){
-        console.log("đã bấm thêm");
-
+    function addAnhEntry(button) {
+        const mauEntry = $(button).closest('.mau-entry');
+        const anhSpContainer = mauEntry.find('.anhSpContainer');
+        
         const newAnhHtml = `
-             <div class="anh-entry">
-                     <h6 style="margin-top:10px;">Ảnh</h6>
-                        <div class="form-group">
-                            <label class="control-label">Chọn ảnh</label>
-                                     <input type="file" class="form-control anh-ten" onchange="previewImage(this)" />
-
-                            <!-- Hình ảnh sẽ hiển thị nếu có -->
-                            <img id="productImage" src="../Images/{{ imageName }}" alt="Product Image" style="max-width: 200px; max-height: 200px;" />
-                        </div>
-                        <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeAnhEntry(this)">Xóa Ảnh</button>
-             </div>
-
+            <div class="anh-entry">
+                <h6 style="margin-top:10px;">Ảnh</h6>
+                <div class="form-group">
+                    <label class="control-label">Chọn ảnh</label>
+                    <input type="file" class="form-control anh-ten" onchange="previewImage(this)" />
+                    <img class="preview-image" src="" alt="Preview" style="max-width: 200px; max-height: 200px; display: none;" />
+                </div>
+                <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeAnhEntry(this)">Xóa Ảnh</button>
+            </div>
         `;
-        console.log("doan tml", newAnhHtml);
-        $('.anhSpContainer').append(newAnhHtml);
+        
+        anhSpContainer.append(newAnhHtml);
     }
     function removeAnhEntry(button) {
         console.log("bãmoa", $(button).closest('.anh-entry'));
@@ -583,81 +608,70 @@
     // Sửa lại hàm addANewProduct để xử lý bất đồng bộ
     async function addANewProduct(apiUrl) {
         try {
-            // Upload ảnh đại diện trước
+            // Upload ảnh đại diện
             let anhDaiDien = '';
             const anhDaiDienInput = document.querySelector('#AnhDaiDien');
-            if (anhDaiDienInput.files && anhDaiDienInput.files[0]) {
-                anhDaiDien = await uploadImage(anhDaiDienInput.files[0]);
+            if (anhDaiDienInput && anhDaiDienInput.files && anhDaiDienInput.files[0]) {
+                try {
+                    anhDaiDien = await uploadImage(anhDaiDienInput.files[0]);
+                } catch (error) {
+                    throw new Error('Failed to upload avatar image: ' + error.message);
+                }
             }
 
-            // Thu thập dữ liệu ROM
+            // Thu thập thông tin sản phẩm
             const roms = [];
-            document.querySelectorAll('.rom-entry').forEach(function(entry) {
-                const maSanPham = document.getElementById('MaSanPham').value;
-                const thongSo = entry.querySelector('.rom-thongso').value;
-                const gia = parseFloat(entry.querySelector('.rom-gia').value);
-
+            $('.rom-entry').each(function() {
                 const rom = {
-                    MaRom: `ro${maSanPham}${thongSo}`,
-                    ThongSo: thongSo,
-                    Gia: gia,
-                    MaSanPham: maSanPham
+                    MaRom: $(this).find('.rom-ma').val(),
+                    ThongSo: $(this).find('.rom-thongso').val(),
+                    Gia: parseFloat($(this).find('.rom-gia').val()),
+                    MaSanPham: $('#MaSanPham').val()
                 };
-
                 if (rom.MaRom && rom.ThongSo && !isNaN(rom.Gia)) {
                     roms.push(rom);
                 }
             });
 
-            // Thu thập và xử lý màu sắc và ảnh sản phẩm
             const mausacs = [];
             const anhsanphams = [];
             
-            // Xử lý upload ảnh cho từng màu
+            // Xử lý từng màu và ảnh
             const mauEntries = document.querySelectorAll('.mau-entry');
             for (const mauEntry of mauEntries) {
-                let soThuTu = "";
-                const tenMau = mauEntry.querySelector('.mau-ten').value;
-                if (tenMau.toLowerCase() === "xanh") soThuTu = "001";
-                else if (tenMau.toLowerCase() === "tím") soThuTu = "002";
-                else if (tenMau.toLowerCase() === "đen") soThuTu = "003";
-                else if (tenMau.toLowerCase() === "trắng") soThuTu = "004";
-                else if (tenMau.toLowerCase() === "vàng") soThuTu = "005";
-
                 const maSanPham = document.getElementById('MaSanPham').value;
-                const mauSac = {
-                    MaMau: `m${maSanPham}${soThuTu}`,
-                    TenMau: tenMau,
-                    MaSanPham: maSanPham
-                };
-
-                // Upload ảnh cho màu này
-                const anhPromises = [];
-                mauEntry.querySelectorAll('.anh-entry').forEach(function(anhEntry) {
-                    const fileInput = anhEntry.querySelector('.anh-ten');
-                    if (fileInput.files && fileInput.files[0]) {
-                        anhPromises.push(uploadImage(fileInput.files[0]));
-                    }
-                });
-
-                // Đợi tất cả ảnh upload xong
-                const uploadedFileNames = await Promise.all(anhPromises);
+                const maMau = mauEntry.querySelector('.mau-ma').value;
+                const tenMau = mauEntry.querySelector('.mau-ten').value;
                 
-                // Thêm thông tin ảnh vào mảng anhsanphams
-                uploadedFileNames.forEach(fileName => {
-                    anhsanphams.push({
-                        TenFile: fileName,
-                        MaMau: mauSac.MaMau,
-                        MaSanPham: mauSac.MaSanPham
+                if (maMau && tenMau !== '-1') {
+                    // Thêm thông tin màu
+                    mausacs.push({
+                        MaMau: maMau,
+                        TenMau: tenMau,
+                        MaSanPham: maSanPham
                     });
-                });
 
-                if (mauSac.MaMau && mauSac.TenMau) {
-                    mausacs.push(mauSac);
+                    // Upload ảnh cho màu này
+                    const anhInputs = mauEntry.querySelectorAll('.anh-ten');
+                    for (const anhInput of anhInputs) {
+                        if (anhInput.files && anhInput.files[0]) {
+                            try {
+                                const fileName = await uploadImage(anhInput.files[0]);
+                                anhsanphams.push({
+                                    TenFile: fileName,
+                                    MaMau: maMau,
+                                    MaSanPham: maSanPham
+                                });
+                            } catch (error) {
+                                console.error('Error uploading color image:', error);
+                                throw error;
+                            }
+                        }
+                    }
                 }
             }
 
-            // Tạo object chứa toàn bộ thông tin sản phẩm
+            // Tạo object chứa thông tin sản phẩm
             var duLieuSanPham = {
                 MaSanPham: document.getElementById('MaSanPham').value,
                 TenSanPham: document.getElementById('TenSanPham').value,
@@ -690,7 +704,7 @@
             };
 
             // Gửi request tạo sản phẩm
-            const response = await fetch(apiUrl, {
+            const createResponse = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -698,7 +712,7 @@
                 body: JSON.stringify(duLieuSanPham)
             });
 
-            if (!response.ok) {
+            if (!createResponse.ok) {
                 throw new Error('Failed to create product');
             }
 
@@ -824,7 +838,7 @@
             contentType: 'application/json',
             data: JSON.stringify(sanPham),
             success: function () {
-                saveHistory('Sửa sản phẩm',
+                saveHistory('Sửa sn phẩm',
                     'Cập nhật sản phẩm: ' + sanPham.maSanPham );
                 alert("Sửa sản phẩm thành công!");
                 location.reload();
@@ -1428,7 +1442,7 @@
     .product-image {
         width: 80px; /* Giảm kích thước thumbnail */
         height: 80px; /* Giữ tỷ lệ vuông */
-        object-fit: cover; /* Đảm bảo ảnh lấp đầy không gian */
+        object-fit: cover; /* Đ��m bảo ảnh lấp đầy không gian */
         margin: 5px;
         border-radius: 5px;
         cursor: pointer;
