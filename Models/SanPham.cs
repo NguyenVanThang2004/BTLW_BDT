@@ -55,8 +55,6 @@ public partial class SanPham
 
     public string? AnhDaiDien { get; set; }
 
-    public bool? BanChay { get; set; }
-
     public virtual ICollection<AnhSanPham> AnhSanPhams { get; set; } = new List<AnhSanPham>();
 
     public virtual ICollection<ChiTietGioHang> ChiTietGioHangs { get; set; } = new List<ChiTietGioHang>();

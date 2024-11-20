@@ -2,15 +2,10 @@
     ViewData["Title"] = "Home Page";
     Layout = "~/Views/Shared/_LayoutPhone.cshtml";
 }
-
-@using X.PagedList.Mvc.Core;
-@model X.PagedList.IPagedList<SanPham>
 @using BTLW_BDT.ViewModels
 
-@* trang *@
 @section SanPhamBanChay {
     <div class="product-hot">
-        <h2>Sản phẩm bán chạy</h2>
         <div class="row">
             @foreach (var item in ViewBag.SanPhamBanChay)
             {
@@ -19,11 +14,6 @@
                         <img src="@item.AnhDaiDien" class="card-img-top" alt="@item.TenSanPham">
                         <div class="card-body">
                             <h5 class="card-title">@item.TenSanPham</h5>
-                            <div class="specs">
-                                <p class="mb-1"><small>Chip: @item.Chip</small></p>
-                                <p class="mb-1"><small>RAM: @item.Ram</small></p>
-                                <p class="mb-1"><small>Màn hình: @item.ManHinh</small></p>
-                            </div>
                             <div class="price-section">
                                 <span class="current-price">@(item.DonGiaBanRa?.ToString("N0")) đ</span>
                                 @if (item.DonGiaBanGoc > item.DonGiaBanRa)
@@ -35,13 +25,6 @@
                             {
                                 <span class="badge bg-danger">-@(item.KhuyenMai)%</span>
                             }
-                            <div class="sales-info">
-                                <span class="text-success">Đã bán: @item.TongSoLuongBan</span>
-                                @if (item.SoLuongTonKho <= 5 && item.SoLuongTonKho > 0)
-                                {
-                                    <span class="text-warning">Sắp hết hàng</span>
-                                }
-                            </div>
                         </div>
                     </div>
                 </div>

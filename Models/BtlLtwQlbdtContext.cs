@@ -88,7 +88,7 @@ public partial class BtlLtwQlbdtContext : DbContext
         {
             entity.HasKey(e => new { e.MaHoaDon, e.MaSanPham });
 
-            entity.ToTable("ChiTietHoaDonBan", tb => tb.HasTrigger("trg_SanPhamBanChay"));
+            entity.ToTable("ChiTietHoaDonBan");
 
             entity.Property(e => e.MaHoaDon).HasMaxLength(50);
             entity.Property(e => e.MaSanPham).HasMaxLength(50);

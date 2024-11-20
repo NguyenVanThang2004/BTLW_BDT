@@ -45,11 +45,7 @@ namespace BTLW_BDT.Controllers
             var sanPhamBanChay = GetSanPhamBanChay();
             ViewBag.SanPhamBanChay = sanPhamBanChay;
 
-            // Lấy danh sách sản phẩm phân trang
-            var lstSanPham = db.SanPhams.AsNoTracking().OrderBy(x => x.TenSanPham);
-            PagedList<SanPham> lst = new PagedList<SanPham>(lstSanPham, pageNumber, pageSize);
-            
-            return View(lst);
+            return View();
         }
 
         public IActionResult SanPhamTheoHang(string mahang, int ? page)
@@ -170,41 +166,78 @@ namespace BTLW_BDT.Controllers
         private List<SanPhamBanChayViewModel> GetSanPhamBanChay()
         {
             const string cacheKey = "SanPhamBanChay";
-            
+
+#pragma warning disable CS8603 // Possible null reference return.
             return _cache.GetOrCreate(cacheKey, entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
                 
-                var query = from sp in db.SanPhams
-                           join ct in db.ChiTietHoaDonBans on sp.MaSanPham equals ct.MaSanPham
-                           join hd in db.HoaDonBans on ct.MaHoaDon equals hd.MaHoaDon
-                           where hd.ThoiGianLap >= DateTime.Now.AddDays(-30)
-                           group new { sp, ct } by new 
-                           { 
-                               sp.MaSanPham,
-                               sp.TenSanPham,
-                               sp.DonGiaBanGoc,
-                               sp.DonGiaBanRa,
-                               sp.KhuyenMai,
-                               sp.AnhDaiDien
-                           } into g
-                           select new SanPhamBanChayViewModel
-                           {
-                               MaSanPham = g.Key.MaSanPham,
-                               TenSanPham = g.Key.TenSanPham,
-                               DonGiaBanGoc = g.Key.DonGiaBanGoc,
-                               DonGiaBanRa = g.Key.DonGiaBanRa,
-                               KhuyenMai = g.Key.KhuyenMai,
-                               AnhDaiDien = g.Key.AnhDaiDien,
-                               TongSoLuongBan = g.Sum(x => x.ct.SoLuongBan ?? 0),
-                               DoanhThu = g.Sum(x => (x.ct.SoLuongBan ?? 0) * (x.ct.DonGiaCuoi ?? 0))
-                           };
+                // Kiểm tra xem có dữ liệu bán hàng không
+                var hasOrders = db.ChiTietHoaDonBans.Any();
+                
+                // Thêm log để kiểm tra
+                System.Diagnostics.Debug.WriteLine($"Has orders: {hasOrders}");
 
-                return query.OrderByDescending(x => x.DoanhThu)
-                           .ThenByDescending(x => x.TongSoLuongBan)
-                           .Take(8)
-                           .ToList();
+                if (hasOrders)
+                {
+                    var query = from sp in db.SanPhams
+                               join ct in db.ChiTietHoaDonBans on sp.MaSanPham equals ct.MaSanPham
+                               where ct.SoLuongBan > 0 && ct.DonGiaCuoi > 0
+                               group new { sp, ct } by new 
+                               { 
+                                   sp.MaSanPham,
+                                   sp.TenSanPham,
+                                   sp.DonGiaBanGoc,
+                                   sp.DonGiaBanRa,
+                                   sp.KhuyenMai,
+                                   sp.AnhDaiDien
+                               } into g
+                               select new SanPhamBanChayViewModel
+                               {
+                                   MaSanPham = g.Key.MaSanPham,
+                                   TenSanPham = g.Key.TenSanPham,
+                                   DonGiaBanGoc = g.Key.DonGiaBanGoc,
+                                   DonGiaBanRa = g.Key.DonGiaBanRa,
+                                   KhuyenMai = g.Key.KhuyenMai,
+                                   AnhDaiDien = g.Key.AnhDaiDien,
+                                   TongSoLuongBan = g.Sum(x => x.ct.SoLuongBan ?? 0),
+                                   DoanhThu = g.Sum(x => (x.ct.SoLuongBan ?? 0) * (x.ct.DonGiaCuoi ?? 0))
+                               };
+
+                    var result = query.OrderByDescending(x => x.TongSoLuongBan)
+                                   .ThenByDescending(x => x.DoanhThu)
+                                   .Take(8)
+                                   .ToList();
+
+                    if (result.Any())
+                    {
+                        System.Diagnostics.Debug.WriteLine("Returning best-selling products");
+                        result.ForEach(p => System.Diagnostics.Debug.WriteLine($"Product: {p.TenSanPham}, Sales: {p.TongSoLuongBan}"));
+                        return result;
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine("Returning newest products by price");
+                var newestProducts = db.SanPhams
+                        .OrderByDescending(x => x.DonGiaBanRa)
+                        .Take(8)
+                        .Select(sp => new SanPhamBanChayViewModel
+                        {
+                            MaSanPham = sp.MaSanPham,
+                            TenSanPham = sp.TenSanPham,
+                            DonGiaBanGoc = sp.DonGiaBanGoc,
+                            DonGiaBanRa = sp.DonGiaBanRa,
+                            KhuyenMai = sp.KhuyenMai,
+                            AnhDaiDien = sp.AnhDaiDien,
+                            TongSoLuongBan = 0,
+                            DoanhThu = 0
+                        })
+                        .ToList();
+
+                newestProducts.ForEach(p => System.Diagnostics.Debug.WriteLine($"Product: {p.TenSanPham}, Price: {p.DonGiaBanRa}"));
+                return newestProducts;
             });
+#pragma warning restore CS8603 // Possible null reference return.
         }
     }
 }
