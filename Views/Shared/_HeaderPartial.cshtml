@@ -25,8 +25,9 @@
         </div>
         <div class="col-lg-1 col-3 text-right">
             <div class="col-lg-1 col-3 text-right">
-                <a asp-controller="Cart" asp-action="DetailCart" class="btn border">
-                    <i class="fas fa-shopping-cart text-primary"></i><span class="badge">0</span>
+                <a asp-controller="Cart" asp-action="DetailCart" class="btn border position-relative">
+                    <i class="fas fa-shopping-cart text-primary"></i>
+                    <span class="badge position-absolute translate-middle badge-position">0</span>
                 </a>
             </div>
         </div>
@@ -242,5 +243,11 @@ $(document).ready(function() {
 
 .nav-item.nav-link:hover {
     background-color: #f8f9fa;
+}
+
+.badge-position {
+    top: 25% !important;
+    right: 0 !important;
+    transform: translateX(50%) !important;
 }
 </style> 
