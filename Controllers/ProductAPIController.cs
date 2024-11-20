@@ -11,29 +11,87 @@ namespace BTLW_BDT.Controllers
     [ApiController]
     public class ProductAPIController : ControllerBase
     {
-        private readonly BtlLtwQlbdtContext db;
+        private readonly BtlLtwQlbdtContext _context;
 
         public ProductAPIController(BtlLtwQlbdtContext context)
         {
-            db = context;
+            _context = context;
         }
 
         // GET: api/ProductAPI/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<SanPham>> GetProduct(string id)
         {
-            var product = await db.SanPhams
-                .Include(p => p.Roms)
-                .Include(p => p.MauSacs)
-                .Include(p => p.AnhSanPhams)
-                .FirstOrDefaultAsync(p => p.MaSanPham == id);
-
-            if (product == null)
+            try
             {
-                return NotFound();
-            }
+                var product = await _context.SanPhams
+                    .Include(p => p.Roms)
+                    .Include(p => p.MauSacs)
+                    .Include(p => p.AnhSanPhams)
+                    .Include(p => p.ChiTietGioHangs)
+                    .Include(p => p.ChiTietHoaDonBans)
+                    .FirstOrDefaultAsync(p => p.MaSanPham == id);
 
-            return Ok(product);
+                if (product == null)
+                {
+                    return NotFound($"Không tìm thấy sản phẩm với mã: {id}");
+                }
+
+                // Chuyển đổi dữ liệu sang dạng phù hợp để trả về
+                var result = new
+                {
+                    maSanPham = product.MaSanPham,
+                    tenSanPham = product.TenSanPham,
+                    anhDaiDien = product.AnhDaiDien,
+                    thoiGianBaoHanh = product.ThoiGianBaoHanh,
+                    soLuongTonKho = product.SoLuongTonKho,
+                    donGiaBanGoc = product.DonGiaBanGoc,
+                    donGiaBanRa = product.DonGiaBanRa,
+                    khuyenMai = product.KhuyenMai,
+                    danhBa = product.DanhBa,
+                    denFlash = product.DenFlash,
+                    congNgheManHinh = product.CongNgheManHinh,
+                    doSangToiDa = product.DoSangToiDa,
+                    loaiPin = product.LoaiPin,
+                    baoMatNangCao = product.BaoMatNangCao,
+                    ghiAmMacDinh = product.GhiAmMacDinh,
+                    jackTaiNghe = product.JackTaiNghe,
+                    mangDiDong = product.MangDiDong,
+                    sim = product.Sim,
+                    maHang = product.MaHang,
+                    manHinh = product.ManHinh,
+                    pin = product.Pin,
+                    camera = product.Camera,
+                    kichThuoc = product.KichThuoc,
+                    chip = product.Chip,
+                    ram = product.Ram,
+                    roms = product.Roms.Select(r => new
+                    {
+                        maRom = r.MaRom,
+                        thongSo = r.ThongSo,
+                        gia = r.Gia,
+                        maSanPham = r.MaSanPham
+                    }).ToList(),
+                    mausacs = product.MauSacs.Select(m => new
+                    {
+                        maMau = m.MaMau,
+                        tenMau = m.TenMau,
+                        maSanPham = m.MaSanPham
+                    }).ToList(),
+                    anhSanPhams = product.AnhSanPhams.Select(a => new
+                    {
+                        tenFile = a.TenFile,
+                        maMau = a.MaMau,
+                        maSanPham = a.MaSanPham
+                    }).ToList()
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         // PUT: api/ProductAPI/{id}
@@ -48,26 +106,26 @@ namespace BTLW_BDT.Controllers
             try
             {
                 // Xóa các ROM, màu sắc và ảnh cũ
-                var existingRoms = await db.Roms.Where(r => r.MaSanPham == id).ToListAsync();
-                var existingMausacs = await db.MauSacs.Where(m => m.MaSanPham == id).ToListAsync();
-                var existingAnhs = await db.AnhSanPhams.Where(a => a.MaSanPham == id).ToListAsync();
+                var existingRoms = await _context.Roms.Where(r => r.MaSanPham == id).ToListAsync();
+                var existingMausacs = await _context.MauSacs.Where(m => m.MaSanPham == id).ToListAsync();
+                var existingAnhs = await _context.AnhSanPhams.Where(a => a.MaSanPham == id).ToListAsync();
 
-                db.Roms.RemoveRange(existingRoms);
-                db.MauSacs.RemoveRange(existingMausacs);
-                db.AnhSanPhams.RemoveRange(existingAnhs);
+                _context.Roms.RemoveRange(existingRoms);
+                _context.MauSacs.RemoveRange(existingMausacs);
+                _context.AnhSanPhams.RemoveRange(existingAnhs);
 
                 // Cập nhật thông tin sản phẩm
-                db.Entry(sanPham).State = EntityState.Modified;
+                _context.Entry(sanPham).State = EntityState.Modified;
 
                 // Thêm ROM, màu sắc và ảnh mới
                 if (sanPham.Roms != null)
-                    db.Roms.AddRange(sanPham.Roms);
+                    _context.Roms.AddRange(sanPham.Roms);
                 if (sanPham.MauSacs != null)
-                    db.MauSacs.AddRange(sanPham.MauSacs);
+                    _context.MauSacs.AddRange(sanPham.MauSacs);
                 if (sanPham.AnhSanPhams != null)
-                    db.AnhSanPhams.AddRange(sanPham.AnhSanPhams);
+                    _context.AnhSanPhams.AddRange(sanPham.AnhSanPhams);
 
-                await db.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return NoContent();
             }
             catch (DbUpdateConcurrencyException)
@@ -82,7 +140,7 @@ namespace BTLW_BDT.Controllers
 
         private bool ProductExists(string id)
         {
-            return db.SanPhams.Any(e => e.MaSanPham == id);
+            return _context.SanPhams.Any(e => e.MaSanPham == id);
         }
 
         [HttpPost("UploadImage")]
