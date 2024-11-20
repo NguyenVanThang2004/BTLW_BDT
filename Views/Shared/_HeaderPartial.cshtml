@@ -24,10 +24,12 @@
             </div>
         </div>
         <div class="col-lg-1 col-3 text-right">
-            <a asp-controller="Cart" asp-action="DetailCart" class="btn border">
-                <i class="fas fa-shopping-cart text-primary"></i>
-                <span class="badge">@ViewBag.CartCount</span>
-            </a>
+            <div class="col-lg-1 col-3 text-right">
+                <a asp-controller="Cart" asp-action="DetailCart" class="btn border">
+                    <i class="fas fa-shopping-cart text-primary"></i>  <span class="badge">0</span>
+                   
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -83,6 +85,30 @@
 </div>
 
 <script>
+
+
+
+    function updateCartCount() {
+        $.ajax({
+            url: '/Home/GetCartQuantity',
+            method: 'GET',
+            success: function (quantity) {
+                $('.badge').text(quantity);
+            },
+            error: function (error) {
+                console.error('Error updating cart count:', error);
+            }
+        });
+    }
+
+    // Cập nhật số lượng khi trang được tải
+    $(document).ready(function () {
+        updateCartCount();
+    });
+
+  
+
+
 function updateDistanceDisplay() {
     const customerLat = @(Context.Session.GetString("CustomerLat") ?? "null");
     const customerLng = @(Context.Session.GetString("CustomerLng") ?? "null");

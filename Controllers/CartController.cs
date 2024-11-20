@@ -13,15 +13,15 @@ public class CartController : Controller
         _context = context;
     }
 
-    private int GetCartCount(string userId)
-    {
-        if (string.IsNullOrEmpty(userId)) return 0;
+    //public int GetCartCount(string userId)
+    //{
+    //    if (string.IsNullOrEmpty(userId)) return 0;
 
-        var gioHang = _context.GioHangs.FirstOrDefault(g => g.TenDangNhap == userId);
-        if (gioHang == null) return 0;
+    //    var gioHang = _context.GioHangs.FirstOrDefault(g => g.TenDangNhap == userId);
+    //    if (gioHang == null) return 0;
 
-        return _context.ChiTietGioHangs.Count(c => c.MaGioHang == gioHang.MaGioHang);
-    }
+    //    return _context.ChiTietGioHangs.Count(c => c.MaGioHang == gioHang.MaGioHang);
+    //}
 
     public IActionResult Index()
     {
@@ -46,11 +46,12 @@ public class CartController : Controller
             .Where(c => c.MaGioHang == gioHang.MaGioHang)
             .ToList();
 
-        ViewBag.CartCount = GetCartCount(userId);
+       // ViewBag.CartCount = GetCartCount(userId);
         ViewData["Page"] = "Shopping Cart";
 
         return View(chiTietGioHang);
     }
+
 
     public IActionResult AddToCart(string id, decimal? currentPrice = null, string? maMau = null, string? maRom = null, int quantity = 1)
     {
@@ -141,7 +142,7 @@ public class CartController : Controller
 
             // Lưu thay đổi
             _context.SaveChanges();
-            ViewBag.CartCount = GetCartCount(userId);
+          //  ViewBag.CartCount = GetCartCount(userId);
 
             TempData["Success"] = "Thêm sản phẩm vào giỏ hàng thành công";
             return RedirectToAction("DetailCart");
@@ -218,7 +219,7 @@ public class CartController : Controller
             gioHang.TongTien -= donGia * item.SoLuong;
             _context.ChiTietGioHangs.Remove(item);
             // Cập nhật ViewBag.CartCount trước khi chuyển hướng
-            ViewBag.CartCount = GetCartCount(userId);
+         //   ViewBag.CartCount = GetCartCount(userId);
             _context.SaveChanges();
         }
         else
@@ -230,7 +231,7 @@ public class CartController : Controller
         return RedirectToAction("DetailCart");
     }
 
-    [HttpPost]  
+    [HttpPost, HttpGet]
     public IActionResult UpdateQuantity(string maSanPham, string? maMau, string? maRom, string action)
     {
         string userId = HttpContext.Session.GetString("Username");
@@ -255,8 +256,6 @@ public class CartController : Controller
             decimal baseRomGia = baseRom.Gia.GetValueOrDefault();
             decimal donGia = (selectedRom.Gia.GetValueOrDefault() - baseRomGia) + sanPham.DonGiaBanRa.GetValueOrDefault();
 
- 
-
             if (action == "increase")
             {
                 item.SoLuong++;
@@ -269,8 +268,6 @@ public class CartController : Controller
             }
 
             _context.SaveChanges();
-            // Cập nhật ViewBag.CartCount trước khi chuyển hướng
-            ViewBag.CartCount = GetCartCount(userId);
         }
 
         return RedirectToAction("DetailCart");
@@ -317,7 +314,7 @@ public class CartController : Controller
             return RedirectToAction("DetailCart");
         }
 
-        ViewBag.CartCount = GetCartCount(userId);
+     //   ViewBag.CartCount = GetCartCount(userId);
         ViewData["Page"] = "Checkout";
         return View(chiTietGioHang);
     }

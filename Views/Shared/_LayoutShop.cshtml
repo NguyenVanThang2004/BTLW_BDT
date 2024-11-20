@@ -106,6 +106,26 @@
     <script src="../assets/js/main.js"></script>
      
     @RenderSection("Scripts", required: false)
+
+    <script>
+        function updateCartCount() {
+            $.ajax({
+                url: '/Home/GetCartQuantity',
+                method: 'GET',
+                success: function (quantity) {
+                    $('.badge').text(quantity);
+                },
+                error: function (error) {
+                    console.error('Error updating cart count:', error);
+                }
+            });
+        }
+
+        // Cập nhật số lượng khi trang được tải
+        $(document).ready(function () {
+            updateCartCount();
+        });
+    </script>
 </body>
 
 </html>

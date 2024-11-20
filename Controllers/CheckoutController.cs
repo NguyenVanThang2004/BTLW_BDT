@@ -111,6 +111,7 @@ namespace BTLW_BDT.Controllers
                     MaKhachHang = khachHang.MaKhachHang ,
                     TrangThai   = "chưa thanh toán"
                     // ma nhan vien 
+
                    
                 };
 
