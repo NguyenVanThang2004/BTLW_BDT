@@ -17,114 +17,116 @@
 
 @model List<BTLW_BDT.Models.ChiTietGioHang>
 
-<div class="row px-xl-5">
-    <div class="col-lg-8">
-        <div class="mb-4">
-            <h4 class="font-weight-semi-bold mb-4">Billing Address</h4>
-            <div class="row">
-                <div class="col-md-6 form-group">
-                    <label>Tên Khách Hàng</label>
-                    <input class="form-control" type="text"
-                           value="@Context.Session.GetString("HoTen")"
-                           readonly>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Ngày Sinh</label>
-                    <input class="form-control" type="date"
-                           value="@ngaySinhFormatted">
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Số Điện Thoại</label>
-                    <input class="form-control" type="text"
-                           value="@Context.Session.GetString("SoDienThoai")"
-                           readonly>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Địa chỉ giao hàng</label>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm địa chỉ..." value="@Context.Session.GetString("DiaChi")">
-                    <div class="map-container mt-3">
-                        <div id="map"></div>
+<form asp-controller="Checkout" asp-action="PlaceOrder" method="post" id="checkoutForm">
+    <div class="row px-xl-5">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <h4 class="font-weight-semi-bold mb-4">Billing Address</h4>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Tên Khách Hàng</label>
+                        <input class="form-control" type="text"
+                               value="@Context.Session.GetString("HoTen")"
+                               readonly>
                     </div>
-                    <input type="hidden" name="DiaChiGiaoHang" id="formattedAddress">
-                    <input type="hidden" name="DiaChiLatitude" id="latitude">
-                    <input type="hidden" name="DiaChiLongitude" id="longitude">
-                    <div id="distanceInfo" class="text-muted small mt-2"></div>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Ghi Chú</label>
-                    <textarea class="form-control" rows="4" cols="50">@Context.Session.GetString("GhiChu")</textarea>
+                    <div class="col-md-6 form-group">
+                        <label>Ngày Sinh</label>
+                        <input class="form-control" type="date"
+                               value="@ngaySinhFormatted">
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Số Điện Thoại</label>
+                        <input class="form-control" type="text"
+                               value="@Context.Session.GetString("SoDienThoai")"
+                               readonly>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Địa chỉ giao hàng</label>
+                        <input type="text" id="searchInput" class="form-control" 
+                               placeholder="Tìm kiếm địa chỉ..." 
+                               value="@Context.Session.GetString("DiaChi")">
+                        <div class="map-container mt-3">
+                            <div id="map"></div>
+                        </div>
+                        <input type="hidden" name="DiaChiGiaoHang" id="formattedAddress">
+                        <input type="hidden" name="DiaChiLatitude" id="latitude">
+                        <input type="hidden" name="DiaChiLongitude" id="longitude">
+                        <input type="hidden" name="PhiGiaoHang" id="shippingFeeInput">
+                        <div id="distanceInfo" class="text-muted small mt-2"></div>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Ghi Chú</label>
+                        <textarea class="form-control" name="ghiChu" id="ghiChu" rows="4" cols="50"></textarea>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-4">
-        <div class="card border-secondary mb-5">
-            <div class="card-header bg-secondary border-0">
-                <h4 class="font-weight-semi-bold m-0">Order Total</h4>
-            </div>
-            <div class="card-body">
-                <h5 class="font-weight-medium mb-3">Products</h5>
+        <div class="col-lg-4">
+            <div class="card border-secondary mb-5">
+                <div class="card-header bg-secondary border-0">
+                    <h4 class="font-weight-semi-bold m-0">Order Total</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="font-weight-medium mb-3">Products</h5>
 
-                @foreach (var item in Model)
-                {
-                    var sanPham = _context.SanPhams.FirstOrDefault(s => s.MaSanPham == item.MaSanPham);
-                    var mauSac = _context.MauSacs.FirstOrDefault(m => m.MaMau == item.ThongSoMau);
-                    var rom = _context.Roms.FirstOrDefault(r => r.MaRom == item.ThongSoRom);
-                    var danhSachRom = _context.Roms.Where(r => r.MaSanPham == item.MaSanPham).ToList();
-                    var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
+                    @foreach (var item in Model)
+                    {
+                        var sanPham = _context.SanPhams.FirstOrDefault(s => s.MaSanPham == item.MaSanPham);
+                        var mauSac = _context.MauSacs.FirstOrDefault(m => m.MaMau == item.ThongSoMau);
+                        var rom = _context.Roms.FirstOrDefault(r => r.MaRom == item.ThongSoRom);
+                        var danhSachRom = _context.Roms.Where(r => r.MaSanPham == item.MaSanPham).ToList();
+                        var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
 
-                    decimal baseRomGia = baseRom?.Gia.GetValueOrDefault() ?? 0;
-                    decimal selectedRomGia = rom?.Gia.GetValueOrDefault() ?? 0;
-                    decimal donGia = (selectedRomGia - baseRomGia) + sanPham.DonGiaBanRa.GetValueOrDefault();
-                    var tongTien = donGia * (item.SoLuong ?? 0);
+                        decimal baseRomGia = baseRom?.Gia.GetValueOrDefault() ?? 0;
+                        decimal selectedRomGia = rom?.Gia.GetValueOrDefault() ?? 0;
+                        decimal donGia = (selectedRomGia - baseRomGia) + sanPham.DonGiaBanRa.GetValueOrDefault();
+                        var tongTien = donGia * (item.SoLuong ?? 0);
 
+                        <div class="d-flex justify-content-between">
+                            <p>@sanPham?.TenSanPham (@mauSac?.TenMau - @rom?.ThongSo) x @item.SoLuong </p>
+                            <p>@Convert.ToDouble(tongTien).ToString("N0") VNĐ</p>
+                        </div>
+                    }
+
+                    <hr class="mt-0">
+                    <div class="d-flex justify-content-between mb-3 pt-1">
+                        <h6 class="font-weight-medium">Subtotal</h6>
+                        <h6 class="font-weight-medium">
+                            @{
+                                var totalAmount = Model.Sum(item =>
+                                {
+                                    var sp = _context.SanPhams.FirstOrDefault(s => s.MaSanPham == item.MaSanPham);
+                                    var danhSachRom = _context.Roms.Where(r => r.MaSanPham == item.MaSanPham).ToList();
+                                    var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
+                                    var selectedRom = _context.Roms.FirstOrDefault(r => r.MaRom == item.ThongSoRom);
+
+                                    decimal baseRomGia = baseRom?.Gia.GetValueOrDefault() ?? 0;
+                                    decimal selectedRomGia = selectedRom?.Gia.GetValueOrDefault() ?? 0;
+                                    decimal donGia = (selectedRomGia - baseRomGia) + sp.DonGiaBanRa.GetValueOrDefault();
+
+                                    return donGia * (item.SoLuong ?? 0);
+                                });
+                            }
+                            @Convert.ToDouble(totalAmount).ToString("N0") VNĐ
+                        </h6>
+                    </div>
                     <div class="d-flex justify-content-between">
-                        <p>@sanPham?.TenSanPham (@mauSac?.TenMau - @rom?.ThongSo) x @item.SoLuong </p>
-                        <p>@Convert.ToDouble(tongTien).ToString("N0") VNĐ</p>
+                        <h6 class="font-weight-medium">Shipping</h6>
+                        <h6 class="font-weight-medium" id="shippingFee">Calculating...</h6>
                     </div>
-                }
-
-                <hr class="mt-0">
-                <div class="d-flex justify-content-between mb-3 pt-1">
-                    <h6 class="font-weight-medium">Subtotal</h6>
-                    <h6 class="font-weight-medium">
-                        @{
-                            var totalAmount = Model.Sum(item =>
-                            {
-                                var sp = _context.SanPhams.FirstOrDefault(s => s.MaSanPham == item.MaSanPham);
-                                var danhSachRom = _context.Roms.Where(r => r.MaSanPham == item.MaSanPham).ToList();
-                                var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
-                                var selectedRom = _context.Roms.FirstOrDefault(r => r.MaRom == item.ThongSoRom);
-
-                                decimal baseRomGia = baseRom?.Gia.GetValueOrDefault() ?? 0;
-                                decimal selectedRomGia = selectedRom?.Gia.GetValueOrDefault() ?? 0;
-                                decimal donGia = (selectedRomGia - baseRomGia) + sp.DonGiaBanRa.GetValueOrDefault();
-
-                                return donGia * (item.SoLuong ?? 0);
-                            });
-                        }
-                        @Convert.ToDouble(totalAmount).ToString("N0") VNĐ
-                    </h6>
                 </div>
-                <div class="d-flex justify-content-between">
-                    <h6 class="font-weight-medium">Shipping</h6>
-                    <h6 class="font-weight-medium" id="shippingFee">Calculating...</h6>
+                <div class="card-footer border-secondary bg-transparent">
+                    <div class="d-flex justify-content-between mt-2">
+                        <h5 class="font-weight-bold">Total</h5>
+                        <h5 class="font-weight-bold" id="totalAmount">
+                            Calculating...
+                        </h5>
+                    </div>
                 </div>
             </div>
-            <div class="card-footer border-secondary bg-transparent">
-                <div class="d-flex justify-content-between mt-2">
-                    <h5 class="font-weight-bold">Total</h5>
-                    <h5 class="font-weight-bold" id="totalAmount">
-                        Calculating...
-                    </h5>
-                </div>
-            </div>
-        </div>
 
-        <form asp-controller="Checkout" asp-action="PlaceOrder" method="post">
             <input type="hidden" id="paymentMethod" name="paymentMethod" value="Pay at store" />
-            <input type="hidden" id="ghiChu" name="ghiChu" />
-
+            
             <div class="payment-info">
                 <div class="payment-selection" onclick="openModal()">
                     <img src="../assets/img/how-pay-icon.png" alt="Icon" class="icon" id="selectedIcon">
@@ -135,29 +137,30 @@
                 </div>
             </div>
 
-            <div class="modal" id="paymentModal">
-                <div class="modal-content">
-                    <span class="close" onclick="closeModal()">&times;</span>
-                    <h2>Select Payment Method</h2>
-                    <div class="payment-options">
-                        <div class="option" onclick="selectMethod('Pay at store', '../assets/img/store-icon.png')">
-                            <img src="../assets/img/store-icon.png" alt="Store" class="option-icon">
-                            <span>Pay at store</span>
-                        </div>
-                        <div class="option" onclick="selectMethod('Bank transfer via QR code', '../assets/img/qr-icon.png')">
-                            <img src="../assets/img/qr-icon.png" alt="QR Code" class="option-icon">
-                            <span>Bank transfer via QR code</span>
-                        </div>
-                    </div>
-                    <button class="confirm-btn" type="button" onclick="confirmSelection()">Confirm</button>
-                </div>
-            </div>
-              <div class="card-footer border-secondary bg-transparent">
+            <div class="card-footer border-secondary bg-transparent">
                 <button type="submit" class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3">
                     Place Order
                 </button>
             </div>
-        </form>
+        </div>
+    </div>
+</form>
+
+<div class="modal" id="paymentModal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Select Payment Method</h2>
+        <div class="payment-options">
+            <div class="option" onclick="selectMethod('Pay at store', '../assets/img/store-icon.png')">
+                <img src="../assets/img/store-icon.png" alt="Store" class="option-icon">
+                <span>Pay at store</span>
+            </div>
+            <div class="option" onclick="selectMethod('Bank transfer via QR code', '../assets/img/qr-icon.png')">
+                <img src="../assets/img/qr-icon.png" alt="QR Code" class="option-icon">
+                <span>Bank transfer via QR code</span>
+            </div>
+        </div>
+        <button class="confirm-btn" type="button" onclick="confirmSelection()">Confirm</button>
     </div>
 </div>
 
@@ -320,7 +323,20 @@
     let currentSelectedElement = null;
     let map, marker, searchBox;
     const shopLocation = { lat: 21.028511, lng: 105.804817 }; // Tọa độ shop
-    const subtotalAmount = @totalAmount; // Lấy tổng tiền hàng từ server
+    
+    // Lấy tổng tiền từ Model thông qua Razor
+    const subtotalAmount = @(Model.Sum(item => {
+        var sp = _context.SanPhams.FirstOrDefault(s => s.MaSanPham == item.MaSanPham);
+        var danhSachRom = _context.Roms.Where(r => r.MaSanPham == item.MaSanPham).ToList();
+        var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
+        var selectedRom = _context.Roms.FirstOrDefault(r => r.MaRom == item.ThongSoRom);
+
+        decimal baseRomGia = baseRom?.Gia.GetValueOrDefault() ?? 0;
+        decimal selectedRomGia = selectedRom?.Gia.GetValueOrDefault() ?? 0;
+        decimal donGia = (selectedRomGia - baseRomGia) + sp.DonGiaBanRa.GetValueOrDefault();
+
+        return donGia * (item.SoLuong ?? 0);
+    }));
 
     function openModal() {
         document.getElementById('paymentModal').style.display = 'block';
@@ -345,17 +361,9 @@
     }
 
     function confirmSelection() {
-        document.getElementById('selectedMethod').textContent = selectedMethodText;
-        document.getElementById('selectedIcon').src = selectedIconSrc;
-        closeModal();
-    }
-
-    function confirmSelection() {
-        // Lấy giá trị ghi chú từ textarea
-        var ghiChu = document.querySelector('textarea').value;
-        document.getElementById('ghiChu').value = ghiChu;
-
-        document.getElementById('selectedMethod').textContent = selectedMethodText;
+        const method = selectedMethodText;
+        document.getElementById('paymentMethod').value = method;
+        document.getElementById('selectedMethod').textContent = method;
         document.getElementById('selectedIcon').src = selectedIconSrc;
         closeModal();
     }
@@ -405,6 +413,7 @@
         map.setCenter(location);
         marker.setPosition(location);
 
+        // Cập nhật các input hidden
         document.getElementById('formattedAddress').value = address;
         document.getElementById('latitude').value = location.lat();
         document.getElementById('longitude').value = location.lng();
@@ -443,13 +452,9 @@
         const total = subtotalAmount + shippingFee;
         totalAmountElement.textContent = `${total.toLocaleString('vi-VN')} VNĐ`;
 
-        // Cập nhật hidden input cho form
-        const shippingFeeInput = document.createElement('input');
-        shippingFeeInput.type = 'hidden';
-        shippingFeeInput.name = 'PhiGiaoHang';
-        shippingFeeInput.value = shippingFee;
-        document.querySelector('form').appendChild(shippingFeeInput);
-
+        // Cập nhật giá trị vào input hidden
+        document.getElementById('shippingFeeInput').value = shippingFee;
+        
         submitButton.disabled = false;
     }
 
@@ -463,4 +468,18 @@
     }
 
     google.maps.event.addDomListener(window, 'load', initMap);
+
+    // Thêm event listener cho form submit
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        const address = document.getElementById('formattedAddress').value;
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+        const shippingFee = document.getElementById('shippingFeeInput').value;
+
+        if (!address || !latitude || !longitude || !shippingFee) {
+            e.preventDefault();
+            alert('Vui lòng chọn địa chỉ giao hàng');
+            return false;
+        }
+    });
 </script>

@@ -109,14 +109,14 @@ namespace BTLW_BDT.Controllers
                     PhuongThucThanhToan = "Pay at store",
                     TongTien = totalAmount,
                     ThoiGianLap = DateTime.Now,
-                    MaKhachHang = khachHang.MaKhachHang ,
-                    TrangThai   = "chưa thanh toán"
-                    // ma nhan vien 
-
-                   
+                    MaKhachHang = khachHang.MaKhachHang,
+                    TrangThai = "chưa thanh toán",
+                    DiaChiGiaoHang = Request.Form["DiaChiGiaoHang"].ToString(),
+                    PhiGiaoHang = decimal.Parse(Request.Form["PhiGiaoHang"].ToString()),
+                    DiaChiLatitude = decimal.Parse(Request.Form["DiaChiLatitude"].ToString()),
+                    DiaChiLongtitude = decimal.Parse(Request.Form["DiaChiLongitude"].ToString()),
+                    GhiChuHd = Request.Form["ghiChu"].ToString()
                 };
-
-
 
                 _context.HoaDonBans.Add(order);
                 _context.SaveChanges();
@@ -182,6 +182,13 @@ namespace BTLW_BDT.Controllers
         {
             try
             {
+                // Lưu thông tin giao hàng vào TempData để sử dụng sau khi thanh toán
+                TempData["DiaChiGiaoHang"] = Request.Form["DiaChiGiaoHang"].ToString();
+                TempData["PhiGiaoHang"] = Request.Form["PhiGiaoHang"].ToString();
+                TempData["DiaChiLatitude"] = Request.Form["DiaChiLatitude"].ToString();
+                TempData["DiaChiLongitude"] = Request.Form["DiaChiLongitude"].ToString();
+                TempData["GhiChuHd"] = Request.Form["ghiChu"].ToString();
+
                 var totalAmount = CalculateTotal(chiTietGioHang);
 
                 TempData["PaymentAmount"] = totalAmount.ToString();
@@ -293,8 +300,12 @@ namespace BTLW_BDT.Controllers
                     TongTien = totalAmount,
                     ThoiGianLap = DateTime.Now,
                     MaKhachHang = khachHang.MaKhachHang,
-                    TrangThai = "đã thanh toán"
-
+                    TrangThai = "đã thanh toán",
+                    DiaChiGiaoHang = TempData["DiaChiGiaoHang"]?.ToString(),
+                    PhiGiaoHang = decimal.Parse(TempData["PhiGiaoHang"]?.ToString() ?? "0"),
+                    DiaChiLatitude = decimal.Parse(TempData["DiaChiLatitude"]?.ToString() ?? "0"),
+                    DiaChiLongtitude = decimal.Parse(TempData["DiaChiLongitude"]?.ToString() ?? "0"),
+                    GhiChuHd = TempData["GhiChuHd"]?.ToString()
                 };
 
                 _context.HoaDonBans.Add(order);
