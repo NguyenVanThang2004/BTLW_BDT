@@ -40,6 +40,37 @@
             loadProducts();
             // Tải các hãng
             loadBrands();
+
+            $(window).on('pageshow', function() {
+                $('#minPrice').val('');
+                $('#maxPrice').val('');
+            });
+
+            // Add RAM filter loading
+            loadRamOptions();
+
+            // Add price filter handlers
+            $('#minPrice, #maxPrice').on('input', function() {
+                currentPage = 1;
+                loadProducts();
+            });
+
+            $('#maxPrice').on('input', function () {
+                var minPrice = parseInt($('#minPrice').val()) || 0;
+                var maxPrice = parseInt($(this).val()) || 0;
+
+                if (maxPrice < minPrice) {
+                    $(this).val(minPrice);
+                }
+                currentPage = 1;
+                loadProducts();
+            });
+
+            // Add RAM filter handler
+            $(document).on('change', '.ram-filter', function() {
+                currentPage = 1;
+                loadProducts();
+            });
         });
 
         function loadBrands() {
@@ -84,12 +115,16 @@
             var searchQuery = $('#searchInputHeader').val() || '';
             var minPrice = $('#minPrice').val() || '';
             var maxPrice = $('#maxPrice').val() || '';
+            var selectedRams = $('.ram-filter:checked').map(function() {
+                return this.value;
+            }).get().join(',');
 
             console.log('Search Parameters:', {
                 searchQuery: searchQuery,
                 minPrice: minPrice,
                 maxPrice: maxPrice,
                 brand: selectedBrand,
+                rams: selectedRams,
                 page: currentPage
             });
 
@@ -101,6 +136,7 @@
                     minPrice: minPrice,
                     maxPrice: maxPrice,
                     brand: selectedBrand,
+                    rams: selectedRams,
                     page: currentPage
                 },
                 success: function (data) {
@@ -200,6 +236,30 @@
                 loadProducts();
             }
         });
+
+        // Add this new function for RAM options
+        function loadRamOptions() {
+            $.ajax({
+                url: '/api/Phone/GetRamOptions',
+                method: 'GET',
+                success: function(data) {
+                    var ramForm = $('#ramFilterForm');
+                    ramForm.empty();
+                    data.forEach(function(ram) {
+                        var checkbox = `
+                            <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                                <input type="checkbox" class="custom-control-input ram-filter" id="ram-${ram}" value="${ram}">
+                                <label class="custom-control-label" for="ram-${ram}">${ram} GB</label>
+                            </div>
+                        `;
+                        ramForm.append(checkbox);
+                    });
+                },
+                error: function(error) {
+                    console.error('Error fetching RAM options:', error);
+                }
+            });
+        }
     </script>
 }
 
