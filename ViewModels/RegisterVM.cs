@@ -35,26 +35,26 @@ namespace BTLW_BDT.ViewModels
         [MaxLength(60, ErrorMessage = "Tối đa 60 kí tự")]
         public string DiaChi { get; set; }
 
-        [Required]
-        [Display(Name = "Tỉnh ID")]
-        public int TinhId { get; set; } // ID của Tỉnh Thành
+        //[Required]
+        //[Display(Name = "Tỉnh ID")]
+        //public int TinhId { get; set; } // ID của Tỉnh Thành
 
-        [Display(Name = "Tên Tỉnh Thành")]
-        public string TenTinh { get; set; } // Tên đầy đủ của Tỉnh Thành
+        //[Display(Name = "Tên Tỉnh Thành")]
+        //public string TenTinh { get; set; } // Tên đầy đủ của Tỉnh Thành
 
-        [Required]
-        [Display(Name = "Quận ID")]
-        public int QuanId { get; set; } // ID của Quận Huyện
+        //[Required]
+        //[Display(Name = "Quận ID")]
+        //public int QuanId { get; set; } // ID của Quận Huyện
 
-        [Display(Name = "Tên Quận Huyện")]
-        public string TenQuan { get; set; } // Tên đầy đủ của Quận Huyện
+        //[Display(Name = "Tên Quận Huyện")]
+        //public string TenQuan { get; set; } // Tên đầy đủ của Quận Huyện
 
-        [Required]
-        [Display(Name = "Phường ID")]
-        public int PhuongId { get; set; } // ID của Phường Xã
+        //[Required]
+        //[Display(Name = "Phường ID")]
+        //public int PhuongId { get; set; } // ID của Phường Xã
 
-        [Display(Name = "Tên Phường Xã")]
-        public string TenPhuong { get; set; } // Tên đầy đủ của Phường Xã
+        //[Display(Name = "Tên Phường Xã")]
+        //public string TenPhuong { get; set; } // Tên đầy đủ của Phường Xã
 
 
 
