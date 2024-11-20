@@ -370,26 +370,26 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         //    return View(pagedList);
         //}
 
-        //[Route("Chat")]
-        //public async Task<IActionResult> Chat()
-        //{
-        //    var customers = await db.KhachHangs
-        //        .Include(k => k.TenDangNhapNavigation) // Include thông tin TaiKhoan
-        //        .Include(k => k.TinNhans) // Include tin nhắn
-        //        .Select(k => new KhachHang
-        //        {
-        //            MaKhachHang = k.MaKhachHang,
-        //            TenKhachHang = k.TenKhachHang,
-        //            AnhDaiDien = k.AnhDaiDien,
-        //            TenDangNhapNavigation = k.TenDangNhapNavigation, // Map thông tin TaiKhoan
-        //            LastMessage = k.TinNhans
-        //                .OrderByDescending(t => t.ThoiGian)
-        //                .FirstOrDefault()
-        //        })
-        //        .ToListAsync();
+        [Route("Chat")]
+        public async Task<IActionResult> Chat()
+        {
+            var customers = await db.KhachHangs
+                .Include(k => k.TenDangNhapNavigation) // Include thông tin TaiKhoan
+                .Include(k => k.TinNhans) // Include tin nhắn
+                .Select(k => new KhachHang
+                {
+                    MaKhachHang = k.MaKhachHang,
+                    TenKhachHang = k.TenKhachHang,
+                    AnhDaiDien = k.AnhDaiDien,
+                    TenDangNhapNavigation = k.TenDangNhapNavigation, // Map thông tin TaiKhoan
+                    LastMessage = k.TinNhans
+                        .OrderByDescending(t => t.ThoiGian)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
 
-        //    return View(customers);
-        //}
+            return View(customers);
+        }
 
         [Route("Profile")]
         [HttpGet]
