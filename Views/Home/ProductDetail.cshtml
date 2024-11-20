@@ -6,4 +6,4 @@
 
 @await Html.PartialAsync("PartialSanPham", Model)
 
-@await Component.InvokeAsync("TrendyProducts")
+@await Component.InvokeAsync("TrendyProducts", new { itemCount = 4 })

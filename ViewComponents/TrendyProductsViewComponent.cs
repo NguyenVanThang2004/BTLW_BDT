@@ -16,17 +16,17 @@ namespace BTLW_BDT.ViewComponents
             _cache = cache;
         }
 
-        public IViewComponentResult Invoke()
+        public IViewComponentResult Invoke(int itemCount = 8)
         {
-            var sanPhamBanChay = GetSanPhamBanChay();
+            var sanPhamBanChay = GetSanPhamBanChay(itemCount);
             return View(sanPhamBanChay);
         }
 
-        private List<SanPhamBanChayViewModel> GetSanPhamBanChay()
+        private List<SanPhamBanChayViewModel> GetSanPhamBanChay(int itemCount)
         {
             const string cacheKey = "SanPhamBanChay";
 
-            return _cache.GetOrCreate(cacheKey, entry =>
+            var allProducts = _cache.GetOrCreate(cacheKey, entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
                 
@@ -71,7 +71,6 @@ namespace BTLW_BDT.ViewComponents
 
                 return _db.SanPhams
                         .OrderByDescending(x => x.DonGiaBanRa)
-                        .Take(8)
                         .Select(sp => new SanPhamBanChayViewModel
                         {
                             MaSanPham = sp.MaSanPham,
@@ -85,6 +84,8 @@ namespace BTLW_BDT.ViewComponents
                         })
                         .ToList();
             });
+
+            return allProducts.Take(itemCount).ToList();
         }
     }
 } 
