@@ -4,7 +4,7 @@ using BTLW_BDT.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using BTLW_BDT.ViewModels;
+using System.Text.RegularExpressions;
 
 namespace BTLW_BDT.Controllers
 {
@@ -21,14 +21,6 @@ namespace BTLW_BDT.Controllers
         [HttpGet]
         public IActionResult Profile()
         {
-            return View();
-        }
-
-        // Action hiển thị trang chỉnh sửa thông tin khách hàng
-        [HttpGet]
-        public IActionResult EditProfile()
-        {
-            // Lấy thông tin từ Session và hiển thị
             var model = new KhachHang
             {
                 MaKhachHang = HttpContext.Session.GetString("MaKhachHang"),
@@ -45,67 +37,63 @@ namespace BTLW_BDT.Controllers
 
         // Action lưu thông tin chỉnh sửa của khách hàng
         [HttpPost]
-        public async Task<IActionResult> EditProfile(KhachHang khachHang, IFormFile Hinh)
+        public async Task<IActionResult> UpdateProfile(KhachHang khachHang, IFormFile? imageFile)
         {
             if (ModelState.IsValid)
             {
                 var existingCustomer = await _context.KhachHangs.FindAsync(khachHang.MaKhachHang);
-
-                //// Kiểm tra tính hợp lệ của số điện thoại
-                //RegisterVM registerVM = new RegisterVM(); // Tạo đối tượng RegisterVM
-                //bool isPhoneValid = registerVM.IsPhoneValid(); // Gọi phương thức IsPhoneValid()
-
-                //if (!isPhoneValid)
-                //{
-                //    ModelState.AddModelError("SoDienThoai", "Số điện thoại không hợp lệ.");
-                //    return View(khachHang);  // Nếu số điện thoại không hợp lệ, trả về view với thông báo lỗi
-                //}
-              
-                
-                ////Kiểm tra tính hợp lệ của email
-                //bool isEmailValid = registerVM.IsEmailValid();
-                //if (!isEmailValid)
-                //{
-                //    ModelState.AddModelError("Email", "Email không hợp lệ hoặc không thể gửi .");
-                //    return View(khachHang);  // Nếu email không hợp lệ, trả về view với thông báo lỗi
-                //}
-
                 if (existingCustomer != null)
                 {
-                    // Chỉ cập nhật các trường có thay đổi
-                    if (existingCustomer.TenKhachHang != khachHang.TenKhachHang)
-                        existingCustomer.TenKhachHang = khachHang.TenKhachHang;
-
-                    if (existingCustomer.NgaySinh != khachHang.NgaySinh)
-                        existingCustomer.NgaySinh = khachHang.NgaySinh;
-
-                    if (existingCustomer.SoDienThoai != khachHang.SoDienThoai)
-                        existingCustomer.SoDienThoai = khachHang.SoDienThoai;
-
-                    if (existingCustomer.DiaChi != khachHang.DiaChi)
-                        existingCustomer.DiaChi = khachHang.DiaChi;
-
-                    if (existingCustomer.Email != khachHang.Email)
-                        existingCustomer.Email = khachHang.Email;
-
-                    if (existingCustomer.GhiChu != khachHang.GhiChu)
-                        existingCustomer.GhiChu = khachHang.GhiChu;
-
-                    // Kiểm tra nếu người dùng chọn ảnh mới
-                    if (Hinh != null && Hinh.Length > 0)
+                    // Validate số điện thoại
+                    var phoneRegex = new Regex(@"^(0)[0-9]{9}$");
+                    if (!phoneRegex.IsMatch(khachHang.SoDienThoai))
                     {
-                        // Upload ảnh mới và cập nhật đường dẫn ảnh
-                        string newAvatarPath = MyUtil.UploadHinh(Hinh, "Customer");
-                        existingCustomer.AnhDaiDien = newAvatarPath;
+                        TempData["ErrorMessage"] = "Số điện thoại không hợp lệ!";
+                        return RedirectToAction("Profile");
+                    }
 
-                        // Cập nhật session Avatar nếu có ảnh mới
+                    // Validate email
+                    var emailRegex = new Regex(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+                    if (!emailRegex.IsMatch(khachHang.Email))
+                    {
+                        TempData["ErrorMessage"] = "Email không hợp lệ!";
+                        return RedirectToAction("Profile");
+                    }
+
+                    // Cập nhật thông tin
+                    existingCustomer.TenKhachHang = khachHang.TenKhachHang;
+                    existingCustomer.NgaySinh = khachHang.NgaySinh;
+                    existingCustomer.SoDienThoai = khachHang.SoDienThoai;
+                    existingCustomer.DiaChi = khachHang.DiaChi;
+                    existingCustomer.Email = khachHang.Email;
+                    existingCustomer.GhiChu = khachHang.GhiChu;
+
+                    // Xử lý upload ảnh nếu có
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                        var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+                        
+                        if (!allowedExtensions.Contains(extension))
+                        {
+                            TempData["ErrorMessage"] = "Chỉ chấp nhận file ảnh .jpg, .jpeg hoặc .png!";
+                            return RedirectToAction("Profile");
+                        }
+
+                        if (imageFile.Length > 5 * 1024 * 1024)
+                        {
+                            TempData["ErrorMessage"] = "Kích thước ảnh không được vượt quá 5MB!";
+                            return RedirectToAction("Profile");
+                        }
+
+                        string newAvatarPath = MyUtil.UploadHinh(imageFile, "Customer");
+                        existingCustomer.AnhDaiDien = newAvatarPath;
                         HttpContext.Session.SetString("Avatar", Url.Content("~/Images/Customer/" + newAvatarPath));
                     }
 
-                    // Lưu thay đổi vào database
                     await _context.SaveChangesAsync();
 
-                    // Cập nhật lại các thông tin khác trong session
+                    // Cập nhật session
                     HttpContext.Session.SetString("HoTen", existingCustomer.TenKhachHang);
                     HttpContext.Session.SetString("NgaySinh", existingCustomer.NgaySinh.ToString());
                     HttpContext.Session.SetString("SoDienThoai", existingCustomer.SoDienThoai);
@@ -113,14 +101,11 @@ namespace BTLW_BDT.Controllers
                     HttpContext.Session.SetString("Email", existingCustomer.Email);
                     HttpContext.Session.SetString("GhiChu", existingCustomer.GhiChu ?? "");
 
-                    TempData["SuccessMessage"] = "Chỉnh sửa profile thành công!";
-
+                    TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
                     return RedirectToAction("Profile");
                 }
             }
-
-            // Trả về view nếu model không hợp lệ
-            return View(khachHang);
+            return View("Profile", khachHang);
         }
 
         [HttpGet]

@@ -4,11 +4,14 @@ using System.Text.RegularExpressions;
 using BTLW_BDT.Models;
 using BTLW_BDT.Models.PhoneModels;
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 
 namespace BTLW_BDT.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Route("Phone")]
     public class PhoneController : Controller
     {
         BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
@@ -111,5 +114,21 @@ namespace BTLW_BDT.Controllers
             var brands = db.Hangs.Select(h => new { h.MaHang, h.TenHang }).ToList();
             return Ok(brands);
         }
+
+        [Route("Search")]
+        public IActionResult Search(string searchString)
+        {
+            ViewBag.SearchString = searchString;
+
+            var products = db.SanPhams.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(p => p.TenSanPham.Contains(searchString));
+            }
+
+            return View(products.ToList());
+        }
     }
 }
+

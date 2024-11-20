@@ -662,8 +662,9 @@
             contentType: 'application/json',
             dataType: 'json',
             success: function (response) {
+                saveHistory('Thêm sản phẩm',
+                    'Thêm sản phẩm mới: ' + $('#MaSanPham').val());
                 alert('Thêm sản phẩm thành công!');
-                //showHideDiveInsertData("displayForm");
                 location.reload();
             },
             error: function (xhr, status, error) {
@@ -792,9 +793,10 @@
             contentType: 'application/json',
             data: JSON.stringify(sanPham),
             success: function () {
+                saveHistory('Sửa sản phẩm',
+                    'Cập nhật sản phẩm: ' + sanPham.maSanPham );
                 alert("Sửa sản phẩm thành công!");
-                $('#editMaSanPham').hide();
-                location.reload(); // Tải lại danh sách sản phẩm (nếu cần)
+                location.reload();
             },
             error: function (xhr, status, error) {
                 if (xhr.status === 400) {
@@ -819,6 +821,8 @@
                 url: apiUrl + '/' + maSanPham,
                 type: 'DELETE',
                 success: function (response) {
+                    saveHistory('Xóa sản phẩm',
+                        'Xóa sản phẩm: ' + maSanPham);
                     alert('Xóa sản phẩm thành công!');
                     location.reload();
                 },
@@ -830,6 +834,29 @@
         }
     }
 </script>
+<script>
+    function saveHistory(loaiHoatDong, ghiChu) {
+        var formData = new FormData();
+        formData.append('loaiHoatDong', loaiHoatDong);
+        formData.append('ghiChu', ghiChu);
+        formData.append('tenDangNhap', '@Context.Session.GetString("Username")');
+
+        $.ajax({
+            url: 'https://localhost:7040/api/LichSu/SaveHistory',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                console.log('Lưu lịch sử thành công');
+            },
+            error: function (xhr, status, error) {
+                console.error('Lỗi khi lưu lịch sử:', error);
+            }
+        });
+    }
+</script>
+
 <script>
     let editromCount = 1;
     let editmauCount = 1;
@@ -1078,6 +1105,8 @@
 </script>
 
 
+
+
 <!-- Thêm JavaScript -->
 <script>
     function selectThumbnail(element, index) {
@@ -1291,7 +1320,7 @@
 
 
 @Html.PagedListPager(Model, page => Url.Action("DanhMucSanPham", new { page = page }),
-        new X.PagedList.Web.Common.PagedListRenderOptions()
+        new PagedListRenderOptions()
     {
         LiElementClasses = new List<String> { "page-item" },
         PageClasses = new List<String> { "page-link" }

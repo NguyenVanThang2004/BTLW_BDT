@@ -1,22 +1,23 @@
 ﻿using BTLW_BDT.Helpers;
 using BTLW_BDT.Models;
-using BTLW_BDT.Repository;
 using BTLW_BDT.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
+using BTLW_BDT.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Đăng ký các dịch vụ cần thiết
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
+builder.Services.AddSignalR();
 
 // Đăng ký DbContext trong DI container
 builder.Services.AddDbContext<BtlLtwQlbdtContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Đăng ký Repository và Service trong DI container
-builder.Services.AddScoped<ILoaiSpRepository, LoaiSpRepository>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 
 // Đăng ký IHttpClientFactory
@@ -30,15 +31,38 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;              // Cookie là cần thiết
 });
 
+
+
 // Đăng ký IHttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.SetIsOriginAllowed(origin => true) // Cho phép tất cả origin trong development
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials();
+    });
+});
+
+var conectionString = builder.Configuration.GetConnectionString("QlbanVaLiContext");
+builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(conectionString));
+
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
 
-builder.Services.AddAuthorization();
 
+builder.Services.AddAuthorization();
+// tao router cho chi tiet san pham
+app.MapControllerRoute(
+    name: "productDetail",
+    pattern: "san-pham/{id}",
+    defaults: new { controller = "Home", action = "ProductDetail" }
+);
 
 if (!app.Environment.IsDevelopment())
 {
@@ -49,15 +73,23 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseSession();
+
 app.UseRouting();
 
-// Kích hoạt middleware cho session, authentication và authorization
-app.UseSession();
+app.UseCors();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=home}/{action=index}/{id?}");
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=access}/{action=login}/{id?}");
+    endpoints.MapHub<ChatHub>("/chatHub");
+});
+
 
 app.Run();

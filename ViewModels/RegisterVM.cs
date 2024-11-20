@@ -35,6 +35,29 @@ namespace BTLW_BDT.ViewModels
         [MaxLength(60, ErrorMessage = "Tối đa 60 kí tự")]
         public string DiaChi { get; set; }
 
+        //[Required]
+        //[Display(Name = "Tỉnh ID")]
+        //public int TinhId { get; set; } // ID của Tỉnh Thành
+
+        //[Display(Name = "Tên Tỉnh Thành")]
+        //public string TenTinh { get; set; } // Tên đầy đủ của Tỉnh Thành
+
+        //[Required]
+        //[Display(Name = "Quận ID")]
+        //public int QuanId { get; set; } // ID của Quận Huyện
+
+        //[Display(Name = "Tên Quận Huyện")]
+        //public string TenQuan { get; set; } // Tên đầy đủ của Quận Huyện
+
+        //[Required]
+        //[Display(Name = "Phường ID")]
+        //public int PhuongId { get; set; } // ID của Phường Xã
+
+        //[Display(Name = "Tên Phường Xã")]
+        //public string TenPhuong { get; set; } // Tên đầy đủ của Phường Xã
+
+
+
         [Display(Name = "Điện thoại")]
         [MaxLength(24, ErrorMessage = "Tối đa 24 kí tự")]
         [RegularExpression(@"0[9875]\d{8}", ErrorMessage = "Chưa đúng định dạng di động Việt Nam")]
@@ -48,10 +71,8 @@ namespace BTLW_BDT.ViewModels
         [DataType(DataType.Upload)]
         public string? Hinh { get; set; }
 
-
-        public int TinhId { get; set; }  // Thêm thuộc tính để lưu ID Tỉnh Thành
-        public int QuanId { get; set; }  // Thêm thuộc tính để lưu ID Quận Huyện
-        public int PhuongId { get; set; } // Thêm thuộc tính để lưu ID Phường Xã
+        public decimal? DiaChiLatitude { get; set; }
+        public decimal? DiaChiLongitude { get; set; }
 
 
         // Phương thức kiểm tra email hợp lệ
