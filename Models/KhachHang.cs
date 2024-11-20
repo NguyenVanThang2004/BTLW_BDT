@@ -30,15 +30,14 @@ public partial class KhachHang
 
     public DateTime? ResetCodeExpiry { get; set; }
 
-    [NotMapped]
-    public TinNhan? LastMessage { get; set; }
-
     public decimal? DiaChiLatitude { get; set; }
 
     public decimal? DiaChiLongitude { get; set; }
 
     public virtual ICollection<HoaDonBan> HoaDonBans { get; set; } = new List<HoaDonBan>();
 
+    [NotMapped]
+    public TinNhan? LastMessage { get; set; }
     public virtual TaiKhoan? TenDangNhapNavigation { get; set; }
 
     public virtual ICollection<TinNhan> TinNhans { get; set; } = new List<TinNhan>();
