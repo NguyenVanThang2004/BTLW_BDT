@@ -40,9 +40,15 @@
                            readonly>
                 </div>
                 <div class="col-md-6 form-group">
-                    <label>Địa chỉ</label>
-                    <input class="form-control" type="text"
-                           value="@Context.Session.GetString("DiaChi")">
+                    <label>Địa chỉ giao hàng</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm địa chỉ..." value="@Context.Session.GetString("DiaChi")">
+                    <div class="map-container mt-3">
+                        <div id="map"></div>
+                    </div>
+                    <input type="hidden" name="DiaChiGiaoHang" id="formattedAddress">
+                    <input type="hidden" name="DiaChiLatitude" id="latitude">
+                    <input type="hidden" name="DiaChiLongitude" id="longitude">
+                    <div id="distanceInfo" class="text-muted small mt-2"></div>
                 </div>
                 <div class="col-md-6 form-group">
                     <label>Ghi Chú</label>
@@ -102,14 +108,14 @@
                 </div>
                 <div class="d-flex justify-content-between">
                     <h6 class="font-weight-medium">Shipping</h6>
-                    <h6 class="font-weight-medium">25,000 VNĐ</h6>
+                    <h6 class="font-weight-medium" id="shippingFee">Calculating...</h6>
                 </div>
             </div>
             <div class="card-footer border-secondary bg-transparent">
                 <div class="d-flex justify-content-between mt-2">
                     <h5 class="font-weight-bold">Total</h5>
-                    <h5 class="font-weight-bold">
-                        @Convert.ToDouble(totalAmount + 25000).ToString("N0") VNĐ
+                    <h5 class="font-weight-bold" id="totalAmount">
+                        Calculating...
                     </h5>
                 </div>
             </div>
@@ -286,12 +292,35 @@
         .confirm-btn:hover {
             background-color: #45a049;
         }
+
+    .map-container {
+        height: 300px;
+        width: 100%;
+        margin-top: 10px;
+    }
+    #map {
+        height: 100%;
+        width: 100%;
+        border-radius: 8px;
+    }
+    #distanceInfo {
+        margin-top: 5px;
+        font-size: 0.9em;
+    }
+    .distance-warning {
+        color: red;
+        font-weight: bold;
+    }
 </style>
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBqIm1BH4Z2iXUobBw9w98dpCIIyRLP-QE&libraries=places,geometry"></script>
 <script>
     let selectedMethodText = 'Pay at store';
     let selectedIconSrc = '../assets/img/how-pay-icon.png';
     let currentSelectedElement = null;
+    let map, marker, searchBox;
+    const shopLocation = { lat: 21.028511, lng: 105.804817 }; // Tọa độ shop
+    const subtotalAmount = @totalAmount; // Lấy tổng tiền hàng từ server
 
     function openModal() {
         document.getElementById('paymentModal').style.display = 'block';
@@ -331,4 +360,107 @@
         closeModal();
     }
 
+    function initMap() {
+        const initialLocation = { lat: 21.028511, lng: 105.804817 };
+
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: initialLocation,
+            zoom: 13
+        });
+
+        const input = document.getElementById('searchInput');
+        searchBox = new google.maps.places.SearchBox(input);
+
+        marker = new google.maps.Marker({
+            map: map,
+            position: initialLocation,
+            draggable: true
+        });
+
+        // Marker shop
+        new google.maps.Marker({
+            position: shopLocation,
+            map: map,
+            icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+            title: 'Vị trí shop'
+        });
+
+        searchBox.addListener('places_changed', () => {
+            const places = searchBox.getPlaces();
+            if (places.length === 0) return;
+
+            const place = places[0];
+            if (!place.geometry || !place.geometry.location) return;
+
+            updateMap(place.geometry.location, place.formatted_address);
+        });
+
+        marker.addListener('dragend', function() {
+            const position = marker.getPosition();
+            geocodePosition(position);
+        });
+    }
+
+    function updateMap(location, address) {
+        map.setCenter(location);
+        marker.setPosition(location);
+
+        document.getElementById('formattedAddress').value = address;
+        document.getElementById('latitude').value = location.lat();
+        document.getElementById('longitude').value = location.lng();
+        document.getElementById('searchInput').value = address;
+
+        calculateShippingFee(location);
+    }
+
+    function calculateShippingFee(location) {
+        const distance = google.maps.geometry.spherical.computeDistanceBetween(
+            location,
+            new google.maps.LatLng(shopLocation.lat, shopLocation.lng)
+        );
+        
+        const distanceKm = distance / 1000;
+        const distanceInfo = document.getElementById('distanceInfo');
+        const shippingFeeElement = document.getElementById('shippingFee');
+        const totalAmountElement = document.getElementById('totalAmount');
+        const submitButton = document.querySelector('button[type="submit"]');
+
+        if (distanceKm > 50) {
+            distanceInfo.innerHTML = `<span class="distance-warning">Khoảng cách ${distanceKm.toFixed(2)}km vượt quá giới hạn giao hàng (50km). Vui lòng chọn địa chỉ khác.</span>`;
+            submitButton.disabled = true;
+            return;
+        }
+
+        // Tính phí ship: 25,000đ cho 5km đầu, mỗi km tiếp theo 5,000đ
+        let shippingFee = 25000;
+        if (distanceKm > 5) {
+            shippingFee += Math.ceil(distanceKm - 5) * 5000;
+        }
+
+        distanceInfo.textContent = `Khoảng cách: ${distanceKm.toFixed(2)}km`;
+        shippingFeeElement.textContent = `${shippingFee.toLocaleString('vi-VN')} VNĐ`;
+        
+        const total = subtotalAmount + shippingFee;
+        totalAmountElement.textContent = `${total.toLocaleString('vi-VN')} VNĐ`;
+
+        // Cập nhật hidden input cho form
+        const shippingFeeInput = document.createElement('input');
+        shippingFeeInput.type = 'hidden';
+        shippingFeeInput.name = 'PhiGiaoHang';
+        shippingFeeInput.value = shippingFee;
+        document.querySelector('form').appendChild(shippingFeeInput);
+
+        submitButton.disabled = false;
+    }
+
+    function geocodePosition(position) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: position }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+                updateMap(position, results[0].formatted_address);
+            }
+        });
+    }
+
+    google.maps.event.addDomListener(window, 'load', initMap);
 </script>

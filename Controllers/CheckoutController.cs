@@ -46,7 +46,8 @@ namespace BTLW_BDT.Controllers
         }
 
         [HttpPost]
-        public IActionResult PlaceOrder(string paymentMethod , string ghiChu)
+        public IActionResult PlaceOrder(string paymentMethod, string ghiChu, string DiaChiGiaoHang, 
+            decimal DiaChiLatitude, decimal DiaChiLongitude, decimal PhiGiaoHang)
         {
             string userId = HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(userId))
