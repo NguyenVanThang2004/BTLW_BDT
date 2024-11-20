@@ -24,10 +24,12 @@
             </div>
         </div>
         <div class="col-lg-1 col-3 text-right">
-            <a asp-controller="Cart" asp-action="DetailCart" class="btn border">
-                <i class="fas fa-shopping-cart text-primary"></i>
-                <span class="badge">@ViewBag.CartCount</span>
-            </a>
+            <div class="col-lg-1 col-3 text-right">
+                <a asp-controller="Cart" asp-action="DetailCart" class="btn border position-relative">
+                    <i class="fas fa-shopping-cart text-primary"></i>
+                    <span class="badge position-absolute translate-middle badge-position">0</span>
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -61,6 +63,7 @@
                         <a asp-controller="Home" asp-action="Index" class="nav-item nav-link active">Home</a>
                         <a asp-controller="Home" asp-action="Shop" class="nav-item nav-link">Shop</a>
                         <a asp-controller="Cart" asp-action="DetailCart" class="nav-item nav-link">Detail Cart</a>
+                        <a asp-controller="Home" asp-action="OrderHistory" class="nav-item nav-link">Order History</a>
                         <a asp-controller="Home" asp-action="Contact" class="nav-item nav-link">Contact</a>
                     </div>
                     <div class="navbar-nav ml-auto py-0">
@@ -83,6 +86,30 @@
 </div>
 
 <script>
+
+
+
+    function updateCartCount() {
+        $.ajax({
+            url: '/Home/GetCartQuantity',
+            method: 'GET',
+            success: function (quantity) {
+                $('.badge').text(quantity);
+            },
+            error: function (error) {
+                console.error('Error updating cart count:', error);
+            }
+        });
+    }
+
+    // Cập nhật số lượng khi trang được tải
+    $(document).ready(function () {
+        updateCartCount();
+    });
+
+  
+
+
 function updateDistanceDisplay() {
     const customerLat = @(Context.Session.GetString("CustomerLat") ?? "null");
     const customerLng = @(Context.Session.GetString("CustomerLng") ?? "null");
@@ -217,5 +244,11 @@ $(document).ready(function() {
 
 .nav-item.nav-link:hover {
     background-color: #f8f9fa;
+}
+
+.badge-position {
+    top: 25% !important;
+    right: 0 !important;
+    transform: translateX(50%) !important;
 }
 </style> 

@@ -62,30 +62,27 @@
                         <td class="align-middle">
                             <div class="input-group quantity mx-auto" style="width: 100px;">
                                 <div class="input-group-btn">
-                                    <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display: inline;">
-                                        <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
-                                        <input type="hidden" name="maMau" value="@item.ThongSoMau" />
-                                        <input type="hidden" name="maRom" value="@item.ThongSoRom" />
-                                        <input type="hidden" name="action" value="decrease" />
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </form>
+                                    <button class="btn btn-sm btn-primary btn-minus"
+                                            data-masp="@item.MaSanPham"
+                                            data-mamau="@item.ThongSoMau"
+                                            data-marom="@item.ThongSoRom">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
                                 </div>
-                                <input type="text" class="form-control form-control-sm bg-secondary text-center" value="@item.SoLuong" readonly>
+                                <input type="text" class="form-control form-control-sm bg-secondary text-center quantity-input"
+                                       value="@item.SoLuong" readonly>
                                 <div class="input-group-btn">
-                                    <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" style="display: inline;">
-                                        <input type="hidden" name="maSanPham" value="@item.MaSanPham" />
-                                        <input type="hidden" name="maMau" value="@item.ThongSoMau" />
-                                        <input type="hidden" name="maRom" value="@item.ThongSoRom" />
-                                        <input type="hidden" name="action" value="increase" />
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-plus"></i>
-                                        </button>
-                                    </form>
+                                    <button class="btn btn-sm btn-primary btn-plus"
+                                            data-masp="@item.MaSanPham"
+                                            data-mamau="@item.ThongSoMau"
+                                            data-marom="@item.ThongSoRom">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
                                 </div>
                             </div>
                         </td>
+
+                       
                         <td class="align-middle">
                             @Convert.ToDouble(tongTien).ToString("N0") VNĐ
                         </td>
@@ -157,52 +154,85 @@
     </div>
 </div>
 
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.btn-minus, .btn-plus').click(function (e) {
+                e.preventDefault();
+                var btn = $(this);
+                var action = btn.hasClass('btn-plus') ? 'increase' : 'decrease';
+                var maSanPham = btn.data('masp');
+                var maMau = btn.data('mamau');
+                var maRom = btn.data('marom');
+
+                $.ajax({
+                    url: '@Url.Action("UpdateQuantity", "Cart")',
+                    type: 'POST',
+                    data: {
+                        maSanPham: maSanPham,
+                        maMau: maMau,
+                        maRom: maRom,
+                        action: action
+                    },
+                    success: function (response) {
+                        // Reload trang để cập nhật thông tin
+                        location.reload();
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+}
+
 <script type="text/javascript">
     $(document).ready(function () {
         // Xử lý nút giảm số lượng
         $('.btn-minus').click(function (e) {
-            e.preventDefault();
-            var form = $(this).closest('form');
-            var quantityInput = form.find('input[name="quantity"]');
+            var quantityInput = $(this).closest('.quantity').find('.quantity-input');
             var currentQuantity = parseInt(quantityInput.val());
 
-            if (currentQuantity > 1) {
-                quantityInput.val(currentQuantity - 1);
-                form.submit();
+            if (currentQuantity <= 1) {
+                e.preventDefault(); // Ngăn form submit nếu số lượng <= 1
+                return false;
             }
         });
 
         // Xử lý nút tăng số lượng
         $('.btn-plus').click(function (e) {
-            e.preventDefault();
-            var form = $(this).closest('form');
-            var quantityInput = form.find('input[name="quantity"]');
+            var quantityInput = $(this).closest('.quantity').find('.quantity-input');
             var currentQuantity = parseInt(quantityInput.val());
 
-            quantityInput.val(currentQuantity + 1);
-            form.submit();
+            // Có thể thêm kiểm tra số lượng tối đa ở đây nếu cần
+            if (currentQuantity >= 10) { // Ví dụ: giới hạn tối đa 10 sản phẩm
+                e.preventDefault();
+                return false;
+            }
         });
 
-        // Cập nhật tổng tiền khi số lượng thay đổi
+        // Cập nhật tổng tiền
         function updateTotalPrice() {
-            var total = 0;
+            var subtotal = 0;
             $('.align-middle').each(function () {
-                var price = parseFloat($(this).find('.item-price').text().replace(/[^0-9.-]+/g, ""));
-                var quantity = parseInt($(this).find('input[type="text"]').val());
-                if (!isNaN(price) && !isNaN(quantity)) {
-                    total += price * quantity;
+                var priceText = $(this).find('td:eq(3)').text().replace(/[^0-9]/g, '');
+                var quantity = parseInt($(this).find('.quantity-input').val());
+                if (!isNaN(priceText) && !isNaN(quantity)) {
+                    subtotal += parseInt(priceText) * quantity;
                 }
             });
 
             // Cộng thêm phí ship
-            total += 25000;
+            var shipping = 25000;
+            var total = subtotal + shipping;
 
-            // Cập nhật hiển thị tổng tiền
-            $('.total-price').text(total.toLocaleString('vi-VN') + ' VNĐ');
+            // Cập nhật hiển thị
+            $('.subtotal').text(subtotal.toLocaleString('vi-VN') + ' VNĐ');
+            $('.total').text(total.toLocaleString('vi-VN') + ' VNĐ');
         }
 
-        // Gọi hàm cập nhật tổng tiền khi trang load và khi có thay đổi số lượng
+        // Gọi hàm cập nhật tổng tiền khi trang load
         updateTotalPrice();
-        $('.quantity input').on('change', updateTotalPrice);
     });
 </script>

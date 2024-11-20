@@ -25,6 +25,14 @@ public partial class HoaDonBan
 
     public string? DiaChiGiaoHang { get; set; }
 
+    public bool? TrangThaiGiaoHang { get; set; }
+
+    public decimal? DiaChiLatitude { get; set; }
+
+    public decimal? DiaChiLongtitude { get; set; }
+
+    public string? GhiChuHd { get; set; }
+
     public virtual ICollection<ChiTietHoaDonBan> ChiTietHoaDonBans { get; set; } = new List<ChiTietHoaDonBan>();
 
     public virtual KhachHang? MaKhachHangNavigation { get; set; }

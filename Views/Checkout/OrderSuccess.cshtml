@@ -8,10 +8,6 @@
     var tempCartDetails = ViewBag.CartDetails as List<CartDetailTemp> ?? new List<CartDetailTemp>();
 }
 
-
-
-
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -29,78 +25,27 @@
                         <p><strong>Mã Đơn Hàng:</strong> @Model.MaHoaDon</p>
                         <p><strong>Tên Khách Hàng:</strong> @Context.Session.GetString("HoTen")</p>
                         <p><strong>Ngày Sinh:</strong> @Context.Session.GetString("NgaySinh")</p>
+                        <p><strong>Số Điện Thoại:</strong> @Context.Session.GetString("SoDienThoai")</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Số Điện Thoại:</strong> @Context.Session.GetString("SoDienThoai")</p>
-                        <p><strong>Địa Chỉ:</strong> @Context.Session.GetString("DiaChi")</p>
                         <p><strong>Thời Gian Đặt:</strong> @Model.ThoiGianLap.ToString("dd/MM/yyyy HH:mm")</p>
                         <p><strong>Phương Thức Thanh Toán:</strong> @Model.PhuongThucThanhToan</p>
-                        <p><strong>Trạng Thái :</strong> @Model.TrangThai</p>
-
+                        <p><strong>Trạng Thái Thanh Toán:</strong> @Model.TrangThai</p>
+                        <p><strong>Trạng Thái Giao Hàng:</strong> @(Model.TrangThaiGiaoHang == true ? "Đã giao hàng" : "Chưa giao hàng")</p>
                     </div>
+                </div>
+
+                <div class="shipping-info mt-3">
+                    <h5 class="font-weight-bold">Thông Tin Giao Hàng</h5>
+                    <p><strong>Địa Chỉ Giao Hàng:</strong> @Model.DiaChiGiaoHang</p>
+                    @if (!string.IsNullOrEmpty(Model.GhiChuHd))
+                    {
+                        <p><strong>Ghi Chú:</strong> @Model.GhiChuHd</p>
+                    }
                 </div>
             </div>
-
-            @{
-                var mergedDetails = Model.ChiTietHoaDonBans
-                .Join(tempCartDetails,
-                hd => hd.MaSanPham,
-                cart => cart.MaSanPham,
-                (hd, cart) => new
-                {
-                    SanPham = hd.MaSanPhamNavigation,
-                    DonGiaCuoi = hd.DonGiaCuoi,
-                    ThongSoMau = cart.ThongSoMau,
-                    ThongSoRom = cart.ThongSoRom,
-                    SoLuongBan = cart.SoLuong
-                })
-                .GroupBy(x => new { x.SanPham.MaSanPham, x.ThongSoMau, x.ThongSoRom })
-                .Select(g => g.First())
-                .ToList();
-            }
-
-            @foreach (var detail in mergedDetails)
-            {
-                var mauSac = _context.MauSacs.FirstOrDefault(m => m.MaMau == detail.ThongSoMau);
-                var rom = _context.Roms.FirstOrDefault(r => r.MaRom == detail.ThongSoRom);
-
-                // Tính giá dựa trên ROM
-                var danhSachRom = _context.Roms.Where(r => r.MaSanPham == detail.SanPham.MaSanPham).ToList();
-                var baseRom = danhSachRom.OrderBy(r => r.Gia).FirstOrDefault();
-                decimal baseRomGia = baseRom?.Gia ?? 0;
-                decimal romGia = rom?.Gia ?? 0;
-                decimal donGia = (romGia - baseRomGia) + detail.SanPham.DonGiaBanRa.GetValueOrDefault();
-
-                <div class="product-item d-flex align-items-center mb-3">
-                    <div class="product-image mr-3">
-                        <img src="~/PhoneImages/Images/@detail.SanPham.AnhDaiDien"
-                             alt="@detail.SanPham.TenSanPham"
-                             class="img-thumbnail product-thumb">
-                    </div>
-                    <div class="product-details flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="mb-1">@detail.SanPham.TenSanPham</h6>
-                                <small class="text-muted">
-                                    Màu: @(mauSac?.TenMau ?? "N/A") - ROM: @(rom?.ThongSo ?? "N/A")
-                                    x @detail.SoLuongBan
-                                </small>
-                            </div>
-                            <div class="text-right">
-                                <p class="mb-0 font-weight-bold">
-                                    @Convert.ToDouble(donGia * detail.SoLuongBan).ToString("N0") VNĐ
-                                </p>
-                                <small class="text-muted">@Convert.ToDouble(donGia).ToString("N0") VNĐ/sp</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-
-
-
-
-
+            <!-- Tổng Tiền -->
+            <div class="mt-4">
                 <hr class="my-4">
                 <div class="d-flex justify-content-between">
                     <h6 class="font-weight-medium">Tạm tính</h6>
@@ -108,23 +53,20 @@
                 </div>
                 <div class="d-flex justify-content-between">
                     <h6 class="font-weight-medium">Phí vận chuyển</h6>
-                    <h6 class="font-weight-medium">25,000 VNĐ</h6> 
+                    <h6 class="font-weight-medium">@Convert.ToDouble(Model.PhiGiaoHang).ToString("N0") VNĐ</h6>
                 </div>
                 <div class="d-flex justify-content-between mt-2">
                     <h5 class="font-weight-bold">Tổng Cộng:</h5>
-                    <h5 class="font-weight-bold">@Convert.ToDouble(Model.TongTien+25000).ToString("N0") VNĐ</h5>
+                    <h5 class="font-weight-bold">@Convert.ToDouble(Model.TongTien + Model.PhiGiaoHang).ToString("N0") VNĐ</h5>
                 </div>
+            </div>
 
             <div class="text-center mt-4 mb-5">
                 <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Tiếp Tục Mua Sắm</a>
             </div>
-            </div>
-
-          
         </div>
     </div>
 </div>
-
 
 <style>
     .order-info, .product-list {
