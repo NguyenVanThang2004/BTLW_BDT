@@ -13,6 +13,8 @@ public partial class ChiTietHoaDonBan
 
     public string MaSanPham { get; set; } = null!;
 
+    public string MaChiTietHoaDonBan { get; set; } = null!;
+
     public virtual HoaDonBan MaHoaDonNavigation { get; set; } = null!;
 
     public virtual SanPham MaSanPhamNavigation { get; set; } = null!;
