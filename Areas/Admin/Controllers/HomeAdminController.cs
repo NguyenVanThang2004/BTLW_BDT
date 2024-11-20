@@ -535,5 +535,61 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             return View(model);
         }
 
+        [Route("ChangePassword")]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [Route("ChangePassword")]
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordVM model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Lấy thông tin người dùng từ Session
+                string userId = HttpContext.Session.GetString("MaNhanVien");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    TempData["ErrorMessage"] = "Không thể xác định người dùng hiện tại. Vui lòng đăng nhập lại.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                // Truy vấn tài khoản người dùng
+                var user = await (from tk in db.TaiKhoans
+                                  join nv in db.NhanViens on tk.TenDangNhap equals nv.TenDangNhap
+                                  where nv.MaNhanVien == userId
+                                  select tk).FirstOrDefaultAsync();
+
+                if (user != null)
+                {
+                    // Kiểm tra mật khẩu hiện tại
+                    string hashedCurrentPassword = model.CurrentPassword.ToSHA256Hash("MySaltKey");
+                    if (user.MatKhau == hashedCurrentPassword)
+                    {
+                        // Hash và cập nhật mật khẩu mới
+                        user.MatKhau = model.NewPassword.ToSHA256Hash("MySaltKey");
+                        await db.SaveChangesAsync();
+
+                        TempData["SuccessMessage"] = "Đổi mật khẩu thành công!";
+                        return RedirectToAction("Index");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("CurrentPassword", "Mật khẩu hiện tại không chính xác.");
+                    }
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy tài khoản người dùng.";
+                }
+            }
+
+            return View(model);
+        }
     }
+
 }
+
+
