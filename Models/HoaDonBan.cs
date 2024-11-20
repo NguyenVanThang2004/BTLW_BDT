@@ -21,6 +21,10 @@ public partial class HoaDonBan
 
     public string? TrangThai { get; set; }
 
+    public decimal? PhiGiaoHang { get; set; }
+
+    public string? DiaChiGiaoHang { get; set; }
+
     public virtual ICollection<ChiTietHoaDonBan> ChiTietHoaDonBans { get; set; } = new List<ChiTietHoaDonBan>();
 
     public virtual KhachHang? MaKhachHangNavigation { get; set; }
