@@ -5,30 +5,5 @@
 @using BTLW_BDT.ViewModels
 
 @section SanPhamBanChay {
-    <div class="product-hot">
-        <div class="row">
-            @foreach (var item in ViewBag.SanPhamBanChay)
-            {
-                <div class="col-md-3 mb-4">
-                    <div class="card h-100">
-                        <img src="@item.AnhDaiDien" class="card-img-top" alt="@item.TenSanPham">
-                        <div class="card-body">
-                            <h5 class="card-title">@item.TenSanPham</h5>
-                            <div class="price-section">
-                                <span class="current-price">@(item.DonGiaBanRa?.ToString("N0")) đ</span>
-                                @if (item.DonGiaBanGoc > item.DonGiaBanRa)
-                                {
-                                    <span class="original-price">@(item.DonGiaBanGoc?.ToString("N0")) đ</span>
-                                }
-                            </div>
-                            @if (item.KhuyenMai > 0)
-                            {
-                                <span class="badge bg-danger">-@(item.KhuyenMai)%</span>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
+    @await Component.InvokeAsync("TrendyProducts")
 }
