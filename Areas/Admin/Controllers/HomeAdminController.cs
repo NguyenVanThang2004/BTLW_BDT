@@ -166,14 +166,20 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             var data = (from hdb in db.HoaDonBans
                         join cthdb in db.ChiTietHoaDonBans on hdb.MaHoaDon equals cthdb.MaHoaDon
                         join sp in db.SanPhams on cthdb.MaSanPham equals sp.MaSanPham
-                        join ctgh in db.ChiTietGioHangs on sp.MaSanPham equals ctgh.MaSanPham
-                        join gh in db.GioHangs on ctgh.MaGioHang equals gh.MaGioHang
+                        
                         select new BieuDo
                         {
                             NgayBan = hdb.ThoiGianLap,
-                            SoLuongBan = cthdb.SoLuongBan,
-                            TongTien = hdb.TongTien,
-                            LoiNhuan = cthdb.DonGiaCuoi
+                            SoLuongBan = (from cth in db.ChiTietHoaDonBans
+                                          select cth.SoLuongBan).Sum(),
+                            TongTien = (from hdbSub in db.HoaDonBans
+                                        select hdbSub.TongTien).Sum(),
+                            LoiNhuan = (from hdbSub in db.HoaDonBans
+                                        select hdbSub.TongTien).Sum()
+                            - (from cth in db.ChiTietHoaDonBans
+                               join spa in db.SanPhams on cth.MaSanPham equals spa.MaSanPham
+                               where (cth.MaHoaDon == hdb.MaHoaDon)
+                               select (cth.DonGiaCuoi ?? sp.DonGiaBanGoc) * cth.SoLuongBan).Sum()
                         }).Select(x => new
                         {
                             date = x.NgayBan.ToString("yyyy-MM-dd"),
@@ -217,36 +223,38 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         [Route("FilterData")]
         public async Task<IActionResult> FilterData(DateTime fromDate, DateTime toDate)
         {
-            var data = (from hdb in db.HoaDonBans
-                        join cthdb in db.ChiTietHoaDonBans on hdb.MaHoaDon equals cthdb.MaHoaDon
-                        join sp in db.SanPhams on cthdb.MaSanPham equals sp.MaSanPham
-                        join ctgh in db.ChiTietGioHangs on sp.MaSanPham equals ctgh.MaSanPham
-                        join gh in db.GioHangs on ctgh.MaGioHang equals gh.MaGioHang
+            var data = db.HoaDonBans
+         .Where(hdb => hdb.ThoiGianLap >= fromDate && hdb.ThoiGianLap <= toDate)
+         .GroupJoin(
+             db.ChiTietHoaDonBans.Join(db.SanPhams,
+                 cth => cth.MaSanPham,
+                 sp => sp.MaSanPham,
+                 (cth, sp) => new
+                 {
+                     cth.MaHoaDon,
+                     DonGiaBanGoc = sp.DonGiaBanGoc,
+                     DonGiaCuoi = cth.DonGiaCuoi,
+                     SoLuongBan = cth.SoLuongBan
+                 }),
+             hdb => hdb.MaHoaDon,
+             cth_sp => cth_sp.MaHoaDon,
+             (hdb, cth_sp) => new { hdb, cth_sp }
+         )
+         .Select(g => new
+         {
+             date = g.hdb.ThoiGianLap.Date.ToString("yyyy-MM-dd"),
+             sold = g.cth_sp.Sum(cth => cth.SoLuongBan),
+             quantity = g.hdb.TongTien,
+             profit = g.hdb.TongTien - g.cth_sp
+                 .Where(cth => cth.DonGiaCuoi != null) // Chỉ tính khi có DonGiaCuoi
+                 .Sum(cth => cth.DonGiaBanGoc * cth.SoLuongBan)
 
-                        select new BieuDo
-                        {
-                            NgayBan = hdb.ThoiGianLap,
-                            SoLuongBan = (from cth in db.ChiTietHoaDonBans
-                                          select cth.SoLuongBan).Sum(),
-                            TongTien = (from hdbSub in db.HoaDonBans
-                                        select hdbSub.TongTien).Sum(),
-                            LoiNhuan = (from hdbSub in db.HoaDonBans
-                                        select hdbSub.TongTien).Sum()
-                            - (from cth in db.ChiTietHoaDonBans
-                               join sp in db.SanPhams on cth.MaSanPham equals sp.MaSanPham
-                               where (cth.MaHoaDon == hdb.MaHoaDon)
-                               select (cth.DonGiaCuoi ?? sp.DonGiaBanGoc) * cth.SoLuongBan).Sum()
-                        }).Where(x => x.NgayBan >= fromDate && x.NgayBan <= toDate).
-                        Select(x => new
-                        {
-                            date = x.NgayBan.ToString("yyyy-MM-dd"),
-                            sold = x.SoLuongBan,
-                            quantity = x.TongTien,
-                            profit = x.LoiNhuan
-                        }).ToList();
+         })
+         .ToList();
+            var totalRevenue = data.Sum(d => d.quantity); // Tổng doanh thu
+            var totalProfit = data.Sum(d => d.profit);
             Console.WriteLine(JsonConvert.SerializeObject(data));
-            return Json(data);
-
+            return Json(new { data, totalRevenue, totalProfit });
         }
         //[Route("XoaSanPham")]
         //[HttpGet]
@@ -362,26 +370,26 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         //    return View(pagedList);
         //}
 
-        [Route("Chat")]
-        public async Task<IActionResult> Chat()
-        {
-            var customers = await db.KhachHangs
-                .Include(k => k.TenDangNhapNavigation) // Include thông tin TaiKhoan
-                .Include(k => k.TinNhans) // Include tin nhắn
-                .Select(k => new KhachHang
-                {
-                    MaKhachHang = k.MaKhachHang,
-                    TenKhachHang = k.TenKhachHang,
-                    AnhDaiDien = k.AnhDaiDien,
-                    TenDangNhapNavigation = k.TenDangNhapNavigation, // Map thông tin TaiKhoan
-                    LastMessage = k.TinNhans
-                        .OrderByDescending(t => t.ThoiGian)
-                        .FirstOrDefault()
-                })
-                .ToListAsync();
+        //[Route("Chat")]
+        //public async Task<IActionResult> Chat()
+        //{
+        //    var customers = await db.KhachHangs
+        //        .Include(k => k.TenDangNhapNavigation) // Include thông tin TaiKhoan
+        //        .Include(k => k.TinNhans) // Include tin nhắn
+        //        .Select(k => new KhachHang
+        //        {
+        //            MaKhachHang = k.MaKhachHang,
+        //            TenKhachHang = k.TenKhachHang,
+        //            AnhDaiDien = k.AnhDaiDien,
+        //            TenDangNhapNavigation = k.TenDangNhapNavigation, // Map thông tin TaiKhoan
+        //            LastMessage = k.TinNhans
+        //                .OrderByDescending(t => t.ThoiGian)
+        //                .FirstOrDefault()
+        //        })
+        //        .ToListAsync();
 
-            return View(customers);
-        }
+        //    return View(customers);
+        //}
 
         [Route("Profile")]
         [HttpGet]
