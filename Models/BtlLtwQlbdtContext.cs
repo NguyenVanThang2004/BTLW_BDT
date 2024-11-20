@@ -157,6 +157,12 @@ public partial class BtlLtwQlbdtContext : DbContext
 
             entity.Property(e => e.MaHoaDon).HasMaxLength(50);
             entity.Property(e => e.DiaChiGiaoHang).HasMaxLength(255);
+            entity.Property(e => e.DiaChiLatitude)
+                .HasColumnType("decimal(10, 8)")
+                .HasColumnName("DiaChi_Latitude");
+            entity.Property(e => e.DiaChiLongtitude)
+                .HasColumnType("decimal(11, 8)")
+                .HasColumnName("DiaChi_Longtitude");
             entity.Property(e => e.KhuyenMai).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.MaKhachHang).HasMaxLength(50);
             entity.Property(e => e.MaNhanVien).HasMaxLength(50);
