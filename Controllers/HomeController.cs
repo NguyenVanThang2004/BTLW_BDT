@@ -9,6 +9,7 @@ using X.PagedList;
 using Microsoft.Data.SqlClient;
 using Dapper;
 using Microsoft.Extensions.Caching.Memory;
+using X.PagedList.Extensions;
 
 namespace BTLW_BDT.Controllers
 {
@@ -182,6 +183,33 @@ namespace BTLW_BDT.Controllers
             }
             
             return View();
+        }
+
+        public IActionResult OrderHistory(int? page)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+            {
+                return RedirectToAction("Login", "Access");
+            }
+
+            var customer = db.KhachHangs.FirstOrDefault(k => k.TenDangNhap == username);
+            if (customer == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+
+            var orders = db.HoaDonBans
+                .Include(h => h.ChiTietHoaDonBans)
+                .ThenInclude(c => c.MaSanPhamNavigation)
+                .Where(h => h.MaKhachHang == customer.MaKhachHang)
+                .OrderByDescending(h => h.ThoiGianLap)
+                .ToPagedList(pageNumber, pageSize);
+
+            return View(orders);
         }
 
     }
