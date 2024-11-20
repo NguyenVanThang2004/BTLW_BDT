@@ -24,12 +24,10 @@
             </div>
         </div>
         <div class="col-lg-1 col-3 text-right">
-            <div class="col-lg-1 col-3 text-right">
-                <a asp-controller="Cart" asp-action="DetailCart" class="btn border position-relative">
-                    <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge position-absolute translate-middle badge-position">0</span>
-                </a>
-            </div>
+            <a asp-controller="Cart" asp-action="DetailCart" class="btn border position-relative">
+                <i class="fas fa-shopping-cart text-primary"></i>
+                <span class="badge badge-position">0</span>
+            </a>
         </div>
     </div>
 </div>
@@ -235,6 +233,8 @@ $(document).ready(function() {
     top: 100%;
     background-color: white;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .nav-item.nav-link {
@@ -247,8 +247,26 @@ $(document).ready(function() {
 }
 
 .badge-position {
-    top: 25% !important;
-    right: 0 !important;
-    transform: translateX(50%) !important;
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    padding: 0.25em 0.6em;
+    font-size: 12px;
+    border-radius: 50%;
+    background-color: #D19C97;
+    color: white;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+.btn.border {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+}
+
 </style> 
