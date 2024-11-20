@@ -46,6 +46,7 @@ public partial class BtlLtwQlbdtContext : DbContext
     public virtual DbSet<TinNhan> TinNhans { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=DESKTOP-B6IH00B\\SQLEXPRESS;Initial Catalog=BTL_LTW_QLBDT;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -163,6 +164,9 @@ public partial class BtlLtwQlbdtContext : DbContext
             entity.Property(e => e.DiaChiLongtitude)
                 .HasColumnType("decimal(11, 8)")
                 .HasColumnName("DiaChi_Longtitude");
+            entity.Property(e => e.GhiChuHd)
+                .HasMaxLength(255)
+                .HasColumnName("GhiChuHD");
             entity.Property(e => e.KhuyenMai).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.MaKhachHang).HasMaxLength(50);
             entity.Property(e => e.MaNhanVien).HasMaxLength(50);
