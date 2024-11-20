@@ -21,13 +21,17 @@
 
 <div id="displayForm" style="display: none;">
     <form id="formAddProduct" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="All" class="text-danger"></div>
+
         <div class="form-group">
             <label class="control-label">Mã sản phẩm</label>
             <input type="text" class="form-control" id="MaSanPham" />
+            <span class="text-danger" id="MaSanPham-error"></span>
         </div>
         <div class="form-group">
             <label class="control-label">Tên sản phẩm</label>
             <input type="text" class="form-control" id="TenSanPham" />
+            <span class="text-danger" id="TenSanPham-error"></span>
         </div>
         <div class="form-group">
             <label class="control-label">Ảnh đại diện</label>
@@ -37,15 +41,18 @@
         <div class="form-group">
             <label class="control-label">Thời gian bảo hành</label>
             <input type="text" class="form-control" id="ThoiGianBaoHanh" />
+            <span class="text-danger" id="ThoiGianBaoHanh-error"></span>
         </div>
         <div class="form-group">
             <label class="control-label">Số lượng tồn kho</label>
             <input type="text" class="form-control" id="SoLuongTonKho" />
+            <span class="text-danger" id="SoLuongTonKho-error"></span>
         </div>
 
         <div class="form-group">
             <label class="control-label">Đơn giá bán gốc</label>
             <input id="DonGiaBanGoc" type="text" class="form-control" />
+            <span class="text-danger" id="DonGiaBanGoc-error"></span>
         </div>
         <div class="form-group">
             <label class="control-label">Đơn giá bán ra</label>
@@ -712,8 +719,23 @@
                 body: JSON.stringify(duLieuSanPham)
             });
 
+            // Xử lý response
             if (!createResponse.ok) {
-                throw new Error('Failed to create product');
+                const errorData = await createResponse.json();
+                
+                // Xóa tất cả thông báo lỗi cũ
+                document.querySelectorAll('.text-danger').forEach(el => el.textContent = '');
+                
+                // Hiển thị lỗi cho từng trường
+                if (errorData.errors) {
+                    Object.keys(errorData.errors).forEach(key => {
+                        const errorElement = document.getElementById(`${key}-error`);
+                        if (errorElement) {
+                            errorElement.textContent = errorData.errors[key].join(', ');
+                        }
+                    });
+                }
+                return;
             }
 
             alert('Thêm sản phẩm thành công!');
@@ -1568,6 +1590,23 @@
     .modal.show .modal-dialog {
         transform: none;
     }
+</style>
+
+<style>
+.text-danger {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
 </style>
 
 

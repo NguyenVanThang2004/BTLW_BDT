@@ -1,59 +1,113 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BTLW_BDT.Models;
 
 public partial class SanPham
 {
+    [Required(ErrorMessage = "Mã sản phẩm không được để trống")]
+    [StringLength(50, ErrorMessage = "Mã sản phẩm không được vượt quá 50 ký tự")]
     public string MaSanPham { get; set; } = null!;
 
-    public string? TenSanPham { get; set; }
+    [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
+    [StringLength(200, ErrorMessage = "Tên sản phẩm không được vượt quá 200 ký tự")]
+    public string TenSanPham { get; set; } = null!;
 
-    public int? ThoiGianBaoHanh { get; set; }
+    [Required(ErrorMessage = "Thời gian bảo hành không được để trống")]
+    [Range(0, 60, ErrorMessage = "Thời gian bảo hành phải từ 0 đến 60 tháng")]
+    public int ThoiGianBaoHanh { get; set; }
 
-    public int? SoLuongTonKho { get; set; }
+    [Required(ErrorMessage = "Số lượng tồn kho không được để trống")]
+    [Range(0, int.MaxValue, ErrorMessage = "Số lượng tồn kho không được âm")]
+    public int SoLuongTonKho { get; set; }
 
-    public decimal? DonGiaBanGoc { get; set; }
+    [Required(ErrorMessage = "Đơn giá bán gốc không được để trống")]
+    [Range(0, double.MaxValue, ErrorMessage = "Đơn giá bán gốc không được âm")]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal DonGiaBanGoc { get; set; }
 
-    public decimal? DonGiaBanRa { get; set; }
+    [Required(ErrorMessage = "Đơn giá bán ra không được để trống")]
+    [Range(0, double.MaxValue, ErrorMessage = "Đơn giá bán ra không được âm")]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal DonGiaBanRa { get; set; }
 
-    public decimal? KhuyenMai { get; set; }
+    [Required(ErrorMessage = "Khuyến mãi không được để trống")]
+    [Range(0, 50, ErrorMessage = "Khuyến mãi phải từ 0 đến 50%")]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal KhuyenMai { get; set; }
 
-    public string? DanhBa { get; set; }
+    [Required(ErrorMessage = "Danh bạ không được để trống")]
+    [StringLength(100, ErrorMessage = "Danh bạ không được vượt quá 100 ký tự")]
+    public string DanhBa { get; set; } = null!;
 
-    public string? DenFlash { get; set; }
+    [Required(ErrorMessage = "Đèn flash không được để trống")]
+    [StringLength(100, ErrorMessage = "Đèn flash không được vượt quá 100 ký tự")]
+    public string DenFlash { get; set; } = null!;
 
-    public string? CongNgheManHinh { get; set; }
+    [Required(ErrorMessage = "Công nghệ màn hình không được để trống")]
+    [StringLength(100, ErrorMessage = "Công nghệ màn hình không được vượt quá 100 ký tự")]
+    public string CongNgheManHinh { get; set; } = null!;
 
-    public int? DoSangToiDa { get; set; }
+    [Required(ErrorMessage = "Độ sáng tối đa không được để trống")]
+    [Range(0, 10000, ErrorMessage = "Độ sáng tối đa phải từ 0 đến 10000 nits")]
+    public int DoSangToiDa { get; set; }
 
-    public string? LoaiPin { get; set; }
+    [Required(ErrorMessage = "Loại pin không được để trống")]
+    [StringLength(100, ErrorMessage = "Loại pin không được vượt quá 100 ký tự")]
+    public string LoaiPin { get; set; } = null!;
 
-    public string? BaoMatNangCao { get; set; }
+    [Required(ErrorMessage = "Bảo mật nâng cao không được để trống")]
+    [StringLength(200, ErrorMessage = "Bảo mật nâng cao không được vượt quá 200 ký tự")]
+    public string BaoMatNangCao { get; set; } = null!;
 
-    public string? GhiAmMacDinh { get; set; }
+    [Required(ErrorMessage = "Ghi âm mặc định không được để trống")]
+    [StringLength(100, ErrorMessage = "Ghi âm mặc định không được vượt quá 100 ký tự")]
+    public string GhiAmMacDinh { get; set; } = null!;
 
-    public string? JackTaiNghe { get; set; }
+    [Required(ErrorMessage = "Jack tai nghe không được để trống")]
+    [StringLength(100, ErrorMessage = "Jack tai nghe không được vượt quá 100 ký tự")]
+    public string JackTaiNghe { get; set; } = null!;
 
-    public string? MangDiDong { get; set; }
+    [Required(ErrorMessage = "Mạng di động không được để trống")]
+    [StringLength(100, ErrorMessage = "Mạng di động không được vượt quá 100 ký tự")]
+    public string MangDiDong { get; set; } = null!;
 
-    public string? Sim { get; set; }
+    [Required(ErrorMessage = "Sim không được để trống")]
+    [StringLength(100, ErrorMessage = "Sim không được vượt quá 100 ký tự")]
+    public string Sim { get; set; } = null!;
 
-    public string? MaHang { get; set; }
+    [Required(ErrorMessage = "Mã hãng không được để trống")]
+    public string MaHang { get; set; } = null!;
 
-    public string? ManHinh { get; set; }
+    [Required(ErrorMessage = "Màn hình không được để trống")]
+    [StringLength(200, ErrorMessage = "Màn hình không được vượt quá 200 ký tự")]
+    public string ManHinh { get; set; } = null!;
 
-    public string? Pin { get; set; }
+    [Required(ErrorMessage = "Pin không được để trống")]
+    [StringLength(100, ErrorMessage = "Pin không được vượt quá 100 ký tự")]
+    public string Pin { get; set; } = null!;
 
-    public string? Camera { get; set; }
+    [Required(ErrorMessage = "Camera không được để trống")]
+    [StringLength(200, ErrorMessage = "Camera không được vượt quá 200 ký tự")]
+    public string Camera { get; set; } = null!;
 
-    public string? KichThuoc { get; set; }
+    [Required(ErrorMessage = "Kích thước không được để trống")]
+    [StringLength(100, ErrorMessage = "Kích thước không được vượt quá 100 ký tự")]
+    public string KichThuoc { get; set; } = null!;
 
-    public string? Chip { get; set; }
+    [Required(ErrorMessage = "Chip không được để trống")]
+    [StringLength(100, ErrorMessage = "Chip không được vượt quá 100 ký tự")]
+    public string Chip { get; set; } = null!;
 
-    public string? Ram { get; set; }
+    [Required(ErrorMessage = "RAM không được để trống")]
+    [StringLength(50, ErrorMessage = "RAM không được vượt quá 50 ký tự")]
+    public string Ram { get; set; } = null!;
 
-    public string? AnhDaiDien { get; set; }
+    [Required(ErrorMessage = "Ảnh đại diện không được để trống")]
+    [StringLength(200, ErrorMessage = "Đường dẫn ảnh đại diện không được vượt quá 200 ký tự")]
+    public string AnhDaiDien { get; set; } = null!;
 
     public virtual ICollection<AnhSanPham> AnhSanPhams { get; set; } = new List<AnhSanPham>();
 
