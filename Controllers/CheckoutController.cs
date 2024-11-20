@@ -115,7 +115,8 @@ namespace BTLW_BDT.Controllers
                     PhiGiaoHang = decimal.Parse(Request.Form["PhiGiaoHang"].ToString()),
                     DiaChiLatitude = decimal.Parse(Request.Form["DiaChiLatitude"].ToString()),
                     DiaChiLongtitude = decimal.Parse(Request.Form["DiaChiLongitude"].ToString()),
-                    GhiChuHd = Request.Form["ghiChu"].ToString()
+                    GhiChuHd = Request.Form["ghiChu"].ToString(),
+                    TrangThaiGiaoHang = false
                 };
 
                 _context.HoaDonBans.Add(order);
@@ -305,7 +306,8 @@ namespace BTLW_BDT.Controllers
                     PhiGiaoHang = decimal.Parse(TempData["PhiGiaoHang"]?.ToString() ?? "0"),
                     DiaChiLatitude = decimal.Parse(TempData["DiaChiLatitude"]?.ToString() ?? "0"),
                     DiaChiLongtitude = decimal.Parse(TempData["DiaChiLongitude"]?.ToString() ?? "0"),
-                    GhiChuHd = TempData["GhiChuHd"]?.ToString()
+                    GhiChuHd = TempData["GhiChuHd"]?.ToString(),
+                    TrangThaiGiaoHang = false
                 };
 
                 _context.HoaDonBans.Add(order);
