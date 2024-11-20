@@ -3,6 +3,7 @@ using BTLW_BDT.Models.PhoneModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using Microsoft.EntityFrameworkCore;
 
 namespace BTLW_BDT.Controllers
 {
@@ -10,43 +11,78 @@ namespace BTLW_BDT.Controllers
     [ApiController]
     public class ProductAPIController : ControllerBase
     {
-        BtlLtwQlbdtContext db = new BtlLtwQlbdtContext();
-        [HttpGet]
-        public IEnumerable<Phone> GetAllProducts()
+        private readonly BtlLtwQlbdtContext db;
+
+        public ProductAPIController(BtlLtwQlbdtContext context)
         {
-            var sanPham = (from p in db.SanPhams
-                           select new Phone
-                           {
-                               MaSanPham = p.MaSanPham,
-                               TenSanPham = p.TenSanPham,
-                               DonGiaBanGoc = p.DonGiaBanGoc,
-                               DonGiaBanRa = p.DonGiaBanRa,
-                               KhuyenMai = p.KhuyenMai,
-                               Ram = p.Ram,
-                               Pin = p.Pin,
-                               AnhDaiDien = string.IsNullOrEmpty(p.AnhDaiDien) ? "" : p.AnhDaiDien.Trim()
-                           }).ToList();
-            return sanPham;
+            db = context;
         }
 
-        //Lấy product theo loại sản phẩm
-        [HttpGet("{mahang}")]
-        public IEnumerable<Phone> GetProductsByCategory(string maHang)
+        // GET: api/ProductAPI/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<SanPham>> GetProduct(string id)
         {
-            var sanPham = (from p in db.SanPhams
-                           where p.MaHang == maHang
-                           select new Phone
-                           {
-                               MaSanPham = p.MaSanPham,
-                               TenSanPham = p.TenSanPham,
-                               DonGiaBanGoc = p.DonGiaBanGoc,
-                               DonGiaBanRa = p.DonGiaBanRa,
-                               KhuyenMai = p.KhuyenMai,
-                               Ram = p.Ram,
-                               Pin = p.Pin,
-                               AnhDaiDien = p.AnhDaiDien ?? ""
-                           }).ToList();
-            return sanPham;
+            var product = await db.SanPhams
+                .Include(p => p.Roms)
+                .Include(p => p.MauSacs)
+                .Include(p => p.AnhSanPhams)
+                .FirstOrDefaultAsync(p => p.MaSanPham == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(product);
+        }
+
+        // PUT: api/ProductAPI/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(string id, SanPham sanPham)
+        {
+            if (id != sanPham.MaSanPham)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                // Xóa các ROM, màu sắc và ảnh cũ
+                var existingRoms = await db.Roms.Where(r => r.MaSanPham == id).ToListAsync();
+                var existingMausacs = await db.MauSacs.Where(m => m.MaSanPham == id).ToListAsync();
+                var existingAnhs = await db.AnhSanPhams.Where(a => a.MaSanPham == id).ToListAsync();
+
+                db.Roms.RemoveRange(existingRoms);
+                db.MauSacs.RemoveRange(existingMausacs);
+                db.AnhSanPhams.RemoveRange(existingAnhs);
+
+                // Cập nhật thông tin sản phẩm
+                db.Entry(sanPham).State = EntityState.Modified;
+
+                // Thêm ROM, màu sắc và ảnh mới
+                if (sanPham.Roms != null)
+                    db.Roms.AddRange(sanPham.Roms);
+                if (sanPham.MauSacs != null)
+                    db.MauSacs.AddRange(sanPham.MauSacs);
+                if (sanPham.AnhSanPhams != null)
+                    db.AnhSanPhams.AddRange(sanPham.AnhSanPhams);
+
+                await db.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProductExists(id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
+        }
+
+        private bool ProductExists(string id)
+        {
+            return db.SanPhams.Any(e => e.MaSanPham == id);
         }
 
         [HttpPost("UploadImage")]

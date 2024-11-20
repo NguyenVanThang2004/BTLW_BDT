@@ -1004,148 +1004,199 @@
                 `;
         $('#editromContainer').append(neweditRomHtml);
     }
-    function editProduct(maSanPham) {
-        $.ajax({
-            url: `https://localhost:7244/api/sanphamapi/GetProductsById/${maSanPham}`, // Đảm bảo URL chính xác
-            type: 'GET',
-            timeout: 10000,
-            success: function (data) {
-                console.log('Dữ liệu nhận được từ API:', data);
-                console.log('masp', (data.maSanPham))
-                console.log('ROMs:', data.roms); // Kiểm tra xem "roms" có tồn tại không
-                console.log('Màu sắc:', data.mauSacs); // Kiểm tra "mauSacs"
-                console.log('Anh', data.anhSanPhams);
-                let roms = data.roms && data.roms.$values ? data.roms.$values : [];
-                console.log('Danh sách ROMs:', roms);
-                // Điền dữ liệu vào form
-                $('#editMaSanPham').val(data.maSanPham).prop('disabled', true);
-                $('#editTenSanPham').val(data.tenSanPham);
-                $('#editAnhDaiDien').val(data.anhDaiDien);
-                $('#editThoiGianBaoHanh').val(data.thoiGianBaoHanh);
-                $('#editSoLuongTonKho').val(data.soLuongTonKho);
-                $('#editDonGiaBanGoc').val(data.donGiaBanGoc);
-                $('#editDonGiaBanRa').val(data.donGiaBanRa);
-                $('#editKhuyenMai').val(data.khuyenMai);
-                $('#editDanhBa').val(data.danhBa);
-                $('#editDenFlash').val(data.denFlash);
-                $('#editCongNgheManHinh').val(data.congNgheManHinh);
-                $('#editDoSangToiDa').val(data.doSangToiDa);
-                $('#editLoaiPin').val(data.loaiPin);
-                $('#editBaoMatNangCao').val(data.baoMatNangCao);
-                $('#editGhiAmMacDinh').val(data.ghiAmMacDinh);
-                $('#editJackTaiNghe').val(data.jackTaiNghe);
-                $('#editMangDiDong').val(data.mangDiDong);
-                $('#editSim').val(data.sim);
-                $('#editMaHang').val(data.maHang);
-                $('#editManHinh').val(data.manHinh);
-                $('#editPin').val(data.pin);
-                $('#editCamera').val(data.camera);
-                $('#editKichThuoc').val(data.kichThuoc);
-                $('#editChip').val(data.chip);
-                $('#editRAM').val(data.ram);
-                if (roms.length > 0) {
-                    let romContainer = $('#editromContainer');
-                    romContainer.empty(); // Xóa toàn bộ nội dung cũ để thêm mới
-                    roms.forEach(rom => {
-                        let romHtml = `
-                        <div class="editrom-entry">
-                            <h4>ROM</h4>
-                            <div class="form-group">
-                                <label class="control-label">Mã ROM</label>
-                                <input type="text" class="form-control editrom-ma" value="${rom.maRom}"readonly />
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">Thông số ROM</label>
-                                <select class="form-control editrom-thongso">
-                                        <option value="64GB" ${rom.thongSo === '64GB' ? 'selected' : ''} data-price="200000" >64GB</option>
-                                        <option value="128GB" ${rom.thongSo === '128GB' ? 'selected' : ''} data-price="400000">128GB</option>
-                                        <option value="256GB" ${rom.thongSo === '256GB' ? 'selected' : ''} data-price="600000">256GB</option>
-                                        <option value="512GB" ${rom.thongSo === '512GB' ? 'selected' : ''} data-price="800000">512GB</option>
-                                        <option value="1TB" ${rom.thongSo === '1TB' ? 'selected' : ''} data-price="1200000">1TB</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">Giá</label>
-                                <input type="number" class="form-control editrom-gia" value="${rom.gia}" />
-                            </div>
-                                 <button type="button" class="btn btn-danger" onclick="removeEditRomEntry(this)">Xóa ROM</button>
-                        </div>`;
-                        romContainer.append(romHtml);
-                    });
-                } else {
-                    console.warn('Dữ liệu ROMs không hợp lệ hoặc trống.');
+    async function editProduct(maSanPham) {
+        try {
+            // Sửa lại đường dẫn API
+            const response = await fetch(`https://localhost:7244/api/ProductAPI/${maSanPham}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to fetch product data: ${errorText}`);
+            }
+            const product = await response.json();
+
+            // Hiển thị form edit
+            showHideDiveInsertData('editForm');
+
+            // Điền thông tin sản phẩm vào form
+            document.getElementById('editMaSanPham').value = product.maSanPham;
+            document.getElementById('editTenSanPham').value = product.tenSanPham;
+            document.getElementById('editThoiGianBaoHanh').value = product.thoiGianBaoHanh;
+            document.getElementById('editSoLuongTonKho').value = product.soLuongTonKho;
+            document.getElementById('editDonGiaBanGoc').value = product.donGiaBanGoc;
+            document.getElementById('editDonGiaBanRa').value = product.donGiaBanRa;
+            document.getElementById('editKhuyenMai').value = product.khuyenMai;
+            document.getElementById('editDanhBa').value = product.danhBa;
+            document.getElementById('editDenFlash').value = product.denFlash;
+            document.getElementById('editCongNgheManHinh').value = product.congNgheManHinh;
+            document.getElementById('editDoSangToiDa').value = product.doSangToiDa;
+            document.getElementById('editLoaiPin').value = product.loaiPin;
+            document.getElementById('editBaoMatNangCao').value = product.baoMatNangCao;
+            document.getElementById('editGhiAmMacDinh').value = product.ghiAmMacDinh;
+            document.getElementById('editJackTaiNghe').value = product.jackTaiNghe;
+            document.getElementById('editMangDiDong').value = product.mangDiDong;
+            document.getElementById('editSim').value = product.sim;
+            document.getElementById('editMaHang').value = product.maHang;
+            document.getElementById('editManHinh').value = product.manHinh;
+            document.getElementById('editPin').value = product.pin;
+            document.getElementById('editCamera').value = product.camera;
+            document.getElementById('editKichThuoc').value = product.kichThuoc;
+            document.getElementById('editChip').value = product.chip;
+            document.getElementById('editRAM').value = product.ram;
+
+            // Hiển thị ảnh đại diện hiện tại
+            if (product.anhDaiDien) {
+                const anhDaiDienPreview = document.getElementById('editAnhDaiDienPreview');
+                anhDaiDienPreview.src = `/PhoneImages/Images/${product.anhDaiDien}`;
+                anhDaiDienPreview.style.display = 'block';
+            }
+
+            // Xử lý ROM
+            const romContainer = document.getElementById('editromContainer');
+            romContainer.innerHTML = '';
+            if (product.roms && product.roms.length > 0) {
+                product.roms.forEach(rom => {
+                    addEditRomEntry(rom);
+                });
+            }
+
+            // Xử lý Màu sắc và Ảnh
+            const mauContainer = document.getElementById('editmauSacContainer');
+            mauContainer.innerHTML = '';
+            if (product.mausacs && product.mausacs.length > 0) {
+                product.mausacs.forEach(mau => {
+                    const anhMau = product.anhSanPhams.filter(anh => anh.maMau === mau.maMau);
+                    addEditMauEntry(mau, anhMau);
+                });
+            }
+
+        } catch (error) {
+            console.error('Error fetching product:', error);
+            alert('Lỗi khi lấy thông tin sản phẩm: ' + error.message);
+        }
+    }
+
+    async function submitEditProduct() {
+        try {
+            const maSanPham = document.getElementById('editMaSanPham').value;
+            let anhDaiDien = '';
+
+            // Upload ảnh đại diện mới nếu có
+            const anhDaiDienInput = document.getElementById('editAnhDaiDien');
+            if (anhDaiDienInput.files && anhDaiDienInput.files[0]) {
+                const formData = new FormData();
+                formData.append('file', anhDaiDienInput.files[0]);
+                const response = await fetch('https://localhost:7244/api/ProductAPI/UploadImage', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) throw new Error('Failed to upload avatar image');
+                const result = await response.json();
+                anhDaiDien = result.fileName;
+            }
+
+            // Thu thập thông tin ROM
+            const roms = [];
+            $('.editrom-entry').each(function() {
+                const rom = {
+                    MaRom: $(this).find('.editrom-ma').val(),
+                    ThongSo: $(this).find('.editrom-thongso').val(),
+                    Gia: parseFloat($(this).find('.editrom-gia').val()),
+                    MaSanPham: maSanPham
+                };
+                if (rom.MaRom && rom.ThongSo && !isNaN(rom.Gia)) {
+                    roms.push(rom);
                 }
+            });
 
-                // Tương tự, xử lý phần màu sắc (nếu có)
-                let mauSacs = data.mauSacs && data.mauSacs.$values ? data.mauSacs.$values : [];
-                console.log('Danh sách màu sắc:', mauSacs);
+            // Thu thập thông tin Màu sắc và Ảnh
+            const mausacs = [];
+            const anhsanphams = [];
+            const mauEntries = document.querySelectorAll('.editmau-entry');
+            for (const mauEntry of mauEntries) {
+                const maMau = mauEntry.querySelector('.editmau-ma').value;
+                const tenMau = mauEntry.querySelector('.editmau-ten').value;
+                
+                if (maMau && tenMau !== '-1') {
+                    mausacs.push({
+                        MaMau: maMau,
+                        TenMau: tenMau,
+                        MaSanPham: maSanPham
+                    });
 
-                if (mauSacs.length > 0) {
-                    let mauSacContainer = $('#editmauSacContainer');
-                    mauSacContainer.empty();
-                    mauSacs.forEach(mauSac => {
-                        console.log('Màu sắc hiện tại:', mauSac.maMau, mauSac.tenMau);
-                        let anhHtml = '';
-                        let anhSanPhams = data.anhSanPhams && data.anhSanPhams.$values ? data.anhSanPhams.$values : [];
-                        let filteredAnhs = anhSanPhams.filter(anh => anh.maSanPham === mauSac.maSanPham && anh.maMau === mauSac.maMau);
-                        console.log(`Ảnh của Màu ${mauSac.maMau}:`, filteredAnhs);
-                        // Lặp qua danh sách ảnh của từng màu
-                        if (filteredAnhs.length > 0) {
-                            let anhSpContainer = $('#editanhSpContainer');
-                            anhSpContainer.empty();
-                            filteredAnhs.forEach(anh => {
-                                console.log("anhne", anh.tenFile);
-                                anhHtml += `
-                                <div class="editanh-entry">
-                                    <h6 style="margin-top:10px;">Ảnh</h6>
-                                    <div class="form-group">
-                                        <label class="control-label">Chọn ảnh</label>
-                                        <input type="file" class="form-control editanh-ten" onchange="editpreviewEditImage(this)" />
-                                        <img src="${anh.tenFile}" alt="Preview" class="editimg-preview mt-2" style="max-width: 200px; max-height: 200px;" />
-                                    </div>
-                                    <button type="button" class="btn btn-danger" onclick="removeEditAnhEntry(this)">Xóa ảnh</button>
-                                </div>`;
+                    // Upload ảnh mới cho màu này
+                    const anhInputs = mauEntry.querySelectorAll('.editanh-ten');
+                    for (const anhInput of anhInputs) {
+                        if (anhInput.files && anhInput.files[0]) {
+                            const formData = new FormData();
+                            formData.append('file', anhInput.files[0]);
+                            const response = await fetch('https://localhost:7244/api/ProductAPI/UploadImage', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            if (!response.ok) throw new Error('Failed to upload color image');
+                            const result = await response.json();
+                            anhsanphams.push({
+                                TenFile: result.fileName,
+                                MaMau: maMau,
+                                MaSanPham: maSanPham
                             });
                         }
-                        let mauSacHtml = `
-                        <div class="editmau-entry">
-                            <h4>Màu Sắc</h4>
-                            <div class="form-group">
-                                <label class="control-label">Mã Màu</label>
-                                <input type="text" class="form-control editmau-ma" value="${mauSac.maMau}" readonly/>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">Tên màu</label>
-                                <select class="form-control editmau-ten">
-                                            <option >Chọn Màu</option>
-                                            <option value="Xanh" ${mauSac.tenMau?.toLowerCase() === 'xanh' ? 'selected' : ''}>Xanh</option>
-                                            <option value="Tím" ${mauSac.tenMau?.toLowerCase() === 'tím' ? 'selected' : ''}>Tím</option>
-                                            <option value="Đen" ${mauSac.tenMau?.toLowerCase() === 'đen' ? 'selected' : ''}>Đen</option>
-                                            <option value="Trắng" ${mauSac.tenMau?.toLowerCase() === 'trắng' ? 'selected' : ''}>Trắng</option>
-                                            <option value="Vàng" ${mauSac.tenMau?.toLowerCase() === 'vàng' ? 'selected' : ''}>Vàng</option>
-                                </select>
-                            </div>
-                                 <button type="button" class="btn btn-danger" onclick="removeEditMauEntry(this)">Xóa màu</button>
-                        <div class="editanhSpContainer">
-                                ${anhHtml}
-                       </div>
-                        <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addEditAnhEntry()">Thêm Ảnh</button>
-
-                        </div>`;
-                        mauSacContainer.append(mauSacHtml);
-                    });
-                } else {
-                    console.warn('Dữ liệu Màu sắc không hợp lệ hoặc trống.');
+                    }
                 }
-                // Hiển thị form sửa
-                $('#editForm').show();
-            },
-            error: function (xhr, status, error) {
-                console.error('Lỗi khi gọi API:', error); // Log lỗi
-                console.log('Chi tiết lỗi:', xhr); // Log chi tiết lỗi
-                alert('Li khi lấy thông tin sản phẩm: ' + error);
             }
-        });
+
+            // Tạo object chứa thông tin cập nhật
+            const updatedProduct = {
+                MaSanPham: maSanPham,
+                TenSanPham: document.getElementById('editTenSanPham').value,
+                AnhDaiDien: anhDaiDien || undefined,
+                ThoiGianBaoHanh: parseInt(document.getElementById('editThoiGianBaoHanh').value),
+                SoLuongTonKho: parseInt(document.getElementById('editSoLuongTonKho').value),
+                DonGiaBanGoc: parseFloat(document.getElementById('editDonGiaBanGoc').value),
+                DonGiaBanRa: parseFloat(document.getElementById('editDonGiaBanRa').value),
+                KhuyenMai: parseFloat(document.getElementById('editKhuyenMai').value),
+                DanhBa: document.getElementById('editDanhBa').value,
+                DenFlash: document.getElementById('editDenFlash').value,
+                CongNgheManHinh: document.getElementById('editCongNgheManHinh').value,
+                DoSangToiDa: parseInt(document.getElementById('editDoSangToiDa').value),
+                LoaiPin: document.getElementById('editLoaiPin').value,
+                BaoMatNangCao: document.getElementById('editBaoMatNangCao').value,
+                GhiAmMacDinh: document.getElementById('editGhiAmMacDinh').value,
+                JackTaiNghe: document.getElementById('editJackTaiNghe').value,
+                MangDiDong: document.getElementById('editMangDiDong').value,
+                Sim: document.getElementById('editSim').value,
+                MaHang: document.getElementById('editMaHang').value,
+                ManHinh: document.getElementById('editManHinh').value,
+                Pin: document.getElementById('editPin').value,
+                Camera: document.getElementById('editCamera').value,
+                KichThuoc: document.getElementById('editKichThuoc').value,
+                Chip: document.getElementById('editChip').value,
+                Ram: document.getElementById('editRAM').value,
+                Roms: roms,
+                Mausacs: mausacs,
+                AnhSanPhams: anhsanphams
+            };
+
+            // Sửa lại đường dẫn API
+            const response = await fetch(`https://localhost:7244/api/ProductAPI/${maSanPham}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedProduct)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to update product: ${errorText}`);
+            }
+
+            alert('Cập nhật sản phẩm thành công!');
+            location.reload();
+        } catch (error) {
+            alert('Lỗi khi cập nhật sản phẩm: ' + error.message);
+            console.error('Error:', error);
+        }
     }
 </script>
 
@@ -1442,7 +1493,7 @@
     .product-image {
         width: 80px; /* Giảm kích thước thumbnail */
         height: 80px; /* Giữ tỷ lệ vuông */
-        object-fit: cover; /* Đ��m bảo ảnh lấp đầy không gian */
+        object-fit: cover; /* Đm bảo ảnh lấp đầy không gian */
         margin: 5px;
         border-radius: 5px;
         cursor: pointer;
