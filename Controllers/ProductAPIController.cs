@@ -57,29 +57,30 @@ namespace BTLW_BDT.Controllers
                 if (file == null || file.Length == 0)
                     return BadRequest("No file uploaded");
 
-                // Tạo đường dẫn đến thư mục lưu file
-                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PhoneImages", "Images");
+                // Đường dẫn tới thư mục lưu ảnh
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PhoneImages", "Images");
                 
-                // Tạo thư mục nếu chưa tồn tại
-                if (!Directory.Exists(uploadPath))
-                    Directory.CreateDirectory(uploadPath);
+                // Tạo tên file độc nhất
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                
+                // Đường dẫn đầy đủ
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                // Tạo tên file độc nhất để tránh trùng lặp
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                var filePath = Path.Combine(uploadPath, fileName);
+                // Đảm bảo thư mục tồn tại
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
 
                 // Lưu file
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
-                    await file.CopyToAsync(stream);
+                    await file.CopyToAsync(fileStream);
                 }
 
-                // Trả về tên file để lưu vào database
-                return Ok(new { fileName = fileName });
+                return Ok(new { fileName = uniqueFileName });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex}");
             }
         }
     }

@@ -572,7 +572,8 @@
             }
 
             const result = await response.json();
-            return result.fileName;
+            // Đường dẫn lưu ảnh sẽ là: ~/PhoneImages/Images/[tên file]
+            return result.fileName; // API trả về tên file đã lưu
         } catch (error) {
             console.error('Error uploading image:', error);
             throw error;
@@ -1294,6 +1295,7 @@
                                         <!-- Giao diện slider -->
                                         <div id="productCarousel_@item.MaSanPham" class="carousel slide" data-bs-ride="carousel">
                                             <!-- Ảnh lớn -->
+
 
 
                                             <div class="color-info mb-2">
