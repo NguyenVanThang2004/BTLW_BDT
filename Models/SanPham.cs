@@ -65,6 +65,5 @@ public partial class SanPham
 
     public virtual ICollection<MauSac> MauSacs { get; set; } = new List<MauSac>();
 
-
     public virtual ICollection<Rom> Roms { get; set; } = new List<Rom>();
 }

@@ -1,5 +1,6 @@
 ﻿@using BTLW_BDT.Models;
 @using X.PagedList.Mvc.Core;
+@inject BTLW_BDT.Models.BtlLtwQlbdtContext context
 @model X.PagedList.IPagedList<SanPham>
 
 @{
@@ -577,7 +578,7 @@
             dataType: 'json',
             success: function (response) {
                 alert('Thêm sản phẩm thành công!');
-                
+                location.reload();
             },
             error: function (xhr, status, error) {
                 let errorMessage = 'Lỗi khi thêm sản phẩm: ';
@@ -948,6 +949,55 @@
     }
 </script>
 
+
+<!-- Thêm JavaScript -->
+<script>
+    function selectThumbnail(element, index) {
+        // Xóa border của tất cả thumbnails trong cùng một modal
+        $(element).closest('.modal-body').find('.product-image').css('border', 'none');
+        // Thêm border cho thumbnail được chọn
+        $(element).css('border', '2px solid #007bff');
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        // Cập nhật màu ban đầu khi modal mở
+        $('.modal').on('shown.bs.modal', function () {
+            var carousel = $(this).find('.carousel');
+            var activeItem = carousel.find('.carousel-item.active');
+            var color = activeItem.data('color');
+            carousel.closest('.modal-body').find('.color-value').text(color);
+
+            // Đánh dấu thumbnail đầu tiên
+            $(this).find('.product-image').first().css('border', '2px solid #007bff');
+        });
+
+        // Cập nhật màu và thumbnail khi chuyển slide
+        $('.carousel').on('slid.bs.carousel', function () {
+            var activeItem = $(this).find('.carousel-item.active');
+            var color = activeItem.data('color');
+            $(this).closest('.modal-body').find('.color-value').text(color);
+
+            // Lấy index của slide hiện tại
+            var activeIndex = $(this).find('.carousel-item.active').index();
+
+            // Cập nhật border cho thumbnail
+            var thumbnails = $(this).closest('.modal-body').find('.product-image');
+            thumbnails.css('border', 'none');
+            thumbnails.eq(activeIndex).css('border', '2px solid #007bff');
+        });
+    });
+
+    function selectThumbnail(element, index) {
+        // Xóa border của tất cả thumbnails trong cùng một modal
+        $(element).closest('.modal-body').find('.product-image').css('border', 'none');
+        // Thêm border cho thumbnail được chọn
+        $(element).css('border', '2px solid #007bff');
+    }
+</script>
+
+
+
 <table class="table table-bordered">
     <thead>
         <tr class="table-warning">
@@ -1022,12 +1072,96 @@
                 <td>
                     <a href="#" onclick="editProduct('@item.MaSanPham'); return false;" class="btn btn-danger delete-btn">Sửa</a>
                     <a onclick="deleteProduct('https://localhost:7040/api/product','@item.MaSanPham'); return false;" value="Delete" class="btn btn-danger delete-btn" >Xóa</a>
+                    <!-- View Image Button -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#imageModal_@item.MaSanPham">
+                        Xem ảnh
+                    </button>
+
+                    <!-- Modal cho từng sản phẩm -->
+                    <div class="modal fade" id="imageModal_@item.MaSanPham" tabindex="-1" aria-labelledby="imageModalLabel_@item.MaSanPham" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="imageModalLabel_@item.MaSanPham">Ảnh Sản Phẩm - @item.TenSanPham</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    @{
+                                        var anhSanPhams = context.AnhSanPhams.Where(a => a.MaSanPham == item.MaSanPham).ToList();
+                                    }
+
+                                    @if (anhSanPhams.Any())
+                                    {
+                                        <!-- Giao diện slider -->
+                                        <div id="productCarousel_@item.MaSanPham" class="carousel slide" data-bs-ride="carousel">
+                                            <!-- Ảnh lớn -->
+
+
+                                            <div class="color-info mb-2">
+                                                <h6 class="color-label">Màu: <span class="color-value"></span></h6>
+                                            </div>
+
+                                            <div class="carousel-inner">
+                                                @foreach (var anh in anhSanPhams.Select((value, index) => new { value, index }))
+                                                {
+                                                    <div class="carousel-item @(anh.index == 0 ? "active" : "")" data-color="@anh.value.MaMau">
+                                                        <div class="d-flex justify-content-center align-items-center">
+                                                            <img src="~/PhoneImages/Images/@anh.value.TenFile"
+                                                                 class="img-fluid"
+                                                                 alt="Ảnh @(anh.index + 1)">
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                           
+                                            @if (anhSanPhams.Count > 1)
+                                            {
+                                                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel_@item.MaSanPham" data-bs-slide="prev">
+                                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                    <span class="visually-hidden">Previous</span>
+                                                </button>
+                                                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel_@item.MaSanPham" data-bs-slide="next">
+                                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                    <span class="visually-hidden">Next</span>
+                                                </button>
+                                            }
+                                        </div>
+
+                                        <!-- Thumbnail ảnh nhỏ -->
+                                        <div class="mt-3">
+                                            @foreach (var anh in anhSanPhams.Select((value, index) => new { value, index }))
+                                            {
+                                                <img src="~/PhoneImages/Images/@anh.value.TenFile"
+                                                     class="product-image mx-2"
+                                                     data-bs-target="#productCarousel_@item.MaSanPham"
+                                                     data-bs-slide-to="@anh.index"
+                                                     alt="Ảnh @(anh.index + 1)"
+                                                     style="width: 100px; height: auto; cursor: pointer;"
+                                                     onclick="selectThumbnail(this, @anh.index)">
+                                            }
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+                                        <p>Không có ảnh cho sản phẩm này</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </td>
 
             </tr>
         }
     </tbody>
 </table>
+
+
+
+    <!-- Modal hiển thị hình ảnh -->
+
+
 @Html.PagedListPager(Model, page => Url.Action("DanhMucSanPham", new { page = page }),
         new X.PagedList.Web.Common.PagedListRenderOptions()
     {
@@ -1078,4 +1212,122 @@
     background-color: #bd2130; /* Slightly darker red when clicked */
 }
 
+        .modal-dialog.modal-lg {
+            max-width: 800px; /* Giới hạn chiều rộng tối đa */
+        }
+
+        /* Điều chỉnh phần hiển thị ảnh chính */
+        .carousel-item img {
+            max-height: 400px; /* Giới hạn chiều cao tối đa */
+            width: auto; /* Tự động điều chỉnh chiều rộng */
+            margin: 0 auto; /* Căn giữa ảnh */
+            object-fit: contain; /* Giữ tỷ lệ ảnh */
+        }
+
+        /* Điều chỉnh thumbnail */
+        .product-image {
+            width: 80px; /* Giảm kích thước thumbnail */
+            height: 80px; /* Giữ tỷ lệ vuông */
+            object-fit: cover; /* Đảm bảo ảnh lấp đầy không gian */
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            border: none;
+        }
+
+            .product-image:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            }
+
+        /* Container cho thumbnails */
+        .mt-3 {
+            display: flex;
+            flex-wrap: wrap; /* Cho phép wrap khi quá nhiều ảnh */
+            justify-content: center;
+            gap: 10px; /* Khoảng cách giữa các thumbnail */
+            padding: 10px;
+        }
+
+        /* Modal body */
+        .modal-body {
+            padding: 20px;
+            max-height: 80vh; /* Giới hạn chiều cao tối đa */
+            overflow-y: auto; /* Cho phép scroll nếu nội dung dài */
+        }
+
+        /* Điều chỉnh nút điều hướng carousel */
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 10%;
+            opacity: 0.8;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            padding: 15px;
+        }
+    /* Hiệu ứng hover cho ảnh trong carousel */
+    .carousel-item img {
+        max-height: 400px;
+        width: auto;
+        margin: 0 auto;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+
+        .carousel-item img:hover {
+            transform: scale(1.05); /* Phóng to ảnh lên 105% */
+        }
+
+    /* Hiệu ứng hover cho thumbnails */
+    .product-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        margin: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .product-image:hover {
+            transform: scale(1.1); /* Phóng to thumbnail lên 110% */
+            box-shadow: 0 0 10px rgba(0,0,0,0.2); /* Thêm bóng đổ khi hover */
+        }
+
+    /* Các style khác giữ nguyên */
+    .modal-dialog.modal-lg {
+        max-width: 800px;
+    }
+
+    .modal-body {
+        padding: 20px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 10%;
+        opacity: 0.8;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        padding: 15px;
+    }
+
+    /* Thêm hiệu ứng mượt mà cho tất cả các transition */
+    * {
+        transition: all 0.3s ease-in-out;
+    }
     </style>
+
+
