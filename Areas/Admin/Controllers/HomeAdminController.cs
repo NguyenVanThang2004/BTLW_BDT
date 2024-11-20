@@ -75,7 +75,36 @@ namespace BTLW_BDT.Areas.Admin.Controllers
 
             return View(lst);
         }
+        //[HttpPost("upload")]
+        //public IActionResult UploadFile([FromForm] IFormFile file)
+        //{
+        //    try
+        //    {
+        //        if (file == null || file.Length == 0)
+        //        {
+        //            return BadRequest("No file selected");
+        //        }
 
+        //        // Lưu file vào wwwroot/Images
+        //        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+        //        if (!Directory.Exists(uploadPath))
+        //        {
+        //            Directory.CreateDirectory(uploadPath);
+        //        }
+
+        //        var filePath = Path.Combine(uploadPath, file.FileName);
+        //        using (var stream = new FileStream(filePath, FileMode.Create))
+        //        {
+        //            file.CopyTo(stream);
+        //        }
+
+        //        return Ok(new { filePath = $"/Images/{file.FileName}" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Lỗi khi lưu file: {ex.Message}");
+        //    }
+        //}
         //[Route("ThemSanPhamMoi")]
         //[HttpGet]
         //public IActionResult ThemSanPhamMoi()
@@ -118,6 +147,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         //    }
         //    return View(sanPham);
         //}
+
         [Route("DashBoard")]
         public IActionResult DashBoard()
         {
@@ -136,14 +166,20 @@ namespace BTLW_BDT.Areas.Admin.Controllers
             var data = (from hdb in db.HoaDonBans
                         join cthdb in db.ChiTietHoaDonBans on hdb.MaHoaDon equals cthdb.MaHoaDon
                         join sp in db.SanPhams on cthdb.MaSanPham equals sp.MaSanPham
-                        join ctgh in db.ChiTietGioHangs on sp.MaSanPham equals ctgh.MaSanPham
-                        join gh in db.GioHangs on ctgh.MaGioHang equals gh.MaGioHang
+                        
                         select new BieuDo
                         {
                             NgayBan = hdb.ThoiGianLap,
-                            SoLuongBan = cthdb.SoLuongBan,
-                            TongTien = hdb.TongTien,
-                            LoiNhuan = cthdb.DonGiaCuoi
+                            SoLuongBan = (from cth in db.ChiTietHoaDonBans
+                                          select cth.SoLuongBan).Sum(),
+                            TongTien = (from hdbSub in db.HoaDonBans
+                                        select hdbSub.TongTien).Sum(),
+                            LoiNhuan = (from hdbSub in db.HoaDonBans
+                                        select hdbSub.TongTien).Sum()
+                            - (from cth in db.ChiTietHoaDonBans
+                               join spa in db.SanPhams on cth.MaSanPham equals spa.MaSanPham
+                               where (cth.MaHoaDon == hdb.MaHoaDon)
+                               select (cth.DonGiaCuoi ?? sp.DonGiaBanGoc) * cth.SoLuongBan).Sum()
                         }).Select(x => new
                         {
                             date = x.NgayBan.ToString("yyyy-MM-dd"),
@@ -156,31 +192,69 @@ namespace BTLW_BDT.Areas.Admin.Controllers
 
         }
         [HttpPost]
-        [Route("GetChartDataBySelect")]
-        public Task<IActionResult> GetChartDataBySelect(DateTime startDate, DateTime endDate)
-        {
-            var data = (from hdb in db.HoaDonBans
-                        join cthdb in db.ChiTietHoaDonBans on hdb.MaHoaDon equals cthdb.MaHoaDon
-                        join sp in db.SanPhams on cthdb.MaSanPham equals sp.MaSanPham
-                        join ctgh in db.ChiTietGioHangs on sp.MaSanPham equals ctgh.MaSanPham
-                        join gh in db.GioHangs on ctgh.MaGioHang equals gh.MaGioHang
-                        select new BieuDo
-                        {
-                            NgayBan = hdb.ThoiGianLap,
-                            SoLuongBan = cthdb.SoLuongBan,
-                            TongTien = hdb.TongTien,
-                            LoiNhuan = cthdb.DonGiaCuoi
-                        }).Where(x => x.NgayBan >= startDate && x.NgayBan <= endDate).
-                        Select(x => new
-                        {
-                            date = x.NgayBan.ToString("yyyy-MM-dd"),
-                            sold = x.SoLuongBan,
-                            quantity = x.TongTien,
-                            profit = x.LoiNhuan
-                        }).ToList();
-            Console.WriteLine(JsonConvert.SerializeObject(data));
-            return Task.FromResult<IActionResult>(Json(data));
 
+        //public async Task<IActionResult> GetChartDataBySelect(DateTime startDate, DateTime endDate)
+
+        //{
+        //    var data = (from hdb in db.HoaDonBans
+        //                join cthdb in db.ChiTietHoaDonBans on hdb.MaHoaDon equals cthdb.MaHoaDon
+        //                join sp in db.SanPhams on cthdb.MaSanPham equals sp.MaSanPham
+        //                join ctgh in db.ChiTietGioHangs on sp.MaSanPham equals ctgh.MaSanPham
+        //                join gh in db.GioHangs on ctgh.MaGioHang equals gh.MaGioHang
+        //                select new BieuDo
+        //                {
+        //                    NgayBan = hdb.ThoiGianLap,
+        //                    SoLuongBan = cthdb.SoLuongBan,
+        //                    TongTien = hdb.TongTien,
+        //                    LoiNhuan = cthdb.DonGiaCuoi
+        //                }).Where(x => x.NgayBan >= startDate && x.NgayBan <= endDate).
+        //                Select(x => new
+        //                {
+        //                    date = x.NgayBan.ToString("yyyy-MM-dd"),
+        //                    sold = x.SoLuongBan,
+        //                    quantity = x.TongTien,
+        //                    profit = x.LoiNhuan
+        //                }).ToList();
+        //    Console.WriteLine(JsonConvert.SerializeObject(data));
+        //    return Task.FromResult<IActionResult>(Json(data));
+
+        //}
+        [HttpPost]
+        [Route("FilterData")]
+        public async Task<IActionResult> FilterData(DateTime fromDate, DateTime toDate)
+        {
+            var data = db.HoaDonBans
+         .Where(hdb => hdb.ThoiGianLap >= fromDate && hdb.ThoiGianLap <= toDate)
+         .GroupJoin(
+             db.ChiTietHoaDonBans.Join(db.SanPhams,
+                 cth => cth.MaSanPham,
+                 sp => sp.MaSanPham,
+                 (cth, sp) => new
+                 {
+                     cth.MaHoaDon,
+                     DonGiaBanGoc = sp.DonGiaBanGoc,
+                     DonGiaCuoi = cth.DonGiaCuoi,
+                     SoLuongBan = cth.SoLuongBan
+                 }),
+             hdb => hdb.MaHoaDon,
+             cth_sp => cth_sp.MaHoaDon,
+             (hdb, cth_sp) => new { hdb, cth_sp }
+         )
+         .Select(g => new
+         {
+             date = g.hdb.ThoiGianLap.Date.ToString("yyyy-MM-dd"),
+             sold = g.cth_sp.Sum(cth => cth.SoLuongBan),
+             quantity = g.hdb.TongTien,
+             profit = g.hdb.TongTien - g.cth_sp
+                 .Where(cth => cth.DonGiaCuoi != null) // Chỉ tính khi có DonGiaCuoi
+                 .Sum(cth => cth.DonGiaBanGoc * cth.SoLuongBan)
+
+         })
+         .ToList();
+            var totalRevenue = data.Sum(d => d.quantity); // Tổng doanh thu
+            var totalProfit = data.Sum(d => d.profit);
+            Console.WriteLine(JsonConvert.SerializeObject(data));
+            return Json(new { data, totalRevenue, totalProfit });
         }
         //[Route("XoaSanPham")]
         //[HttpGet]
@@ -222,31 +296,33 @@ namespace BTLW_BDT.Areas.Admin.Controllers
                 searchDate = parsedDate.Date; // Lấy chỉ phần ngày, bỏ giờ phút giây
             }
 
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
+              // Dereference of a possibly null reference.
             var lstSanPham = from hdb in db.HoaDonBans
                              join kh in db.KhachHangs on hdb.MaKhachHang equals kh.MaKhachHang
                              where string.IsNullOrEmpty(searchQuery)
                                    || hdb.MaHoaDon.Contains(searchQuery)  // Tìm theo Mã Hóa Đơn
                                    || kh.TenKhachHang.Contains(searchQuery)  // Tìm theo Tên Khách Hàng
+                                   || hdb.PhiGiaoHang.ToString().Contains(searchQuery)
                                    || hdb.PhuongThucThanhToan.Contains(searchQuery)  // Tìm theo Phương thức thanh toán
                                    || hdb.KhuyenMai.ToString().Contains(searchQuery)  // Tìm theo Khuyến Mại
                                    || hdb.TongTien.ToString().Contains(searchQuery)  // Tìm theo Tổng Tiền
                                    || (searchDate.HasValue && hdb.ThoiGianLap.Date == searchDate.Value)
                                    || db.ChiTietHoaDonBans.Where(cthdb => cthdb.MaHoaDon == hdb.MaHoaDon).Any(cthdb => cthdb.MaSanPham.Contains(searchQuery)) // Tìm theo Mã sản phẩm
                                    || kh.SoDienThoai.Contains(searchQuery)
-                                   || kh.DiaChi.Contains(searchQuery)
+                                   || hdb.DiaChiGiaoHang.Contains(searchQuery)
                                    || hdb.MaNhanVien.Contains(searchQuery)
                              select new
                              {
                                  MaHDB = hdb.MaHoaDon,
                                  PTTT = hdb.PhuongThucThanhToan,
+                                 PhiGH = hdb.PhiGiaoHang,
                                  TT = hdb.TongTien,
                                  KM = hdb.KhuyenMai,
                                  Time = hdb.ThoiGianLap,
                                  MaNV = hdb.MaNhanVien,
                                  TenKH = kh.TenKhachHang,
                                  SDT = kh.SoDienThoai,
-                                 DC = kh.DiaChi,
+                                 DC = hdb.DiaChiGiaoHang,
                                  ProductDetails = db.ChiTietHoaDonBans
                                                     .Where(cthdb => cthdb.MaHoaDon == hdb.MaHoaDon)
                                                     .Select(cthdb => new
@@ -255,7 +331,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
                                                         MaSp = cthdb.MaSanPham
                                                     }).ToList()
                              };
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            // Dereference of a possibly null reference.
 
             var pagedList = lstSanPham.ToPagedList(pageNumber, pageSize);
             return View(pagedList);

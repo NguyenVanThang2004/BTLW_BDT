@@ -1,5 +1,6 @@
 ﻿@using BTLW_BDT.Models;
 @using X.PagedList.Mvc.Core;
+@inject BTLW_BDT.Models.BtlLtwQlbdtContext context
 @model X.PagedList.IPagedList<SanPham>
 
 @{
@@ -10,8 +11,8 @@
 <h1>Danh Muc San Pham</h1>
 <form method="get" asp-action="QuanLyHoaDon">
     <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Tìm kiếm tất cả thông tin..." name="searchQuery" value="@ViewData["searchQuery"]" />
-        <button class="btn btn-outline-secondary" type="submit">Tìm kiếm</button>
+        <input style="padding:0"type="text" class="form-control" placeholder="Tìm kiếm tất cả thông tin..." name="searchQuery" value="@ViewData["searchQuery"]" />
+        <button style =" margin:0"class="btn btn-outline-secondary" type="submit">Tìm kiếm</button>
     </div>
 </form>
 
@@ -126,11 +127,77 @@
             <label class="control-label">Chip</label>
             <input id="Chip" type="text" class="form-control" />
         </div>
+       
         <div class="form-group">
-            <label class="control-label">Ram</label>
+            <label class="control-label">RAM</label>
             <input id="RAM" type="text" class="form-control" />
         </div>
 
+        <!-- Add new Rom section -->
+        <div id="romContainer">
+            <div class="rom-entry">
+                <h4>ROM #1</h4>
+                <div class="form-group">
+                    <label class="control-label">Mã ROM</label>
+                    <input type="text" class="form-control rom-ma" readonly />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Thông số ROM</label>
+                    <select class="form-control rom-thongso">
+                        <option value="-1" data-price="0">Chọn ROM</option>
+                        <option value="64GB" data-price="200000">64GB</option>
+                        <option value="128GB" data-price="400000">128GB</option>
+                        <option value="256GB" data-price="600000">256GB</option>
+                        <option value="512GB" data-price="800000">512GB</option>
+                        <option va lue="1TB" data-price="1200000">1TB</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Giá</label>
+                    <input type="number" class="form-control rom-gia" readonly />
+                </div>
+            </div>
+            
+            
+        </div>
+        <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addRomEntry()">Thêm ROM</button>
+        <div id="mauSacContainer">
+            <div class="mau-entry">
+                <h4>Màu sắc #1</h4>
+                <div class="form-group">
+                    <label class="control-label">Mã Màu</label>
+                    <input type="text" class="form-control mau-ma" readonly />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Tên màu</label>
+                    <select class="form-control mau-ten   ">
+                        <option value="-1">Chọn Màu</option>
+                        <option value="Xanh">Xanh</option>
+                        <option value="Tím">Tím</option>
+                        <option value="Đen">Đen</option>
+                        <option value="Trắng">Trắng</option>
+                        <option value="Vàng">Vàng</option>
+                    </select>
+                </div>
+                
+            </div>
+            <div class="anhSpContainer">
+                <div class="anh-entry">
+                    <h6 style ="margin-top:10px;">Ảnh </h6>
+                    <div class="form-group">
+                        <label class="control-label">Chọn ảnh</label>
+                        <input type="file" class="form-control anh-ten" onchange="previewImage(this)" />
+
+                        <!-- Hình ảnh sẽ hiển thị nếu có -->
+                        <img id="productImage" src="" alt="Product Image" style="max-width: 200px; max-height: 200px;" />
+                    </div>
+                </div> 
+                
+            </div>
+            <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addAnhEntry()">Thêm Ảnh</button>
+            
+        </div>
+        <button  type="button" class="btn btn-secondary" onclick="addMauEntry()">Thêm Màu</button>
         <div class="form-group">
             <input onclick="addANewProduct('https://localhost:7040/api/product/'); return false;" value="Create" class="btn btn-primary" />
         </div>
@@ -245,16 +312,313 @@
             <label class="control-label">RAM</label>
             <input type="text" class="form-control" id="editRAM" />
         </div>
+        
+        <div id="editromContainer">
+            <div class="editrom-entry">
+                <h4>ROM #1</h4>
+                <div class="form-group">
+                    <label class="control-label">Mã ROM</label>
+                    <input type="text" class="form-control editrom-ma" readonly />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Thông số ROM</label>
+                    <select class="form-control editrom-thongso">
+                        <option value="-1" data-price="0">Chọn ROM</option>
+                        <option value="64GB" data-price="200000">64GB</option>
+                        <option value="128GB" data-price="400000">128GB</option>
+                        <option value="256GB" data-price="600000">256GB</option>
+                        <option value="512GB" data-price="800000">512GB</option>
+                        <option va lue="1TB" data-price="1200000">1TB</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Giá</label>
+                    <input type="number" class="form-control editrom-gia" readonly />
+                </div>
+            </div>
+
+        </div>
+
+        <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addEditRomEntry()">Thêm ROM</button>
+        <div id="editmauSacContainer">
+            <div class="editmau-entry">
+                <h4>Màu sắc #1</h4>
+                <div class="form-group">
+                    <label class="control-label">Mã Màu</label>
+                    <input type="text" class="form-control editmau-ma" readonly />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Tên màu</label>
+                    <select class="form-control editmau-ten   ">
+                        <option value="-1">Chọn Màu</option>
+                        <option value="Xanh">Xanh</option>
+                        <option value="Tím">Tím</option>
+                        <option value="Đen">Đen</option>
+                        <option value="Trắng">Trắng</option>
+                        <option value="Vàng">Vàng</option>
+                    </select>
+                </div>
+            </div>
+            <div class="editanhSpContainer">
+                <div class="editanh-entry">
+                    <h6 style="margin-top:10px;">Ảnh </h6>
+                    <div class="form-group">
+                        <label class="control-label">Chọn ảnh</label>
+                        <input type="file" class="form-control editanh-ten" onchange="previewImage(this)" />
+                        <!-- Thẻ img để hiển thị hình ảnh -->
+                        <img src="" alt="Preview" class="editimg-preview mt-2" style="max-width: 200px; max-height: 200px; display: none;" />
+                    </div>
+                </div>
+
+            </div>
+            <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addEditAnhEntry()">Thêm Ảnh</button>
+
+        </div>
+        <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addEditMauEntry()">Thêm Màu</button>
         <div class="form-group">
-            <button type="button" onclick="submitEditProduct()" class="btn btn-danger delete-btn">Lưu</button>
+            <button style="margin-top:10px;" type="button" onclick="submitEditProduct()" class="btn btn-danger delete-btn">Lưu</button>
         </div>
     </form>
 </div>
 
 <script type="text/javascript">
+    let romCount = 1;
+    let mauCount = 1;
+    $(document).ready(function () {
+        // Lấy MaSanPham từ input chính
+        
+
+        // Xử lý tự động tạo MaRom
+        $(document).on('input', '.rom-thongso', function () {
+            const maSanPham = $('#MaSanPham').val();
+            const thongSo = $(this).val();
+            const maRom = `ro${maSanPham}${thongSo}`;
+            $(this).closest('.rom-entry').find('.rom-ma').val(maRom); // Điền mã ROM vào form
+        });
+
+        // Xử lý tự động tạo MaMau
+        $(document).on('input', '.mau-ten', function () {
+            let soThuTu = ""; // Biến để lưu số thứ tự
+            const tenMau = $(this).val();
+            if (tenMau.toLowerCase() === "xanh") {
+                soThuTu = "001";
+            } else if (tenMau.toLowerCase() === "tím") {
+                soThuTu = "002";
+            } else if (tenMau.toLowerCase() === "đen") {
+                soThuTu = "003";
+            }
+             else if (tenMau.toLowerCase() === "trắng") {
+                soThuTu = "004";
+            }
+            else if (tenMau.toLowerCase() === "vàng") {
+                soThuTu = "005";
+            }
+            const maSanPham = $('#MaSanPham').val();
+            
+            const maMau = `m${maSanPham}${soThuTu}`;
+            $(this).closest('.mau-entry').find('.mau-ma').val(maMau); // Điền mã màu vào form
+        });
+    });
+    function previewImage(input) {
+        var file = input.files[0];
+        var reader = new FileReader();
+
+        // Khi đọc file thành công, hiển thị ảnh lên form
+        reader.onload = function (e) {
+            // Cập nhật lại ảnh trong form
+            document.getElementById("productImage").src = e.target.result;
+        };
+
+        // Đọc file ảnh
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+    function showHideDiveInsertData(activeDiv) {
+        if ($(document.getElementById(activeDiv)).is(":visible")) {
+            $(document.getElementById(activeDiv)).hide('slow');
+        }
+        else {
+            $(document.getElementById(activeDiv)).show('slow');
+        }
+    }
+    function addAnhEntry(){
+        console.log("đã bấm thêm");
+        
+        const newAnhHtml = `
+             <div class="anh-entry">
+                     <h6 style="margin-top:10px;">Ảnh</h6>
+                        <div class="form-group">
+                            <label class="control-label">Chọn ảnh</label>
+                                     <input type="file" class="form-control anh-ten" onchange="previewImage(this)" />
+
+                            <!-- Hình ảnh sẽ hiển thị nếu có -->
+                            <img id="productImage" src="../Images/{{ imageName }}" alt="Product Image" style="max-width: 200px; max-height: 200px;" />
+                        </div>
+                        <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeAnhEntry(this)">Xóa Ảnh</button>
+             </div>
+                    
+        `;
+        console.log("doan tml", newAnhHtml);
+        $('.anhSpContainer').append(newAnhHtml);
+    }
+    function removeAnhEntry(button) {
+        console.log("bãmoa", $(button).closest('.anh-entry'));
+        $(button).closest('.anh-entry').remove();    
+    }
+    function addMauEntry(){
+        mauCount++;
+        const newMauHtml = `
+            <div class="mau-entry">
+                        <h4>Màu sắc #${mauCount}</h4>
+                        <div class="form-group">
+                            <label class="control-label">Mã Màu</label>
+                                <input type="text" class="form-control mau-ma" readonly />
+                        </div>
+                           <div class="form-group">
+                                <label class="control-label">Tên màu</label>
+                                <select class="form-control mau-ten">
+                                       <option value="-1">Chọn Màu</option>
+                            <option value="Xanh">Xanh</option>
+                            <option value="Tím">Tím</option>
+                            <option value="Đen">Đen</option>
+                            <option value="Trắng">Trắng</option>
+                            <option value="Vàng">Vàng</option>
+                                </select>
+                        </div>
+                        <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeMauEntry(this)">Xóa màu</button>
+                <div class="anhSpContainer">
+                    <div class="anh-entry">
+                            <h6 style="margin-top:10px;">Ảnh </h6>
+                        <div class="form-group">
+                            <label class="control-label">Chọn ảnh</label>
+                             <input type="file" class="form-control anh-ten" onchange="previewImage(this)" />
+
+                            <!-- Hình ảnh sẽ hiển thị nếu có -->
+                            <img id="productImage" src="../Images/{{ imageName }}" alt="Product Image" style="max-width: 200px; max-height: 200px;" />
+                        </div>
+                    </div>
+
+                </div>
+                <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addAnhEntry()">Thêm Ảnh</button>
+                 </div>
+
+             </div>
+        `;
+        $('#mauSacContainer').append(newMauHtml);
+    }
+    function addRomEntry() {
+        romCount++;
+        const newRomHtml = `
+                <div class="rom-entry">
+                    <h4>ROM #${romCount}</h4>
+                    <div class="form-group">
+                        <label class="control-label">Mã ROM</label>
+                            <input type="text" class="form-control rom-ma" readonly/>
+                    </div>
+                       <div class="form-group">
+                        <label class="control-label">Thông số ROM</label>
+                        <select class="form-control rom-thongso">
+                                <option value="-1" data-price="0">Chọn ROM</option>
+                              <option value="64GB" data-price="200000">64GB</option>
+                                <option value="128GB" data-price="400000">128GB</option>
+                                <option value="256GB" data-price="600000">256GB</option>
+                                <option value="512GB" data-price="800000">512GB</option>
+                                <option value="1TB" data-price="1200000">1TB</option>   
+                        </select>
+                    </div>  
+                    <div class="form-group">
+                        <label class="control-label">Giá</label>
+                        <input type="number" class="form-control rom-gia" readonly />
+                    </div>
+                    <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeRomEntry(this)">Xóa ROM</button>
+                </div>
+            `;
+        $('#romContainer').append(newRomHtml);
+    }
+    $(document).on('change', '.rom-thongso', function () {
+        let selectedThongSo = $(this).val();
+        let selectedOption = $(this).find('option:selected');
+        let selectedPrice = selectedOption.data('price');
+        $(this).closest('.form-group').next().find('.rom-gia').val(selectedPrice || 0);
+
+        console.log('Thông số chọn:', selectedOption); // Kiểm tra giá trị ThongSo
+    })
+    
+    function removeRomEntry(button) {
+        $(button).closest('.rom-entry').remove();
+        romCount= romCount -1;
+    }
+    function removeMauEntry(button) {
+        $(button).closest('.mau-entry').remove();
+        mauCount = mauCount -1;
+    }
+
     function addANewProduct(apiUrl) {
-        // Thu thập dữ liệu từ form
-        console.log('AAAA:', apiUrl);
+        // Thu thập dữ liệu ROM
+        const roms = [];
+        $('.rom-entry').each(function () {
+            const maSanPham = $('#MaSanPham').val(); // Lấy MaSanPham từ input
+            const thongSo = $(this).find('.rom-thongso').val(); // Lấy ThongSo từ option
+            const gia = parseFloat($(this).find('.rom-gia').val()); // Lấy giá trị giá
+
+            const rom = {
+                MaRom: `ro${maSanPham}${thongSo}`, // Tạo MaRom tự động
+                ThongSo: thongSo,
+                Gia: gia,
+                MaSanPham: maSanPham
+            };
+            console.log(rom);
+            console.log(rom)
+            if (rom.MaRom && rom.ThongSo && !isNaN(rom.Gia)) { // Kiểm tra dữ liệu hợp lệ
+                roms.push(rom);
+            }
+        })
+        const mausacs = [];
+        const anhsanphams = [];
+        $('.mau-entry').each(function () {
+            let soThuTu = ""; // Biến để lưu số thứ tự
+            const tenMau = $(this).find('.mau-ten').val();
+            if (tenMau.toLowerCase() === "xanh") {
+                soThuTu = "001";
+            } else if (tenMau.toLowerCase() === "tím") {
+                soThuTu = "002";
+            } else if (tenMau.toLowerCase() === "đen") {
+                soThuTu = "003";
+            }
+            else if (tenMau.toLowerCase() === "trắng") {
+                soThuTu = "004";
+            }
+            else if (tenMau.toLowerCase() === "vàng") {
+                soThuTu = "005";
+            }
+            const maSanPham = $('#MaSanPham').val(); // Lấy MaSanPham từ input
+             // Lấy TenMau từ input
+            const mausac = {
+                MaMau: `m${maSanPham}${soThuTu}`, // Tạo MaMau tự động
+                TenMau: tenMau,
+                MaSanPham: maSanPham
+            };
+            $('.anhSpContainer .anh-entry').each(function () {
+                console.log("Đã vào đây");
+                const tenFile = $(this).find('.anh-ten').val(); // Giả sử đây là input file
+                console.log("ten file cua m", tenFile);
+                const anhsanpham = {
+                    TenFile: tenFile,
+                    MaMau: mausac.MaMau, // Lấy MaMau hiện tại từ mausac
+                    MaSanPham: mausac.MaSanPham
+                };
+                if (anhsanpham.TenFile) { // Kiểm tra nếu ảnh hợp lệ
+                    anhsanphams.push(anhsanpham);
+                }
+            });
+            console.log(mausac)
+            if (mausac.MaMau && mausac.TenMau ) { // Kiểm tra dữ liệu hợp lệ
+                mausacs.push(mausac);            
+            }
+        })
+        console.log("Danh sách màu sắc:", mausacs);
+        console.log("Danh sách ảnh sản phẩm:", anhsanphams);
         var duLieuSanPham = {
             MaSanPham: $('#MaSanPham').val(),
             TenSanPham: $('#TenSanPham').val(),
@@ -280,64 +644,118 @@
             Camera: $('#Camera').val(),
             KichThuoc: $('#KichThuoc').val(),
             Chip: $('#Chip').val(),
-            RAM: $('#RAM').val()
-
+            Ram: $('#RAM').val(),
+            Roms: roms,
+            Mausacs:mausacs,
+            AnhSanPhams: anhsanphams
         };
-        console.log('jQuery version:', $.fn.jquery); // Kiểm tra version jQuery
-        console.log('Data being sent:', duLieuSanPham); // Kiểm tra dữ liệu gửi đi
-        // Gửi yêu cầu AJAX
+
+        if (!duLieuSanPham.MaSanPham || !duLieuSanPham.TenSanPham) {
+            alert('Vui lòng nhập đầy đủ thông tin bắt buộc');
+            return;
+        }
+        
         $.ajax({
             type: 'POST',
             url: apiUrl,
             data: JSON.stringify(duLieuSanPham),
             contentType: 'application/json',
             dataType: 'json',
-            timeout: 30000,
-            success: function (phanHoi) {
+            success: function (response) {
+                saveHistory('Thêm sản phẩm',
+                    'Thêm sản phẩm mới: ' + $('#MaSanPham').val());
                 alert('Thêm sản phẩm thành công!');
-                window.location.href = 'https://localhost:7244/admin/DanhMucSanPham'; // Chuyển hướng sau khi thêm thành công
+                location.reload();
             },
             error: function (xhr, status, error) {
-                // Log chi tiết thông tin lỗi
-                console.log('XHR:', xhr);
-                console.log('Status:', status);
-                console.log('Error:', error);
-                console.log('Response Text:', xhr.responseText);
-
-                // Log dữ liệu gửi đi
-                console.log('Dữ liệu gửi đi:', duLieuSanPham);
-
-                // Hiển thị thông báo lỗi chi tiết
-                let errorMessage = 'Lỗi khi gọi API:\n';
-                errorMessage += 'Status: ' + status + '\n';
-                errorMessage += 'Error: ' + error + '\n';
-
-                if (xhr.responseText) {
-                    try {
-                        // Thử parse responseText nếu là JSON
-                        const responseObj = JSON.parse(xhr.responseText);
-                        errorMessage += 'Response: ' + JSON.stringify(responseObj, null, 2);
-                    } catch (e) {
-                        // Nếu không phải JSON thì hiện text gốc
-                        errorMessage += 'Response: ' + xhr.responseText;
-                    }
+                let errorMessage = 'Lỗi khi thêm sản phẩm: ';
+                if (xhr.responseJSON) {
+                    errorMessage += xhr.responseJSON.message || xhr.responseJSON;
+                } else {
+                    errorMessage += error;
                 }
                 alert(errorMessage);
             }
         });
     }
-    function showHideDiveInsertData(activeDiv) {
-        if ($(document.getElementById(activeDiv)).is(":visible")) {
-            $(document.getElementById(activeDiv)).hide('slow');
-        }
-        else {
-            $(document.getElementById(activeDiv)).show('slow');
-        }
-    }
-    
 </script>
+
 <script>
+    $(document).on('change', '.editrom-thongso', function () {
+        let selectedThongSo = $(this).val();
+        let selectedOption = $(this).find('option:selected');
+        let selectedPrice = selectedOption.data('price');
+        $(this).closest('.form-group').next().find('.editrom-gia').val(selectedPrice || 0);
+
+        console.log('Thông số chọn:', selectedPrice); // Kiểm tra giá trị ThongSo
+    })
+    $(document).on('input', '.editrom-thongso', function () {
+        
+        const maSanPham = $('#editMaSanPham').val();
+        const thongSo = $(this).val();
+        const maRom = `ro${maSanPham}${thongSo}`;
+        $(this).closest('.editrom-entry').find('.editrom-ma').val(maRom); // Điền mã ROM vào form
+    })
+    // Xử lý tự động tạo MaMau
+    $(document).on('input', '.editmau-ten', function () {
+        let soThuTu = ""; // Biến để lưu số thứ tự
+        const tenMau = $(this).val();
+        if (tenMau.toLowerCase() === "xanh") {
+            soThuTu = "001";
+        } else if (tenMau.toLowerCase() === "tím") {
+            soThuTu = "002";
+        } else if (tenMau.toLowerCase() === "đen") {
+            soThuTu = "003";
+        }
+        else if (tenMau.toLowerCase() === "trắng") {
+            soThuTu = "004";
+        }
+        else if (tenMau.toLowerCase() === "vàng") {
+            soThuTu = "005";
+        }
+        const maSanPham = $('#editMaSanPham').val();
+
+        const maMau = `m${maSanPham}${soThuTu}`;
+        $(this).closest('.editmau-entry').find('.editmau-ma').val(maMau); // Điền mã màu vào form
+    });
     function submitEditProduct() {
+        const roms = [];
+        $('.editrom-entry').each(function () {
+            const rom = {
+                MaRom: $(this).find('.editrom-ma').val(),
+                ThongSo: $(this).find('.editrom-thongso').val(), // Lấy giá trị của option đã chọn
+                Gia: parseFloat($(this).find('.editrom-gia').val()), // Lấy giá trị price từ thuộc tính data-price
+                MaSanPham: $('#editMaSanPham').val()
+            };
+            console.log(rom)
+            if (rom.MaRom && rom.ThongSo && !isNaN(rom.Gia)) { // Kiểm tra dữ liệu hợp lệ
+                roms.push(rom);
+            }
+        })
+        const mausacs = [];
+        const anhsanphams = [];
+        $('.editmau-entry').each(function () {
+            const mausac = {
+                MaMau: $(this).find('.editmau-ma').val(),
+                TenMau: $(this).find('.editmau-ten').val(),
+                MaSanPham: $('#editMaSanPham').val()
+            };
+            console.log(mausac)
+            $('.editanhSpContainer .editanh-entry').each(function () {
+                console.log("Đã vào đây");
+                const anhsanpham = {
+                    TenFile: $(this).find('.editanh-ten').val(),
+                    MaMau: mausac.MaMau, // Lấy MaMau hiện tại từ mausac
+                    MaSanPham: mausac.MaSanPham
+                };
+                if (anhsanpham.TenFile) { // Kiểm tra nếu ảnh hợp lệ
+                    anhsanphams.push(anhsanpham);
+                }
+            });          
+            if (mausac.MaMau && mausac.TenMau) { // Kiểm tra dữ liệu hợp lệ
+                mausacs.push(mausac);
+            }
+        })
         var sanPham = {
             maSanPham: $('#editMaSanPham').val(),
             tenSanPham: $('#editTenSanPham').val(),
@@ -363,7 +781,10 @@
             camera: $('#editCamera').val(),
             kichThuoc: $('#editKichThuoc').val(),
             chip: $('#editChip').val(),
-            ram: $('#editRAM').val()
+            ram: $('#editRAM').val(),
+            roms:roms,
+            mauSacs:mausacs,
+            anhSanPhams:anhsanphams
 
         };
         $.ajax({
@@ -372,9 +793,10 @@
             contentType: 'application/json',
             data: JSON.stringify(sanPham),
             success: function () {
+                saveHistory('Sửa sản phẩm',
+                    'Cập nhật sản phẩm: ' + sanPham.maSanPham );
                 alert("Sửa sản phẩm thành công!");
-                $('edit#MaSanPham').hide();
-                location.reload(); // Tải lại danh sách sản phẩm (nếu cần)
+                location.reload();
             },
             error: function (xhr, status, error) {
                 if (xhr.status === 400) {
@@ -399,6 +821,8 @@
                 url: apiUrl + '/' + maSanPham,
                 type: 'DELETE',
                 success: function (response) {
+                    saveHistory('Xóa sản phẩm',
+                        'Xóa sản phẩm: ' + maSanPham);
                     alert('Xóa sản phẩm thành công!');
                     location.reload();
                 },
@@ -411,16 +835,143 @@
     }
 </script>
 <script>
+    function saveHistory(loaiHoatDong, ghiChu) {
+        var formData = new FormData();
+        formData.append('loaiHoatDong', loaiHoatDong);
+        formData.append('ghiChu', ghiChu);
+        formData.append('tenDangNhap', '@Context.Session.GetString("Username")');
+
+        $.ajax({
+            url: 'https://localhost:7040/api/LichSu/SaveHistory',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                console.log('Lưu lịch sử thành công');
+            },
+            error: function (xhr, status, error) {
+                console.error('Lỗi khi lưu lịch sử:', error);
+            }
+        });
+    }
+</script>
+
+<script>
+    let editromCount = 1;
+    let editmauCount = 1;
+    function editpreviewImage(input) {
+        var file = input.files[0];
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            var imgPreview = input.nextElementSibling;
+            imgPreview.src = e.target.result;
+            imgPreview.style.display = 'block';  // Hiển thị ảnh preview
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);  // Đọc file và hiển thị preview
+        }
+    }
+    function removeEditRomEntry(button) {
+        $(button).closest('.editrom-entry').remove();
+    }
+    function removeEditMauEntry(button) {
+        $(button).closest('.editmau-entry').remove();
+    }
+    function removeEditAnhEntry(button) {
+        console.log("bãmoa", $(button).closest('.anh-entry'));
+
+        $(button).closest('.editanh-entry').remove();
+
+    }
+    function addEditAnhEntry() {
+        console.log("đã bấm sửa");
+
+        const newEditAnhHtml = `
+                 <div class="editanh-entry">
+                         <h6 style="margin-top:10px;">Ảnh</h6>
+                            <div class="form-group">
+                                <label class="control-label">Chọn ảnh</label>
+                                <input type="file" class="form-control editanh-ten" onchange="editpreviewImage(this)" />
+                            <!-- Thẻ img để hiển thị hình ảnh -->
+                                <img src="" alt="Preview" class="editimg-preview mt-2" style="max-width: 200px; max-height: 200px; display: none;" />
+                            </div>
+                            <button style="margin-top:10px;" type="button" class="btn btn-danger" onclick="removeEditAnhEntry(this)">Xóa Ảnh</button>
+                 </div>
+            `;
+        console.log("doan tml", newEditAnhHtml);
+        $('.editanhSpContainer').append(newEditAnhHtml);
+    }
+    
+    function addEditMauEntry() {
+        editmauCount++;
+        const neweditMauHtml = `
+                <div class="editmau-entry">
+                            <h4>Màu sắc #${editmauCount}</h4>
+                            <div class="form-group">
+                                <label class="control-label">Mã Màu</label>
+                                    <input type="text" class="form-control editmau-ma" readonly/>
+                            </div>
+                               <div class="form-group">
+                                    <label class="control-label">Tên màu</label>
+                                    <select class="form-control editmau-ten">
+                                           <option value="-1">Chọn Màu</option>
+                                <option value="Xanh">Xanh</option>
+                                <option value="Tím">Tím</option>
+                                <option value="Đen">Đen</option>
+                                <option value="Trắng">Trắng</option>
+                                <option value="Vàng">Vàng</option>
+                                    </select>
+                            </div>
+                            <button type="button" class="btn btn-danger" onclick="removeEditMauEntry(this)">Xóa màu</button>
+                        </div>
+            `;
+        $('#editmauSacContainer').append(neweditMauHtml);
+    }
+    function addEditRomEntry() {
+        editromCount++;
+        const neweditRomHtml = `
+                    <div class="editrom-entry">
+                        <h4>ROM #${editromCount}</h4>
+                        <div class="form-group">
+                            <label class="control-label">Mã ROM</label>
+                                <input type="text" class="form-control editrom-ma"readonly />
+                        </div>
+                           <div class="form-group">
+                            <label class="control-label">Thông số ROM</label>
+                            <select class="form-control editrom-thongso">
+                                    <option value="-1" data-price="0">Chọn ROM</option>
+                                  <option value="64GB" data-price="200000">64GB</option>
+                                    <option value="128GB" data-price="400000">128GB</option>
+                                    <option value="256GB" data-price="600000">256GB</option>
+                                    <option value="512GB" data-price="800000">512GB</option>
+                                    <option value="1TB" data-price="1200000">1TB</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Giá</label>
+                            <input type="number" class="form-control editrom-gia" readonly />
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="removeEditRomEntry(this)">Xóa ROM</button>
+                    </div>
+                `;
+        $('#editromContainer').append(neweditRomHtml);
+    }
     function editProduct(maSanPham) {
         $.ajax({
             url: `https://localhost:7040/api/Product/GetProductsById/${maSanPham}`, // Đảm bảo URL chính xác
             type: 'GET',
-            timeout:10000,
+            timeout: 10000,
             success: function (data) {
                 console.log('Dữ liệu nhận được từ API:', data);
-                console.log('masp',(data.maSanPham))
-                console.log('ténp',(data.tenSanPham))
-                console.log('ténp',(data.thoiGianBaoHanh))
+                console.log('masp', (data.maSanPham))
+                console.log('ROMs:', data.roms); // Kiểm tra xem "roms" có tồn tại không
+                console.log('Màu sắc:', data.mauSacs); // Kiểm tra "mauSacs"
+                console.log('Anh', data.anhSanPhams);
+                let roms = data.roms && data.roms.$values ? data.roms.$values : [];
+                console.log('Danh sách ROMs:', roms);
                 // Điền dữ liệu vào form
                 $('#editMaSanPham').val(data.maSanPham).prop('disabled', true);
                 $('#editTenSanPham').val(data.tenSanPham);
@@ -447,7 +998,100 @@
                 $('#editKichThuoc').val(data.kichThuoc);
                 $('#editChip').val(data.chip);
                 $('#editRAM').val(data.ram);
+                if (roms.length > 0) {
+                    let romContainer = $('#editromContainer');
+                    romContainer.empty(); // Xóa toàn bộ nội dung cũ để thêm mới
+                    roms.forEach(rom => {
+                        let romHtml = `
+                        <div class="editrom-entry">
+                            <h4>ROM</h4>
+                            <div class="form-group">
+                                <label class="control-label">Mã ROM</label>
+                                <input type="text" class="form-control editrom-ma" value="${rom.maRom}"readonly />
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Thông số ROM</label>
+                                <select class="form-control editrom-thongso">
+                                        <option value="64GB" ${rom.thongSo === '64GB' ? 'selected' : ''} data-price="200000" >64GB</option>
+                                        <option value="128GB" ${rom.thongSo === '128GB' ? 'selected' : ''} data-price="400000">128GB</option>
+                                        <option value="256GB" ${rom.thongSo === '256GB' ? 'selected' : ''} data-price="600000">256GB</option>
+                                        <option value="512GB" ${rom.thongSo === '512GB' ? 'selected' : ''} data-price="800000">512GB</option>
+                                        <option value="1TB" ${rom.thongSo === '1TB' ? 'selected' : ''} data-price="1200000">1TB</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Giá</label>
+                                <input type="number" class="form-control editrom-gia" value="${rom.gia}" />
+                            </div>
+                                 <button type="button" class="btn btn-danger" onclick="removeEditRomEntry(this)">Xóa ROM</button>
+                        </div>`;
+                        romContainer.append(romHtml);
+                    });
+                } else {
+                    console.warn('Dữ liệu ROMs không hợp lệ hoặc trống.');
+                }
 
+                // Tương tự, xử lý phần màu sắc (nếu có)
+                let mauSacs = data.mauSacs && data.mauSacs.$values ? data.mauSacs.$values : [];
+                console.log('Danh sách màu sắc:', mauSacs);
+
+                if (mauSacs.length > 0) {
+                    let mauSacContainer = $('#editmauSacContainer');
+                    mauSacContainer.empty();
+                    mauSacs.forEach(mauSac => {     
+                        console.log('Màu sắc hiện tại:', mauSac.maMau, mauSac.tenMau);
+                        let anhHtml = '';
+                        let anhSanPhams = data.anhSanPhams && data.anhSanPhams.$values ? data.anhSanPhams.$values : [];
+                        let filteredAnhs = anhSanPhams.filter(anh => anh.maSanPham === mauSac.maSanPham && anh.maMau === mauSac.maMau);
+                        console.log(`Ảnh của Màu ${mauSac.maMau}:`, filteredAnhs);
+                        // Lặp qua danh sách ảnh của từng màu
+                        if (filteredAnhs.length > 0) {
+                            let anhSpContainer = $('#editanhSpContainer');
+                            anhSpContainer.empty();
+                            filteredAnhs.forEach(anh => {
+                                console.log("anhne", anh.tenFile);
+                                anhHtml += `
+                                <div class="editanh-entry">
+                                    <h6 style="margin-top:10px;">Ảnh</h6>
+                                    <div class="form-group">
+                                        <label class="control-label">Chọn ảnh</label>
+                                        <input type="file" class="form-control editanh-ten" onchange="editpreviewEditImage(this)" />
+                                        <img src="${anh.tenFile}" alt="Preview" class="editimg-preview mt-2" style="max-width: 200px; max-height: 200px;" />
+                                    </div>
+                                    <button type="button" class="btn btn-danger" onclick="removeEditAnhEntry(this)">Xóa ảnh</button>
+                                </div>`;
+                            });
+                        }
+                        let mauSacHtml = `
+                        <div class="editmau-entry">
+                            <h4>Màu Sắc</h4>
+                            <div class="form-group">
+                                <label class="control-label">Mã Màu</label>
+                                <input type="text" class="form-control editmau-ma" value="${mauSac.maMau}" readonly/>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Tên màu</label>
+                                <select class="form-control editmau-ten">
+                                            <option >Chọn Màu</option>
+                                            <option value="Xanh" ${mauSac.tenMau?.toLowerCase() === 'xanh' ? 'selected' : ''}>Xanh</option>
+                                            <option value="Tím" ${mauSac.tenMau?.toLowerCase() === 'tím' ? 'selected' : ''}>Tím</option>
+                                            <option value="Đen" ${mauSac.tenMau?.toLowerCase() === 'đen' ? 'selected' : ''}>Đen</option>
+                                            <option value="Trắng" ${mauSac.tenMau?.toLowerCase() === 'trắng' ? 'selected' : ''}>Trắng</option>
+                                            <option value="Vàng" ${mauSac.tenMau?.toLowerCase() === 'vàng' ? 'selected' : ''}>Vàng</option>
+                                </select>
+                            </div>
+                                 <button type="button" class="btn btn-danger" onclick="removeEditMauEntry(this)">Xóa màu</button>
+                        <div class="editanhSpContainer">
+                                ${anhHtml}
+                       </div>
+                        <button style="margin-top:10px;" type="button" class="btn btn-secondary" onclick="addEditAnhEntry()">Thêm Ảnh</button>
+
+                        </div>`;
+                        mauSacContainer.append(mauSacHtml);
+                    });
+                } else {
+                    console.warn('Dữ liệu Màu sắc không hợp lệ hoặc trống.');
+                }
                 // Hiển thị form sửa
                 $('#editForm').show();
             },
@@ -459,6 +1103,57 @@
         });
     }
 </script>
+
+
+
+
+<!-- Thêm JavaScript -->
+<script>
+    function selectThumbnail(element, index) {
+        // Xóa border của tất cả thumbnails trong cùng một modal
+        $(element).closest('.modal-body').find('.product-image').css('border', 'none');
+        // Thêm border cho thumbnail được chọn
+        $(element).css('border', '2px solid #007bff');
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        // Cập nhật màu ban đầu khi modal mở
+        $('.modal').on('shown.bs.modal', function () {
+            var carousel = $(this).find('.carousel');
+            var activeItem = carousel.find('.carousel-item.active');
+            var color = activeItem.data('color');
+            carousel.closest('.modal-body').find('.color-value').text(color);
+
+            // Đánh dấu thumbnail đầu tiên
+            $(this).find('.product-image').first().css('border', '2px solid #007bff');
+        });
+
+        // Cập nhật màu và thumbnail khi chuyển slide
+        $('.carousel').on('slid.bs.carousel', function () {
+            var activeItem = $(this).find('.carousel-item.active');
+            var color = activeItem.data('color');
+            $(this).closest('.modal-body').find('.color-value').text(color);
+
+            // Lấy index của slide hiện tại
+            var activeIndex = $(this).find('.carousel-item.active').index();
+
+            // Cập nhật border cho thumbnail
+            var thumbnails = $(this).closest('.modal-body').find('.product-image');
+            thumbnails.css('border', 'none');
+            thumbnails.eq(activeIndex).css('border', '2px solid #007bff');
+        });
+    });
+
+    function selectThumbnail(element, index) {
+        // Xóa border của tất cả thumbnails trong cùng một modal
+        $(element).closest('.modal-body').find('.product-image').css('border', 'none');
+        // Thêm border cho thumbnail được chọn
+        $(element).css('border', '2px solid #007bff');
+    }
+</script>
+
+
 
 <table class="table table-bordered">
     <thead>
@@ -472,12 +1167,9 @@
             <th  style="text-align:center">
                 Tên sản phẩm
             </th>
-            <th  style="text-align:center">
+           @*  <th  style="text-align:center">
                 Ảnh đại diện
-            </th>
-            <th  style="text-align:center">
-                Thời gian BH
-            </th>
+            </th> *@
             <th  style="text-align:center">
                 SL Tồn kho
             </th>
@@ -489,29 +1181,7 @@
             </th>
             <th  style="text-align:center">
                 Khuyến mại
-            <th  style="text-align:center">
-                Mã Hãng
             </th>
-
-            <th  style="text-align:center">
-                Màn hình
-            </th>
-            <th  style="text-align:center">
-                Pin
-            </th>
-            <th  style="text-align:center">
-                Camera
-            </th>
-            <th  style="text-align:center">
-                Kích thước
-            </th>
-            <th  style="text-align:center">
-                Chip
-            </th>
-            <th  style="text-align:center">
-                Ram
-            </th>
-
             <th>
 
             </th>
@@ -540,13 +1210,10 @@
                 <td style="text-align:center">
                     @Html.DisplayFor(modelItem => item.TenSanPham)
                 </td>
-               <td class="d-flex justify-content-center align-items-center" >
+               @* <td class="d-flex justify-content-center align-items-center" >
                     <img class="img-fluid" style="width:35px;height:50px;" src="@Url.Content("~/PhoneImages/anh/" + item.AnhDaiDien)" alt="Product Image">
                 </td>
-
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.ThoiGianBaoHanh)
-                </td>
+ *@
                 <td  style="text-align:center">
                     @Html.DisplayFor(modelItem => item.SoLuongTonKho)
                 </td>
@@ -556,44 +1223,102 @@
                 <td  style="text-align:center">
                     @Html.DisplayFor(modelItem => item.DonGiaBanRa)
                 </td>
-                <td  style="text-align:center">
+                <td style="text-align:center">
                     @Html.DisplayFor(modelItem => item.KhuyenMai)
                 </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.MaHang)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.ManHinh)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.Pin)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.Camera)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.KichThuoc)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.Chip)
-                </td>
-                <td  style="text-align:center">
-                    @Html.DisplayFor(modelItem => item.Ram)
-                </td>
-
-
                 <td>
                     <a href="#" onclick="editProduct('@item.MaSanPham'); return false;" class="btn btn-danger delete-btn">Sửa</a>
                     <a onclick="deleteProduct('https://localhost:7040/api/product','@item.MaSanPham'); return false;" value="Delete" class="btn btn-danger delete-btn" >Xóa</a>
+                    <!-- View Image Button -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#imageModal_@item.MaSanPham">
+                        Xem ảnh
+                    </button>
+
+                    <!-- Modal cho từng sản phẩm -->
+                    <div class="modal fade" id="imageModal_@item.MaSanPham" tabindex="-1" aria-labelledby="imageModalLabel_@item.MaSanPham" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="imageModalLabel_@item.MaSanPham">Ảnh Sản Phẩm - @item.TenSanPham</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    @{
+                                        var anhSanPhams = context.AnhSanPhams.Where(a => a.MaSanPham == item.MaSanPham).ToList();
+                                    }
+
+                                    @if (anhSanPhams.Any())
+                                    {
+                                        <!-- Giao diện slider -->
+                                        <div id="productCarousel_@item.MaSanPham" class="carousel slide" data-bs-ride="carousel">
+                                            <!-- Ảnh lớn -->
+
+
+                                            <div class="color-info mb-2">
+                                                <h6 class="color-label">Màu: <span class="color-value"></span></h6>
+                                            </div>
+
+                                            <div class="carousel-inner">
+                                                @foreach (var anh in anhSanPhams.Select((value, index) => new { value, index }))
+                                                {
+                                                    <div class="carousel-item @(anh.index == 0 ? "active" : "")" data-color="@anh.value.MaMau">
+                                                        <div class="d-flex justify-content-center align-items-center">
+                                                            <img src="~/PhoneImages/Images/@anh.value.TenFile"
+                                                                 class="img-fluid"
+                                                                 alt="Ảnh @(anh.index + 1)">
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                           
+                                            @if (anhSanPhams.Count > 1)
+                                            {
+                                                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel_@item.MaSanPham" data-bs-slide="prev">
+                                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                    <span class="visually-hidden">Previous</span>
+                                                </button>
+                                                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel_@item.MaSanPham" data-bs-slide="next">
+                                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                    <span class="visually-hidden">Next</span>
+                                                </button>
+                                            }
+                                        </div>
+
+                                        <!-- Thumbnail ảnh nhỏ -->
+                                        <div class="mt-3">
+                                            @foreach (var anh in anhSanPhams.Select((value, index) => new { value, index }))
+                                            {
+                                                <img src="~/PhoneImages/Images/@anh.value.TenFile"
+                                                     class="product-image mx-2"
+                                                     data-bs-target="#productCarousel_@item.MaSanPham"
+                                                     data-bs-slide-to="@anh.index"
+                                                     alt="Ảnh @(anh.index + 1)"
+                                                     style="width: 100px; height: auto; cursor: pointer;"
+                                                     onclick="selectThumbnail(this, @anh.index)">
+                                            }
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+                                        <p>Không có ảnh cho sản phẩm này</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </td>
 
-               <td>
-
-               </td>
             </tr>
         }
     </tbody>
 </table>
+
+
+
+    <!-- Modal hiển thị hình ảnh -->
+
+
 @Html.PagedListPager(Model, page => Url.Action("DanhMucSanPham", new { page = page }),
         new PagedListRenderOptions()
     {
@@ -601,11 +1326,11 @@
         PageClasses = new List<String> { "page-link" }
     })
 
-
-
-
     <style>
         /* Styling the Edit link */
+        th{
+            width:10%;
+        }
 .edit-link {
     color: #007bff; /* Bootstrap primary color */
     text-decoration: none; /* Remove underline */
@@ -644,4 +1369,122 @@
     background-color: #bd2130; /* Slightly darker red when clicked */
 }
 
+        .modal-dialog.modal-lg {
+            max-width: 800px; /* Giới hạn chiều rộng tối đa */
+        }
+
+        /* Điều chỉnh phần hiển thị ảnh chính */
+        .carousel-item img {
+            max-height: 400px; /* Giới hạn chiều cao tối đa */
+            width: auto; /* Tự động điều chỉnh chiều rộng */
+            margin: 0 auto; /* Căn giữa ảnh */
+            object-fit: contain; /* Giữ tỷ lệ ảnh */
+        }
+
+        /* Điều chỉnh thumbnail */
+        .product-image {
+            width: 80px; /* Giảm kích thước thumbnail */
+            height: 80px; /* Giữ tỷ lệ vuông */
+            object-fit: cover; /* Đảm bảo ảnh lấp đầy không gian */
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            border: none;
+        }
+
+            .product-image:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            }
+
+        /* Container cho thumbnails */
+        .mt-3 {
+            display: flex;
+            flex-wrap: wrap; /* Cho phép wrap khi quá nhiều ảnh */
+            justify-content: center;
+            gap: 10px; /* Khoảng cách giữa các thumbnail */
+            padding: 10px;
+        }
+
+        /* Modal body */
+        .modal-body {
+            padding: 20px;
+            max-height: 80vh; /* Giới hạn chiều cao tối đa */
+            overflow-y: auto; /* Cho phép scroll nếu nội dung dài */
+        }
+
+        /* Điều chỉnh nút điều hướng carousel */
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 10%;
+            opacity: 0.8;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            padding: 15px;
+        }
+    /* Hiệu ứng hover cho ảnh trong carousel */
+    .carousel-item img {
+        max-height: 400px;
+        width: auto;
+        margin: 0 auto;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+
+        .carousel-item img:hover {
+            transform: scale(1.05); /* Phóng to ảnh lên 105% */
+        }
+
+    /* Hiệu ứng hover cho thumbnails */
+    .product-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        margin: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .product-image:hover {
+            transform: scale(1.1); /* Phóng to thumbnail lên 110% */
+            box-shadow: 0 0 10px rgba(0,0,0,0.2); /* Thêm bóng đổ khi hover */
+        }
+
+    /* Các style khác giữ nguyên */
+    .modal-dialog.modal-lg {
+        max-width: 800px;
+    }
+
+    .modal-body {
+        padding: 20px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 10%;
+        opacity: 0.8;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        padding: 15px;
+    }
+
+    /* Thêm hiệu ứng mượt mà cho tất cả các transition */
+    * {
+        transition: all 0.3s ease-in-out;
+    }
     </style>
+
+

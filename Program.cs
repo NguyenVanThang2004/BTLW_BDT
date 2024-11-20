@@ -82,6 +82,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
@@ -89,5 +90,6 @@ app.UseEndpoints(endpoints =>
         pattern: "{controller=access}/{action=login}/{id?}");
     endpoints.MapHub<ChatHub>("/chatHub");
 });
+
 
 app.Run();
