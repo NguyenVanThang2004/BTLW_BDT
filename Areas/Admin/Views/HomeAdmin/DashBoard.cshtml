@@ -58,6 +58,10 @@
     <div class="col-md-12">
         <p> Biểu đồ thống kê</p>
         <div id="myfirstchart" style="height:250px; width: 60%;"></div>
+        <div class="totals">
+            <p><b>Tổng doanh thu:</b> <span id="total-revenue">0</span> VND</p>
+            <p><b>Tổng lợi nhuận:</b> <span id="total-profit">0</span> VND</p>
+        </div>
     </div>
 </body>
 
@@ -88,10 +92,11 @@
                     data: {
                         fromDate: fromDate, toDate: toDate
                     },
-                    success: function (data) {
-                        if (data) {
-                            // Cập nhật biểu đồ với dữ liệu mới
-                            ChartMorris.setData(data.map(function (item) {
+                    success: function (response) {
+                        console.log("Data received:", response); // Kiểm tra dữ liệu trả về
+                        if (response && response.data) {
+                            // Cập nhật biểu đồ
+                            ChartMorris.setData(response.data.map(function (item) {
                                 return {
                                     date: item.date,
                                     sold: item.sold,
@@ -99,9 +104,15 @@
                                     profit: item.profit
                                 };
                             }));
+
+                            // Cập nhật tổng doanh thu và lợi nhuận
+                            $("#total-revenue").text(response.totalRevenue.toLocaleString());
+                            $("#total-profit").text(response.totalProfit.toLocaleString());
                         } else {
                             console.warn("No data received for Morris chart update.");
                             ChartMorris.setData([]);
+                            $("#total-revenue").text("0");
+                            $("#total-profit").text("0");
                         }
                     },
                     error: function (error) {
