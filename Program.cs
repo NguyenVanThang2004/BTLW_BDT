@@ -1,6 +1,5 @@
 ﻿using BTLW_BDT.Helpers;
 using BTLW_BDT.Models;
-using BTLW_BDT.Repository;
 using BTLW_BDT.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +18,6 @@ builder.Services.AddDbContext<BtlLtwQlbdtContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Đăng ký Repository và Service trong DI container
-builder.Services.AddScoped<ILoaiSpRepository, LoaiSpRepository>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 
 // Đăng ký IHttpClientFactory
@@ -48,6 +46,11 @@ builder.Services.AddCors(options =>
                .AllowCredentials();
     });
 });
+
+var conectionString = builder.Configuration.GetConnectionString("QlbanVaLiContext");
+builder.Services.AddDbContext<BtlLtwQlbdtContext>(x => x.UseSqlServer(conectionString));
+
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
