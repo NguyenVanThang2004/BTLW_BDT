@@ -8,7 +8,7 @@
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h1>Danh Muc San Pham</h1>
+<h1>Danh Mục Sản Phẩm</h1>
 <form method="get" asp-action="QuanLyHoaDon">
     <div class="input-group mb-3">
         <input style="padding:0" type="text" class="form-control" placeholder="Tìm kiếm tất cả thông tin..." name="searchQuery" value="@ViewData["searchQuery"]" />
@@ -1293,7 +1293,7 @@
                     <a href="#" onclick="editProduct('@item.MaSanPham'); return false;" class="btn btn-danger delete-btn">Sửa</a>
                     <a onclick="deleteProduct('https://localhost:7244/api/sanphamapi','@item.MaSanPham'); return false;" value="Delete" class="btn btn-danger delete-btn">Xóa</a>
                     <!-- View Image Button -->
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#imageModal_@item.MaSanPham">
+                    <button type="button" class="btn btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#imageModal_@item.MaSanPham">
                         Xem ảnh
                     </button>
 
