@@ -4,6 +4,7 @@
 @using BTLW_BDT.Models.Cart
 @{
     ViewData["Title"] = "Order Success";
+    ViewData["Page"] = "Order Success";
     Layout = "~/Views/Shared/_LayoutCart.cshtml";
     var tempCartDetails = ViewBag.CartDetails as List<CartDetailTemp> ?? new List<CartDetailTemp>();
 }

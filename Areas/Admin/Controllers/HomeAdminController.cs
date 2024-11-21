@@ -25,7 +25,7 @@ namespace BTLW_BDT.Areas.Admin.Controllers
         [Route("index")]
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("DanhMucSanPham");
         }
         [Route("DanhMucSanPham")]
         public IActionResult DanhMucSanPham(string searchQuery, int? page)
